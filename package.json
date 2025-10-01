@@ -35,6 +35,9 @@
     "sharp": "0.32.6",
     "zod": "^3.22.4"
   },
+  "overrides": {
+    "sharp": "0.30.4"
+  },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/leaflet": "^1.9.20",
