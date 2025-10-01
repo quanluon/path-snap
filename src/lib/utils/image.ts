@@ -16,7 +16,7 @@ export async function processImage(
   const { width = 1920, height = 1080, quality = IMAGE_CONFIG.QUALITY } = options;
 
   return sharp(buffer)
-    .rotate() // respect EXIF orientation
+    .rotate() // normalize EXIF orientation
     .resize(width, height, {
       fit: 'inside',
       withoutEnlargement: true,

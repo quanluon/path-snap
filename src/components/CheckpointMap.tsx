@@ -54,8 +54,10 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
     const groups: { [key: string]: any[] } = {};
     const threshold = 0.0001; // ~10 meters in degrees
 
-    imageList.forEach(image => {
-      const key = `${Math.round(image.latitude / threshold)}_${Math.round(image.longitude / threshold)}`;
+    imageList
+      .filter(img => img.latitude != null && img.longitude != null)
+      .forEach(image => {
+      const key = `${Math.round((image.latitude as number) / threshold)}_${Math.round((image.longitude as number) / threshold)}`;
       if (!groups[key]) {
         groups[key] = [];
       }
@@ -124,8 +126,9 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
   }
 
   // Calculate center point from all images
-  const centerLat = images.reduce((sum, img) => sum + img.latitude, 0) / images.length;
-  const centerLng = images.reduce((sum, img) => sum + img.longitude, 0) / images.length;
+  const locImages = images.filter(img => img.latitude != null && img.longitude != null);
+  const centerLat = locImages.reduce((sum, img) => sum + (img.latitude as number), 0) / (locImages.length || 1);
+  const centerLng = locImages.reduce((sum, img) => sum + (img.longitude as number), 0) / (locImages.length || 1);
 
   return (
     <div className={`relative ${className}`}>
@@ -144,8 +147,8 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
         {groupNearbyImages(images).map((group) => 
           group.map((image, imageIndex) => {
             const [offsetLat, offsetLng] = getOffsetPosition(
-              image.latitude, 
-              image.longitude, 
+              image.latitude as number, 
+              image.longitude as number, 
               imageIndex, 
               group.length
             );
@@ -240,7 +243,7 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
                         
                         <div className="flex items-center text-xs text-gray-600">
                           <MapPinIcon className="w-3 h-3 mr-1" />
-                          <span>{image.latitude.toFixed(4)}, {image.longitude.toFixed(4)}</span>
+                          <span>{(image.latitude as number).toFixed(4)}, {(image.longitude as number).toFixed(4)}</span>
                         </div>
                       </div>
                       
@@ -262,7 +265,7 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
                         )}
                         
                         <button
-                          onClick={() => openGoogleMaps(image.latitude, image.longitude)}
+                          onClick={() => openGoogleMaps(image.latitude as number, image.longitude as number)}
                           className="flex items-center px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
                           title={t.plan.openGoogleMaps}
                         >

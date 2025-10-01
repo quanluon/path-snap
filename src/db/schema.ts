@@ -39,8 +39,8 @@ export const images = pgTable('images', {
   url: text('url').notNull(),
   thumbnailUrl: text('thumbnail_url'),
   description: text('description'),
-  latitude: real('latitude').notNull(),
-  longitude: real('longitude').notNull(),
+  latitude: real('latitude'),
+  longitude: real('longitude'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

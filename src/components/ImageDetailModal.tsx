@@ -67,28 +67,30 @@ export default function ImageDetailModal({
               )}
 
               {/* Location */}
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                  <MapPinIcon className="w-5 h-5 mr-2 text-blue-600" />
-                  {t.images.location}
-                </h4>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">
-                    <strong>Latitude:</strong> {image.latitude.toFixed(6)}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Longitude:</strong> {image.longitude.toFixed(6)}
-                  </p>
-                  <a
-                    href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    Open in Google Maps →
-                  </a>
+              {image.latitude != null && image.longitude != null && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <MapPinIcon className="w-5 h-5 mr-2 text-blue-600" />
+                    {t.images.location}
+                  </h4>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">
+                      <strong>Latitude:</strong> {image.latitude.toFixed(6)}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Longitude:</strong> {image.longitude.toFixed(6)}
+                    </p>
+                    <a
+                      href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Open in Google Maps →
+                    </a>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Timestamp */}
               <div className="mb-6">

@@ -13,7 +13,7 @@ interface Location {
 }
 
 interface CameraCaptureProps {
-  onCapture: (file: File, location: Location, description: string) => Promise<void>;
+  onCapture: (file: File, location: Location | null, description: string) => Promise<void>;
   planId?: string;
 }
 
@@ -93,10 +93,7 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
       return;
     }
 
-    if (!location) {
-      setMessage({ type: 'error', text: t.camera.locationRequired });
-      return;
-    }
+    // Location is optional; proceed even if missing
 
     setIsCapturing(true);
     try {
@@ -210,7 +207,7 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
       {/* Upload Button */}
       <button
         onClick={handleUpload}
-        disabled={isCapturing || !preview || !location}
+        disabled={isCapturing || !preview}
         className="w-full py-3 px-6 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
       >
         {isCapturing ? t.camera.uploading : t.camera.uploadButton}

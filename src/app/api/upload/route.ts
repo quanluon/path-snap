@@ -25,8 +25,10 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get('image') as File;
-    const latitude = parseFloat(formData.get('latitude') as string);
-    const longitude = parseFloat(formData.get('longitude') as string);
+    const latitudeRaw = formData.get('latitude');
+    const longitudeRaw = formData.get('longitude');
+    const latitude = latitudeRaw !== null ? parseFloat(String(latitudeRaw)) : null;
+    const longitude = longitudeRaw !== null ? parseFloat(String(longitudeRaw)) : null;
     const description = formData.get('description') as string | null;
     const planId = formData.get('planId') as string | null;
 
@@ -39,11 +41,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!validateCoordinates(latitude, longitude)) {
-      return NextResponse.json(
-        { error: 'Invalid coordinates' },
-        { status: 400 }
-      );
+    // Validate coordinates only if provided
+    if (latitude !== null && longitude !== null) {
+      if (!validateCoordinates(latitude, longitude)) {
+        return NextResponse.json(
+          { error: 'Invalid coordinates' },
+          { status: 400 }
+        );
+      }
     }
 
     // Upload image using storage provider (Supabase or S3)
@@ -58,8 +63,8 @@ export async function POST(request: NextRequest) {
         url: uploadResult.url,
         thumbnailUrl: uploadResult.thumbnailUrl,
         description: description || null,
-        latitude,
-        longitude,
+        latitude: latitude ?? null,
+        longitude: longitude ?? null,
       })
       .returning();
 

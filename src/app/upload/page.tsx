@@ -18,13 +18,15 @@ export default function UploadPage() {
 
   const handleUpload = async (
     file: File,
-    location: { latitude: number; longitude: number },
+    location: { latitude: number; longitude: number } | null,
     description: string
   ) => {
     const formData = new FormData();
     formData.append('image', file);
-    formData.append('latitude', location.latitude.toString());
-    formData.append('longitude', location.longitude.toString());
+    if (location) {
+      formData.append('latitude', location.latitude.toString());
+      formData.append('longitude', location.longitude.toString());
+    }
     if (description) {
       formData.append('description', description);
     }
