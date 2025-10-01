@@ -26,16 +26,14 @@ export async function uploadToSupabase(
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Process main image with Sharp (auto-normalize orientation, higher quality)
+    // Process main image with Sharp (higher quality). No rotation.
     const processedImage = await sharp(buffer)
-      .rotate() // normalize EXIF orientation so UI doesn't need rotation
       .resize(1920, 1920, { fit: 'inside', withoutEnlargement: true })
       .jpeg({ quality: 92 })
       .toBuffer();
 
-    // Process thumbnail with Sharp (auto-normalize orientation)
+    // Process thumbnail with Sharp. No rotation.
     const thumbnail = await sharp(buffer)
-      .rotate()
       .resize(300, 300, { fit: 'cover' })
       .jpeg({ quality: 85 })
       .toBuffer();

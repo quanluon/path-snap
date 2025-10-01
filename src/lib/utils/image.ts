@@ -16,7 +16,6 @@ export async function processImage(
   const { width = 1920, height = 1080, quality = IMAGE_CONFIG.QUALITY } = options;
 
   return sharp(buffer)
-    .rotate() // normalize EXIF orientation
     .resize(width, height, {
       fit: 'inside',
       withoutEnlargement: true,
@@ -27,7 +26,6 @@ export async function processImage(
 
 export async function generateThumbnail(buffer: Buffer): Promise<Buffer> {
   return sharp(buffer)
-    .rotate()
     .resize(400, 400, {
       fit: 'cover',
     })
