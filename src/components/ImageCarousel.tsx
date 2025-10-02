@@ -98,7 +98,7 @@ export default function ImageCarousel({
                   >
                     <div className="text-center">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                      <p className="text-white/80 text-lg font-medium">Loading more images...</p>
+                      <p className="text-white/80 text-lg font-secondary font-medium">Loading more images...</p>
                     </div>
                   </div>
                 );
@@ -118,8 +118,8 @@ export default function ImageCarousel({
                   >
                     <div className="text-center">
                       <div className="text-white/60 text-6xl mb-4">✨</div>
-                      <p className="text-white/80 text-lg font-medium">You&apos;ve reached the end!</p>
-                      <p className="text-white/60 text-sm mt-2">No more images to show</p>
+                      <p className="text-white/80 text-lg font-secondary font-medium">You&apos;ve reached the end!</p>
+                      <p className="text-white/60 text-sm font-caption mt-2">No more images to show</p>
                     </div>
                   </div>
                 );
@@ -165,7 +165,7 @@ export default function ImageCarousel({
                   <div className="bg-black p-6 flex-shrink-0">
                     {/* Description */}
                     {image.description && (
-                      <p className="text-white text-base mb-4 font-medium leading-relaxed break-words line-clamp-3">
+                      <p className="text-white text-base mb-4 text-story font-smooth break-words line-clamp-3">
                         {image.description}
                       </p>
                     )}
@@ -174,7 +174,7 @@ export default function ImageCarousel({
                     <div className="flex items-center justify-between text-white/90 mb-2">
                       <div className="flex items-center">
                         <MapPinIcon className="w-4 h-4 mr-2" />
-                        <span className="text-sm font-medium truncate max-w-[200px]">
+                        <span className="text-sm text-meta font-smooth truncate max-w-[200px]">
                           {image.latitude.toFixed(4)}, {image.longitude.toFixed(4)}
                         </span>
                       </div>
@@ -182,7 +182,7 @@ export default function ImageCarousel({
                       {image.reactionCount !== undefined && image.reactionCount > 0 && (
                         <div className="flex items-center bg-white/20 px-3 py-1 rounded-full">
                           <HeartIcon className="w-4 h-4 mr-1" />
-                          <span className="text-sm font-medium">
+                          <span className="text-sm text-meta font-smooth">
                             {image.reactionCount}
                           </span>
                         </div>
@@ -190,7 +190,7 @@ export default function ImageCarousel({
                     </div>
 
                     {/* Timestamp */}
-                    <div className="text-white/70 text-sm">
+                    <div className="text-white/70 text-sm text-meta font-smooth">
                       {new Date(image.createdAt).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',

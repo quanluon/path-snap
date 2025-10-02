@@ -87,10 +87,10 @@ export default function HomePage() {
       {/* Header - Fixed at top */}
       <div className="fixed top-0 left-0 right-0 z-10 bg-black/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-2xl font-display font-bold text-white">
             {t.nav.home}
           </h1>
-          <p className="text-white/70 text-sm">
+          <p className="text-white/70 text-sm font-caption">
             Discover checkpoints from around the world
           </p>
         </div>
@@ -101,7 +101,7 @@ export default function HomePage() {
         <div className="h-screen flex justify-center items-center bg-black">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-            <p className="text-white/80 text-lg font-medium">{t.common.loading}</p>
+            <p className="text-white/80 text-lg font-secondary font-medium">{t.common.loading}</p>
           </div>
         </div>
       ) : (
