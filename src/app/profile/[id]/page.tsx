@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense, useMemo, useRef } from 'react';
-import { useParams } from 'next/navigation';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import ImageCard from '@/components/ImageCard';
-import OptimizedImage from '@/components/OptimizedImage';
-import { UserIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import type { ImageWithReactions, User } from '@/types';
-import Link from 'next/link';
+import { useState, useEffect, Suspense, useMemo, useRef } from "react";
+import { useParams } from "next/navigation";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import ImageCard from "@/components/ImageCard";
+import OptimizedImage from "@/components/OptimizedImage";
+import { UserIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import type { ImageWithReactions, User } from "@/types";
+import Link from "next/link";
 
 interface UserProfileData {
   user: User;
@@ -18,7 +18,7 @@ interface UserProfileData {
 function UserProfileContent() {
   const params = useParams();
   const userId = params.id as string;
-  
+
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +26,7 @@ function UserProfileContent() {
 
   // Calculate items per row based on screen size
   const itemsPerRow = useMemo(() => {
-    if (typeof window === 'undefined') return 3;
+    if (typeof window === "undefined") return 3;
     const width = window.innerWidth;
     if (width < 768) return 1; // Mobile
     if (width < 1024) return 2; // Tablet
@@ -60,35 +60,25 @@ function UserProfileContent() {
         setError(null);
 
         // Fetch user's images using the images API with userId filter
-        const imagesResponse = await fetch(`/api/images?userId=${userId}&limit=100`);
-        
+        const imagesResponse = await fetch(
+          `/api/images?userId=${userId}&limit=100`
+        );
+
         if (!imagesResponse.ok) {
-          throw new Error('Failed to fetch user images');
+          throw new Error("Failed to fetch user images");
         }
 
         const imagesData = await imagesResponse.json();
-        
-        // Get user info - either from images or from separate user API
-        let user: User;
-        
-        if (imagesData.images && imagesData.images.length > 0) {
-          // Get user info from the first image's author data
-          user = imagesData.images[0].author;
-          if (!user) {
-            throw new Error('User data not found in images');
+
+        // User has no images, fetch user info separately
+        const userResponse = await fetch(`/api/users/${userId}/info`);
+        if (!userResponse.ok) {
+          if (userResponse.status === 404) {
+            throw new Error("User not found");
           }
-        } else {
-          // User has no images, fetch user info separately
-          const userResponse = await fetch(`/api/users/${userId}/info`);
-          if (!userResponse.ok) {
-            if (userResponse.status === 404) {
-              throw new Error('User not found');
-            }
-            throw new Error('Failed to fetch user info');
-          }
-          const userData = await userResponse.json();
-          user = userData.user;
+          throw new Error("Failed to fetch user info");
         }
+        const { user } = await userResponse.json();
 
         setProfileData({
           user,
@@ -96,8 +86,8 @@ function UserProfileContent() {
           totalImages: imagesData.images ? imagesData.images.length : 0,
         });
       } catch (err) {
-        console.error('Error fetching user profile:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load profile');
+        console.error("Error fetching user profile:", err);
+        setError(err instanceof Error ? err.message : "Failed to load profile");
       } finally {
         setIsLoading(false);
       }
@@ -122,10 +112,12 @@ function UserProfileContent() {
       <div className="min-h-screen bg-dark-gradient flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-400 text-6xl mb-4">⚠️</div>
-          <h1 className="text-white text-2xl font-semibold mb-2">Profile Not Found</h1>
+          <h1 className="text-white text-2xl font-semibold mb-2">
+            Profile Not Found
+          </h1>
           <p className="text-white/70 mb-6">{error}</p>
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
           >
             Go Home
@@ -178,7 +170,7 @@ function UserProfileContent() {
               {user.name && (
                 <p className="text-white/70 text-lg mb-4">{user.email}</p>
               )}
-              
+
               {/* Stats */}
               <div className="flex items-center space-x-6 text-white/70">
                 <div className="flex items-center space-x-2">
@@ -187,10 +179,17 @@ function UserProfileContent() {
                   <span className="text-sm">images</span>
                 </div>
                 <div className="text-sm">
-                  Joined {new Date(user.createdAt).toLocaleDateString('en-US', {
-                    month: 'long',
-                    year: 'numeric'
-                  })}
+                  {user.createdAt ? (
+                    <>
+                      Joined{" "}
+                      {new Date(user.createdAt).toLocaleDateString("en-US", {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </>
+                  ) : (
+                    <span>Member</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -203,8 +202,12 @@ function UserProfileContent() {
         {images.length === 0 ? (
           <div className="text-center py-16">
             <MapPinIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
-            <h2 className="text-white text-xl font-semibold mb-2">No Images Yet</h2>
-            <p className="text-white/70">This user hasn&apos;t shared any images yet.</p>
+            <h2 className="text-white text-xl font-semibold mb-2">
+              No Images Yet
+            </h2>
+            <p className="text-white/70">
+              This user hasn&apos;t shared any images yet.
+            </p>
           </div>
         ) : (
           <>
@@ -216,14 +219,14 @@ function UserProfileContent() {
               ref={parentRef}
               className="h-[600px] overflow-auto"
               style={{
-                contain: 'strict',
+                contain: "strict",
               }}
             >
               <div
                 style={{
                   height: `${virtualizer.getTotalSize()}px`,
-                  width: '100%',
-                  position: 'relative',
+                  width: "100%",
+                  position: "relative",
                 }}
               >
                 {virtualizer.getVirtualItems().map((virtualItem) => {
@@ -234,15 +237,23 @@ function UserProfileContent() {
                     <div
                       key={virtualItem.key}
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         top: 0,
                         left: 0,
-                        width: '100%',
+                        width: "100%",
                         height: `${virtualItem.size}px`,
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
                     >
-                      <div className={`grid gap-6 ${itemsPerRow === 1 ? 'grid-cols-1' : itemsPerRow === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                      <div
+                        className={`grid gap-12 ${
+                          itemsPerRow === 1
+                            ? "grid-cols-1"
+                            : itemsPerRow === 2
+                            ? "grid-cols-2"
+                            : "grid-cols-3"
+                        }`}
+                      >
                         {imageRow.map((image) => (
                           <ImageCard
                             key={image.id}
@@ -268,14 +279,16 @@ function UserProfileContent() {
 
 export default function UserProfilePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-dark-gradient flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white/70">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-dark-gradient flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p className="text-white/70">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <UserProfileContent />
     </Suspense>
   );

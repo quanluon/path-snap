@@ -8,7 +8,7 @@ import {
   UserIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
-import { CalendarIcon, ShareIcon } from "@heroicons/react/24/outline";
+import { CalendarIcon, ShareIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import OptimizedImage from "@/components/OptimizedImage";
 import ReactionBar from "@/components/ReactionBar";
 import { useReactions } from "@/hooks/useReactions";
@@ -99,6 +99,38 @@ export default function ImageDetailModal({
     }
   };
 
+  const handleDownload = async () => {
+    if (!image) return;
+
+    try {
+      // Fetch the image as a blob
+      const response = await fetch(image.url);
+      const blob = await response.blob();
+      
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Generate filename with timestamp and description
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const description = image.description ? image.description.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 30) : 'checkpoint';
+      const filename = `checkpoint_${description}_${timestamp}.jpg`;
+      
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      // Fallback: open image in new tab
+      window.open(image.url, '_blank');
+    }
+  };
+
   const handleImageClick = () => {
     setShowPreview(true);
   };
@@ -157,12 +189,22 @@ export default function ImageDetailModal({
                   <h2 className="text-display text-white text-2xl font-bold">
                     Checkpoint Details
                   </h2>
-                  <button
-                    onClick={handleShare}
-                    className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
-                  >
-                    <ShareIcon className="w-5 h-5 text-white" />
-                  </button>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={handleDownload}
+                      className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                      title="Download image"
+                    >
+                      <ArrowDownTrayIcon className="w-5 h-5 text-white" />
+                    </button>
+                    <button
+                      onClick={handleShare}
+                      className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                      title="Share image"
+                    >
+                      <ShareIcon className="w-5 h-5 text-white" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Author */}
