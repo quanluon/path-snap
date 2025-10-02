@@ -35,6 +35,9 @@ export function useReactions({
   // Store original values for rollback
   const [originalCounts, setOriginalCounts] = useState<ReactionCounts>(initialCounts);
   const [originalUserReaction, setOriginalUserReaction] = useState<ReactionType | undefined>(initialUserReaction);
+  
+  // Track if we're in the middle of an optimistic update
+  const [isOptimisticUpdate, setIsOptimisticUpdate] = useState(false);
 
   const supabase = createClient();
 
@@ -54,30 +57,6 @@ export function useReactions({
     
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
-
-  // Subscribe to real-time updates for reactions
-  useEffect(() => {
-    const channel = supabase
-      .channel(`reactions:${imageId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'reactions',
-          filter: `image_id=eq.${imageId}`,
-        },
-        async (payload) => {
-          // Refetch reaction counts when reactions change
-          await fetchReactionCounts();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [imageId, supabase]);
 
   const fetchReactionCounts = useCallback(async () => {
     try {
@@ -110,8 +89,72 @@ export function useReactions({
     fetchUserReaction();
   }, [fetchReactionCounts, fetchUserReaction]);
 
+  // Subscribe to real-time updates for reactions
+  useEffect(() => {
+    if (!imageId) return;
+
+    console.log('Setting up real-time subscription for image:', imageId);
+
+    const channel = supabase
+      .channel(`reactions:${imageId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reactions',
+          filter: `image_id=eq.${imageId}`,
+        },
+        async (payload) => {
+          console.log('Real-time reaction update received:', payload);
+          
+          // Skip real-time updates if we're in the middle of an optimistic update
+          if (isOptimisticUpdate) {
+            console.log('Skipping real-time update due to optimistic update in progress');
+            return;
+          }
+          
+          // Refetch data to get latest counts and user reaction
+          await fetchReactionCounts();
+          await fetchUserReaction();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Real-time subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to real-time reactions');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('Failed to subscribe to real-time reactions');
+        }
+      });
+
+    return () => {
+      console.log('Cleaning up real-time subscription for image:', imageId);
+      supabase.removeChannel(channel);
+    };
+  }, [imageId, fetchReactionCounts, fetchUserReaction, isOptimisticUpdate]);
+
+  // Fallback polling mechanism (every 30 seconds) in case real-time fails
+  useEffect(() => {
+    if (!imageId) return;
+
+    const interval = setInterval(async () => {
+      // Skip polling if we're in the middle of an optimistic update
+      if (isOptimisticUpdate) return;
+      
+      console.log('Polling for reaction updates...');
+      await fetchReactionCounts();
+      await fetchUserReaction();
+    }, 30000); // Poll every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [imageId, fetchReactionCounts, fetchUserReaction, isOptimisticUpdate]);
+
   const addReaction = useCallback(async (type: ReactionType) => {
     if (isLoading || !isAuthenticated) return;
+
+    // Set optimistic update flag
+    setIsOptimisticUpdate(true);
 
     // Store current state for rollback
     setOriginalCounts(reactionCounts);
@@ -148,19 +191,23 @@ export function useReactions({
         throw new Error(errorData.error || 'Failed to add reaction');
       }
 
-      // API call successful, no need to update UI again
-      // Real-time subscription will handle any server-side changes
+      // API call successful, clear optimistic update flag
+      setIsOptimisticUpdate(false);
 
     } catch (err) {
       // Rollback on error
       setReactionCounts(originalCounts);
       setUserReaction(originalUserReaction);
       setError(err instanceof Error ? err.message : 'Failed to add reaction');
+      setIsOptimisticUpdate(false);
     }
   }, [imageId, isLoading, reactionCounts, userReaction, originalCounts, originalUserReaction]);
 
   const removeReaction = useCallback(async () => {
     if (isLoading || !userReaction || !isAuthenticated) return;
+
+    // Set optimistic update flag
+    setIsOptimisticUpdate(true);
 
     // Store current state for rollback
     setOriginalCounts(reactionCounts);
@@ -191,14 +238,15 @@ export function useReactions({
         throw new Error(errorData.error || 'Failed to remove reaction');
       }
 
-      // API call successful, no need to update UI again
-      // Real-time subscription will handle any server-side changes
+      // API call successful, clear optimistic update flag
+      setIsOptimisticUpdate(false);
 
     } catch (err) {
       // Rollback on error
       setReactionCounts(originalCounts);
       setUserReaction(originalUserReaction);
       setError(err instanceof Error ? err.message : 'Failed to remove reaction');
+      setIsOptimisticUpdate(false);
     }
   }, [imageId, isLoading, userReaction, reactionCounts, originalCounts, originalUserReaction, isAuthenticated]);
 
