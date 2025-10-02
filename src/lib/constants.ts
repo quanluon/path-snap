@@ -30,7 +30,7 @@ export const ROUTES = {
 
 export const REACTION_TYPES = {
   LIKE: 'like',
-  LOVE: 'love',
+  HEART: 'heart',
   WOW: 'wow',
 } as const;
 

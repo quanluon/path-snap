@@ -6,8 +6,7 @@ import { relations } from 'drizzle-orm';
  * Using Drizzle ORM with PostgreSQL + PostGIS extension
  */
 
-// Enum for reaction types
-export const reactionTypeEnum = pgEnum('reaction_type', ['like', 'love', 'wow']);
+// Reaction types are now stored as varchar for flexibility
 
 // Users table (extends Supabase Auth)
 export const users = pgTable('users', {
@@ -50,7 +49,17 @@ export const reactions = pgTable('reactions', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').references(() => users.id).notNull(),
   imageId: uuid('image_id').references(() => images.id).notNull(),
-  type: reactionTypeEnum('type').notNull(),
+  type: text('type').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Image views table for tracking views
+export const imageViews = pgTable('image_views', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  imageId: uuid('image_id').references(() => images.id).notNull(),
+  userId: uuid('user_id').references(() => users.id), // null for anonymous views
+  ipAddress: text('ip_address'), // for anonymous tracking
+  userAgent: text('user_agent'), // for analytics
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -59,6 +68,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   images: many(images),
   plans: many(plans),
   reactions: many(reactions),
+  imageViews: many(imageViews),
 }));
 
 export const plansRelations = relations(plans, ({ one, many }) => ({
@@ -79,6 +89,7 @@ export const imagesRelations = relations(images, ({ one, many }) => ({
     references: [plans.id],
   }),
   reactions: many(reactions),
+  views: many(imageViews),
 }));
 
 export const reactionsRelations = relations(reactions, ({ one }) => ({
@@ -88,6 +99,17 @@ export const reactionsRelations = relations(reactions, ({ one }) => ({
   }),
   image: one(images, {
     fields: [reactions.imageId],
+    references: [images.id],
+  }),
+}));
+
+export const imageViewsRelations = relations(imageViews, ({ one }) => ({
+  user: one(users, {
+    fields: [imageViews.userId],
+    references: [users.id],
+  }),
+  image: one(images, {
+    fields: [imageViews.imageId],
     references: [images.id],
   }),
 }));

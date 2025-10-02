@@ -7,6 +7,10 @@ export default {
   dbCredentials: {
     connectionString: process.env.DATABASE_URL!,
   },
+  introspect: {
+    casing: 'camel',
+  },
+  schemaFilter: ['public'], // Only manage the public schema
 } satisfies Config;
 
 

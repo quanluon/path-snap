@@ -1,0 +1,1 @@
+ALTER TYPE "reaction_type" ADD VALUE 'heart';

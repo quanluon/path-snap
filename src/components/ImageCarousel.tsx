@@ -2,8 +2,7 @@
 
 import { useMemo, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { MapPinIcon, HeartIcon } from '@heroicons/react/24/solid';
-import OptimizedImage from '@/components/OptimizedImage';
+import ImageItem from '@/components/ImageItem';
 import type { ImageWithReactions } from '@/types';
 
 interface ImageCarouselProps {
@@ -130,8 +129,10 @@ export default function ImageCarousel({
             if (!image) return null;
 
             return (
-              <div
+              <ImageItem
                 key={virtualItem.key}
+                image={image}
+                onImageClick={onImageClick}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -140,66 +141,7 @@ export default function ImageCarousel({
                   height: `${virtualItem.size}px`,
                   transform: `translateY(${virtualItem.start}px)`,
                 }}
-                className="w-full bg-black"
-              >
-                {/* Image and Content Container */}
-                <div className="w-full h-full bg-black flex flex-col">
-                  {/* Image Section */}
-                  <div className="relative w-full flex-1 bg-black flex items-center justify-center">
-                    <div 
-                      className="relative w-full h-full cursor-pointer"
-                      onClick={() => onImageClick?.(image)}
-                    >
-                      <OptimizedImage
-                        src={image.thumbnailUrl || image.url}
-                        alt={image.description || 'Checkpoint image'}
-                        fill
-                        className="object-contain"
-                        objectFit="contain"
-                        fallbackSrc="/placeholder-image.svg"
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Text Content Section */}
-                  <div className="bg-black p-6 flex-shrink-0">
-                    {/* Description */}
-                    {image.description && (
-                      <p className="text-white text-base mb-4 text-story font-smooth break-words line-clamp-3">
-                        {image.description}
-                      </p>
-                    )}
-                    
-                    {/* Location and Reactions */}
-                    <div className="flex items-center justify-between text-white/90 mb-2">
-                      <div className="flex items-center">
-                        <MapPinIcon className="w-4 h-4 mr-2" />
-                        <span className="text-sm text-meta font-smooth truncate max-w-[200px]">
-                          {image.latitude.toFixed(4)}, {image.longitude.toFixed(4)}
-                        </span>
-                      </div>
-                      
-                      {image.reactionCount !== undefined && image.reactionCount > 0 && (
-                        <div className="flex items-center bg-white/20 px-3 py-1 rounded-full">
-                          <HeartIcon className="w-4 h-4 mr-1" />
-                          <span className="text-sm text-meta font-smooth">
-                            {image.reactionCount}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Timestamp */}
-                    <div className="text-white/70 text-sm text-meta font-smooth">
-                      {new Date(image.createdAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              />
             );
           })}
         </div>

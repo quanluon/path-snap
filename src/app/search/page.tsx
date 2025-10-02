@@ -76,20 +76,6 @@ export default function SearchPage() {
     setIsModalOpen(true);
   };
 
-  const handleReaction = async (imageId: string, type: string) => {
-    try {
-      await fetch("/api/reactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageId, type }),
-      });
-      // Refresh results to get updated reaction counts
-      // Note: In a real app, you'd want to update the specific image in results
-      // For now, we'll just refresh the search results
-    } catch (error) {
-      console.error("Error adding reaction:", error);
-    }
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -127,7 +113,6 @@ export default function SearchPage() {
         image={selectedImage}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onReact={handleReaction}
       />
     </div>
   );

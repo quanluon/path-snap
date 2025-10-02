@@ -68,34 +68,9 @@ export default function HomePage() {
     setIsModalOpen(true);
   };
 
-  const handleReaction = async (imageId: string, type: string) => {
-    try {
-      await fetch('/api/reactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageId, type }),
-      });
-      // Refresh images to get updated reaction counts
-      fetchImages();
-    } catch (error) {
-      console.error('Error adding reaction:', error);
-    }
-  };
 
   return (
     <div className="relative">
-      {/* Header - Fixed at top */}
-      <div className="fixed top-0 left-0 right-0 z-10 bg-black/80 backdrop-blur-md border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-display font-bold text-white">
-            {t.nav.home}
-          </h1>
-          <p className="text-white/70 text-sm font-caption">
-            Discover checkpoints from around the world
-          </p>
-        </div>
-      </div>
-
       {/* Main Content */}
       {isLoading ? (
         <div className="h-screen flex justify-center items-center bg-black">
@@ -118,7 +93,6 @@ export default function HomePage() {
         image={selectedImage}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onReact={handleReaction}
       />
     </div>
   );

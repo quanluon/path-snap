@@ -8,6 +8,20 @@
       "when": 1759325967326,
       "tag": "0000_tricky_kulan_gath",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1759391966370,
+      "tag": "0001_cultured_forgotten_one",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1759392366052,
+      "tag": "0002_lame_blue_blade",
+      "breakpoints": true
     }
   ]
 }

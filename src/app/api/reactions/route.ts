@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/db';
 import { reactions } from '@/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { REACTION_TYPES } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
 

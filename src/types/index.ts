@@ -1,4 +1,5 @@
-import type { images, plans, reactions, users } from '@/db/schema';
+import type { images, plans, reactions, users, imageViews } from '@/db/schema';
+import type { ReactionType } from '@/lib/constants';
 
 /**
  * Type definitions for the application
@@ -16,9 +17,22 @@ export type NewPlan = typeof plans.$inferInsert;
 export type Reaction = typeof reactions.$inferSelect;
 export type NewReaction = typeof reactions.$inferInsert;
 
+export type ImageView = typeof imageViews.$inferSelect;
+export type NewImageView = typeof imageViews.$inferInsert;
+
 export interface ImageWithReactions extends Image {
   reactions?: Reaction[];
   reactionCount?: number;
+  reactionCounts?: ReactionCounts;
+  userReaction?: ReactionType;
+  author?: User;
+  viewCount?: number;
+}
+
+export interface ReactionCounts {
+  like: number;
+  heart: number;
+  wow: number;
 }
 
 export interface PlanWithImages extends Plan {
