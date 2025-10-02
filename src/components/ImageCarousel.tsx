@@ -104,8 +104,8 @@ export default function ImageCarousel({
                     src={image.thumbnailUrl || image.url}
                     alt={image.description || 'Checkpoint image'}
                     fill
-                    className="object-cover"
-                    objectFit="cover"
+                    className="object-contain"
+                    objectFit="contain"
                     fallbackSrc="/placeholder-image.svg"
                   />
                   
