@@ -3,6 +3,7 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import ImageItem from '@/components/ImageItem';
+import { useBatchReactions } from '@/hooks/useBatchReactions';
 import type { ImageWithReactions } from '@/types';
 
 interface ImageCarouselProps {
@@ -24,6 +25,9 @@ export default function ImageCarousel({
   isLoadingMore = false 
 }: ImageCarouselProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  
+  // Use batch reactions hook for optimized API calls
+  const { reactionCounts, userReactions, fetchBatchReactions, addReaction, removeReaction } = useBatchReactions();
 
   // Calculate total item count (including loading state)
   const itemCount = useMemo(() => {
@@ -53,6 +57,14 @@ export default function ImageCarousel({
       onLoadMore();
     }
   }, [virtualizer, images.length, onLoadMore, hasMore, isLoadingMore]);
+
+  // Fetch batch reactions when images change
+  useEffect(() => {
+    if (images.length > 0) {
+      const imageIds = images.map(img => img.id);
+      fetchBatchReactions(imageIds);
+    }
+  }, [images, fetchBatchReactions]);
 
   if (images.length === 0) {
     return (
@@ -133,6 +145,10 @@ export default function ImageCarousel({
                 key={virtualItem.key}
                 image={image}
                 onImageClick={onImageClick}
+                reactionCounts={reactionCounts[image.id]}
+                userReaction={userReactions[image.id]}
+                onReactionChange={(type) => addReaction(image.id, type)}
+                isAuthenticated={true} // TODO: Get from auth context
                 style={{
                   position: 'absolute',
                   top: 0,

@@ -3,59 +3,30 @@
 import ImageCarousel from '@/components/ImageCarousel';
 import ImageDetailModal from '@/components/ImageDetailModal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useImages } from '@/hooks/useImages';
 import type { ImageWithReactions } from '@/types';
 import { useEffect, useState } from 'react';
 
 export default function HomePage() {
   const { t } = useLanguage();
-  const [images, setImages] = useState<ImageWithReactions[]>([]);
   const [selectedImage, setSelectedImage] = useState<ImageWithReactions | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
   const itemsPerPage = 50;
 
-  const fetchImages = async (isInitial = false) => {
-    try {
-      if (isInitial) {
-        setIsLoading(true);
-        setImages([]);
-        setHasMore(true);
-      } else {
-        setIsLoadingMore(true);
-      }
-      
-      const response = await fetch(`/api/images?limit=${itemsPerPage}&offset=${images.length}`);
-      const data = await response.json();
-      
-      const newImages = data.images || [];
-      
-      if (isInitial) {
-        setImages(newImages);
-      } else {
-        // Filter out duplicates based on image ID
-        const uniqueNewImages = newImages.filter(
-          (newImage: ImageWithReactions) => 
-            !images.some(existingImage => existingImage.id === newImage.id)
-        );
-        setImages(prev => [...prev, ...uniqueNewImages]);
-      }
-      
-      // If no new images returned, no more to load
-      setHasMore(newImages.length > 0);
-    } catch (error) {
-      console.error('Error fetching images:', error);
-      setHasMore(false);
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  };
+  const {
+    images,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    error,
+    fetchImages,
+    refreshImages,
+  } = useImages({ itemsPerPage });
+
 
   useEffect(() => {
     fetchImages(true);
-  }, []);
+  }, [fetchImages]);
 
   const loadMoreImages = async () => {
     if (hasMore && !isLoadingMore) {

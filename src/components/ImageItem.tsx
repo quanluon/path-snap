@@ -4,24 +4,37 @@ import { MapPinIcon, EyeIcon } from '@heroicons/react/24/solid';
 import { UserIcon as UserIconOutline } from '@heroicons/react/24/outline';
 import OptimizedImage from '@/components/OptimizedImage';
 import ReactionBar from '@/components/ReactionBar';
-import { useReactions } from '@/hooks/useReactions';
 import { useImageView } from '@/hooks/useImageView';
 import { useRouter } from 'next/navigation';
-import type { ImageWithReactions } from '@/types';
+import type { ImageWithReactions, ReactionCounts } from '@/types';
+import type { ReactionType } from '@/lib/constants';
 
 interface ImageItemProps {
   image: ImageWithReactions;
   onImageClick?: (image: ImageWithReactions) => void;
   style?: React.CSSProperties;
+  // Optional reaction data from batch hook
+  reactionCounts?: ReactionCounts;
+  userReaction?: ReactionType;
+  onReactionChange?: (type: ReactionType) => Promise<void>;
+  isAuthenticated?: boolean;
 }
 
-export default function ImageItem({ image, onImageClick, style }: ImageItemProps) {
+export default function ImageItem({ 
+  image, 
+  onImageClick, 
+  style, 
+  reactionCounts: propReactionCounts,
+  userReaction: propUserReaction,
+  onReactionChange,
+  isAuthenticated: propIsAuthenticated
+}: ImageItemProps) {
   const router = useRouter();
-  const { reactionCounts, userReaction, addReaction, isAuthenticated } = useReactions({
-    imageId: image.id,
-    initialCounts: image.reactionCounts || { like: 0, heart: 0, wow: 0 },
-    initialUserReaction: image.userReaction,
-  });
+  
+  // Use props if available (from batch hook), otherwise fallback to individual hook
+  const reactionCounts = propReactionCounts || image.reactionCounts || { like: 0, heart: 0, wow: 0 };
+  const userReaction = propUserReaction !== undefined ? propUserReaction : image.userReaction;
+  const isAuthenticated = propIsAuthenticated !== undefined ? propIsAuthenticated : true; // Default to true if not specified
 
   // Track view when image is displayed
   useImageView({ imageId: image.id });
@@ -31,7 +44,9 @@ export default function ImageItem({ image, onImageClick, style }: ImageItemProps
       // If clicking the same reaction, remove it
       return;
     }
-    await addReaction(type as 'like' | 'heart' | 'wow');
+    if (onReactionChange) {
+      await onReactionChange(type as 'like' | 'heart' | 'wow');
+    }
   };
 
   const handleAuthorClick = (e: React.MouseEvent) => {

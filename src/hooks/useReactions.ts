@@ -59,6 +59,11 @@ export function useReactions({
   }, [supabase.auth]);
 
   const fetchReactionCounts = useCallback(async () => {
+    if (!imageId || imageId.trim() === '') {
+      console.log('Skipping fetchReactionCounts: empty imageId');
+      return;
+    }
+
     try {
       const response = await fetch(`/api/reactions/counts?imageId=${imageId}`);
       if (!response.ok) throw new Error('Failed to fetch reaction counts');
@@ -72,16 +77,30 @@ export function useReactions({
   }, [imageId]);
 
   const fetchUserReaction = useCallback(async () => {
+    // Only fetch user reaction if authenticated
+    if (!isAuthenticated) {
+      setUserReaction(undefined);
+      return;
+    }
+
     try {
       const response = await fetch(`/api/reactions/user?imageId=${imageId}`);
-      if (!response.ok) throw new Error('Failed to fetch user reaction');
+      if (!response.ok) {
+        if (response.status === 401) {
+          // User not authenticated, clear reaction
+          setUserReaction(undefined);
+          return;
+        }
+        throw new Error('Failed to fetch user reaction');
+      }
       
       const data = await response.json();
       setUserReaction(data.reaction?.type || undefined);
     } catch (err) {
       console.error('Error fetching user reaction:', err);
+      // Don't set error state for user reactions as it's not critical
     }
-  }, [imageId]);
+  }, [imageId, isAuthenticated]);
 
   // Fetch initial data
   useEffect(() => {
@@ -116,7 +135,10 @@ export function useReactions({
           
           // Refetch data to get latest counts and user reaction
           await fetchReactionCounts();
-          await fetchUserReaction();
+          // Only fetch user reaction if authenticated
+          if (isAuthenticated) {
+            await fetchUserReaction();
+          }
         }
       )
       .subscribe((status) => {
@@ -144,11 +166,14 @@ export function useReactions({
       
       console.log('Polling for reaction updates...');
       await fetchReactionCounts();
-      await fetchUserReaction();
+      // Only fetch user reaction if authenticated
+      if (isAuthenticated) {
+        await fetchUserReaction();
+      }
     }, 30000); // Poll every 30 seconds
 
     return () => clearInterval(interval);
-  }, [imageId, fetchReactionCounts, fetchUserReaction, isOptimisticUpdate]);
+  }, [imageId, fetchReactionCounts, fetchUserReaction, isOptimisticUpdate, isAuthenticated]);
 
   const addReaction = useCallback(async (type: ReactionType) => {
     if (isLoading || !isAuthenticated) return;

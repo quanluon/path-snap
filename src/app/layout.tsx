@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Poppins, Outfit, Geist } from "next/font/google"
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { PlanProvider } from "@/contexts/PlanContext";
+import { ServiceWorkerProvider } from "@/components/ServiceWorkerProvider";
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
 
@@ -70,17 +71,24 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#3b82f6" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="PathSnap" />
       </head>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} ${outfit.variable} ${geist.variable} antialiased bg-dark-gradient min-h-screen`}
       >
         <LanguageProvider>
           <PlanProvider>
-            <Header />
-            <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
-              {children}
-            </main>
-            <Navigation />
+            <ServiceWorkerProvider>
+              <Header />
+              <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
+                {children}
+              </main>
+              <Navigation />
+            </ServiceWorkerProvider>
           </PlanProvider>
         </LanguageProvider>
         <script

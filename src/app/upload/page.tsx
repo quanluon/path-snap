@@ -7,12 +7,14 @@ import AuthModal from '@/components/AuthModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePlan } from '@/contexts/PlanContext';
+import { useServiceWorker } from '@/components/ServiceWorkerProvider';
 
 export default function UploadPage() {
   const router = useRouter();
   const { t } = useLanguage();
   const { user, isLoading } = useAuth();
   const { activePlan } = usePlan();
+  const { storeUploadForSync, enableNotifications } = useServiceWorker();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
@@ -37,19 +39,63 @@ export default function UploadPage() {
       formData.append('planId', activePlan.id);
     }
 
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      console.error('Upload failed:', errorData);
-      throw new Error(`Upload failed: ${errorData.error || 'Unknown error'}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Upload failed:', errorData);
+        
+        // Store upload for background sync on failure
+        await storeUploadForSync({
+          formData,
+          metadata: {
+            description,
+            latitude: location?.latitude,
+            longitude: location?.longitude,
+            planId: activePlan?.id
+          }
+        });
+        
+        throw new Error(`Upload failed: ${errorData.error || 'Unknown error'}`);
+      }
+
+      const result = await response.json();
+      
+      // Signal that a new image was uploaded
+      if (result.image) {
+        localStorage.setItem('newImageUploaded', JSON.stringify({
+          image: result.image,
+          timestamp: Date.now()
+        }));
+        
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new CustomEvent('imageUploaded', {
+          detail: { image: result.image }
+        }));
+      }
+
+      // Redirect to home page after successful upload
+      router.push('/');
+    } catch (error) {
+      // If network fails, store for background sync
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.log('Network error, storing upload for background sync');
+        await storeUploadForSync({
+          formData,
+          metadata: {
+            description,
+            latitude: location?.latitude,
+            longitude: location?.longitude,
+            planId: activePlan?.id
+          }
+        });
+      }
+      throw error;
     }
-
-    // Redirect to home page after successful upload
-    router.push('/');
   };
 
   if (isLoading) {
