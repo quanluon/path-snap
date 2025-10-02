@@ -91,35 +91,6 @@ export default function SearchImages({ onSearch, results, isLoading }: SearchIma
           </div>
         </div>
       </div>
-
-      {/* Results */}
-      {results && (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">
-            {results.length} {t.search.resultsFound}
-          </h3>
-          {results.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">{t.search.noResults}</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {results.map((image) => (
-                <div key={image.id} className="relative group">
-                  <img
-                    src={image.thumbnailUrl || image.url}
-                    alt={image.description || ''}
-                    className="w-full aspect-square object-cover rounded-lg"
-                  />
-                  {image.description && (
-                    <p className="mt-2 text-sm text-gray-700 line-clamp-2">
-                      {image.description}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

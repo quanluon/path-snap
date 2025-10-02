@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { MapPinIcon, PhotoIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import OptimizedImage from '@/components/OptimizedImage';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { images } from '@/db/schema';
 
@@ -190,35 +191,16 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0">
                     <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                      <img
+                      <OptimizedImage
                         src={image.thumbnailUrl || image.url}
                         alt={image.description || `Checkpoint ${imageIndex + 1}`}
-                        className="w-full h-full object-cover"
-                        crossOrigin="anonymous"
-                        onError={(e) => {
+                        width={48}
+                        height={48}
+                        className="object-cover"
+                        objectFit="cover"
+                        fallbackSrc="/placeholder-image.svg"
+                        onError={() => {
                           console.log('Image failed to load:', image.thumbnailUrl || image.url);
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          // Show dot as fallback
-                          const container = target.parentElement;
-                          if (container) {
-                            container.innerHTML = `
-                              <div style="
-                                width: 100%; 
-                                height: 100%; 
-                                background-color: #3B82F6; 
-                                border-radius: 8px; 
-                                display: flex; 
-                                align-items: center; 
-                                justify-content: center;
-                                color: white;
-                                font-size: 12px;
-                                font-weight: bold;
-                              ">
-                                ${imageIndex + 1}
-                              </div>
-                            `;
-                          }
                         }}
                         onLoad={() => {
                           console.log('Image loaded successfully:', image.thumbnailUrl || image.url);

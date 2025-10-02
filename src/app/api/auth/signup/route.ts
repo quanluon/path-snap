@@ -20,10 +20,16 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient();
 
-    // Sign up with Supabase Auth
+    // Sign up with Supabase Auth (auto-confirm enabled)
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: undefined, // Disable email confirmation
+        data: {
+          name: name || null,
+        }
+      }
     });
 
     if (authError) {
@@ -45,13 +51,37 @@ export async function POST(request: NextRequest) {
       avatarUrl: null,
     });
 
+    // Auto-login the user after successful signup
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
+      console.error('Auto-login error:', signInError);
+      // Still return success for signup, but user will need to login manually
+      return NextResponse.json(
+        {
+          user: {
+            id: authData.user.id,
+            email: authData.user.email,
+            name,
+          },
+          message: 'Account created successfully. Please login.',
+        },
+        { status: 201 }
+      );
+    }
+
     return NextResponse.json(
       {
         user: {
-          id: authData.user.id,
-          email: authData.user.email,
+          id: signInData.user?.id || authData.user.id,
+          email: signInData.user?.email || authData.user.email,
           name,
         },
+        session: signInData.session,
+        message: 'Account created and logged in successfully',
       },
       { status: 201 }
     );

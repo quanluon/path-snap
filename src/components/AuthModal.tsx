@@ -45,7 +45,16 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
 
       // Success - close modal and refresh page
       onClose();
-      window.location.reload();
+      
+      // For signup, show success message if auto-login worked
+      if (mode === 'signup' && data.message) {
+        // Small delay to show success message
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        window.location.reload();
+      }
     } catch (error) {
       setError((error as Error).message);
     } finally {

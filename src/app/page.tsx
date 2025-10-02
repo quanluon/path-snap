@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import ImageCarousel from '@/components/ImageCarousel';
 import ImageDetailModal from '@/components/ImageDetailModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { ImageWithReactions } from '@/types';
+import { useEffect, useState } from 'react';
 
 export default function HomePage() {
   const { t } = useLanguage();
@@ -12,21 +12,54 @@ export default function HomePage() {
   const [selectedImage, setSelectedImage] = useState<ImageWithReactions | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const itemsPerPage = 50;
 
-  useEffect(() => {
-    fetchImages();
-  }, []);
-
-  const fetchImages = async () => {
+  const fetchImages = async (isInitial = false) => {
     try {
-      setIsLoading(true);
-      const response = await fetch('/api/images?limit=20');
+      if (isInitial) {
+        setIsLoading(true);
+        setImages([]);
+        setHasMore(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+      
+      const response = await fetch(`/api/images?limit=${itemsPerPage}&offset=${images.length}`);
       const data = await response.json();
-      setImages(data.images || []);
+      
+      const newImages = data.images || [];
+      
+      if (isInitial) {
+        setImages(newImages);
+      } else {
+        // Filter out duplicates based on image ID
+        const uniqueNewImages = newImages.filter(
+          (newImage: ImageWithReactions) => 
+            !images.some(existingImage => existingImage.id === newImage.id)
+        );
+        setImages(prev => [...prev, ...uniqueNewImages]);
+      }
+      
+      // If no new images returned, no more to load
+      setHasMore(newImages.length > 0);
     } catch (error) {
       console.error('Error fetching images:', error);
+      setHasMore(false);
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchImages(true);
+  }, []);
+
+  const loadMoreImages = async () => {
+    if (hasMore && !isLoadingMore) {
+      await fetchImages(false);
     }
   };
 
@@ -65,7 +98,15 @@ export default function HomePage() {
           <div className="text-gray-500">{t.common.loading}</div>
         </div>
       ) : (
-        <ImageCarousel images={images} onImageClick={handleImageClick} />
+        <>
+          <ImageCarousel 
+            images={images} 
+            onImageClick={handleImageClick}
+            onLoadMore={loadMoreImages}
+            hasMore={hasMore}
+            isLoadingMore={isLoadingMore}
+          />
+        </>
       )}
 
       <ImageDetailModal

@@ -2,19 +2,35 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
-import { ChevronLeftIcon, ChevronRightIcon, MapPinIcon } from '@heroicons/react/24/solid';
+import { MapPinIcon } from '@heroicons/react/24/solid';
+import OptimizedImage from '@/components/OptimizedImage';
 import type { ImageWithReactions } from '@/types';
 
 interface ImageCarouselProps {
   images: ImageWithReactions[];
   onImageClick?: (image: ImageWithReactions) => void;
   startIndex?: number;
+  onLoadMore?: () => Promise<void>;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
 }
 
-export default function ImageCarousel({ images, onImageClick, startIndex = 0 }: ImageCarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start' });
-  const [prevBtnEnabled, setPrevBtnEnabled] = useState(false);
-  const [nextBtnEnabled, setNextBtnEnabled] = useState(false);
+export default function ImageCarousel({ 
+  images, 
+  onImageClick, 
+  startIndex = 0, 
+  onLoadMore, 
+  hasMore = false, 
+  isLoadingMore = false 
+}: ImageCarouselProps) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: false, 
+    align: 'start',
+    axis: 'y', // Vertical scrolling
+    dragFree: false, // Snap to each image
+    containScroll: 'trimSnaps',
+    skipSnaps: false
+  });
   const [selectedIndex, setSelectedIndex] = useState(startIndex);
 
   // Scroll to startIndex when component mounts or startIndex changes
@@ -25,20 +41,33 @@ export default function ImageCarousel({ images, onImageClick, startIndex = 0 }: 
     }
   }, [emblaApi, startIndex, images.length]);
 
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
-  }, [emblaApi]);
+  // Keep current position when new images are loaded
+  useEffect(() => {
+    if (emblaApi && images.length > 0) {
+      // Don't scroll if we're just adding more images (infinite scroll)
+      // Only scroll if it's a fresh load or explicit startIndex change
+      const currentSlideCount = emblaApi.slideNodes().length;
+      if (currentSlideCount > 0 && selectedIndex < currentSlideCount) {
+        // Maintain current position
+        emblaApi.scrollTo(selectedIndex, false); // false = don't animate
+      }
+    }
+  }, [emblaApi, images.length, selectedIndex]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-    setPrevBtnEnabled(emblaApi.canScrollPrev());
-    setNextBtnEnabled(emblaApi.canScrollNext());
-  }, [emblaApi]);
+    const currentIndex = emblaApi.selectedScrollSnap();
+    setSelectedIndex(currentIndex);
+    
+    // Check if we're near the end and should load more
+    if (onLoadMore && hasMore && !isLoadingMore) {
+      const totalSlides = emblaApi.slideNodes().length;
+      // Load more when we're within 2 slides of the end
+      if (currentIndex >= totalSlides - 2) {
+        onLoadMore();
+      }
+    }
+  }, [emblaApi, onLoadMore, hasMore, isLoadingMore]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -56,103 +85,76 @@ export default function ImageCarousel({ images, onImageClick, startIndex = 0 }: 
   }
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full h-[70vh] sm:h-[600px]">
       {/* Carousel */}
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-4">
-          {images.map((image) => (
+      <div className="overflow-hidden h-full" ref={emblaRef}>
+        <div className="flex flex-col h-full">
+          {images.map((image, index) => (
             <div
-              key={image.id}
-              className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%]"
+              key={`${image.id}-${index}`}
+              className="flex-[0_0_100%] h-full flex items-center justify-center p-4"
             >
               <div
-                className="relative group cursor-pointer bg-gray-100 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                className="relative group cursor-pointer bg-gray-100 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow w-full max-w-md mx-auto h-full"
                 onClick={() => onImageClick?.(image)}
               >
                 {/* Image */}
-                <div className="aspect-square relative">
-                  <img
+                <div className="relative h-full">
+                  <OptimizedImage
                     src={image.thumbnailUrl || image.url}
                     alt={image.description || 'Checkpoint image'}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
+                    fill
+                    className="object-cover"
+                    objectFit="cover"
+                    fallbackSrc="/placeholder-image.svg"
                   />
                   
                   {/* Overlay on hover */}
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity" />
                 </div>
 
-                {/* Image Info */}
-                <div className="p-4">
+                {/* Image Info - Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                   {image.description && (
-                    <p className="text-sm text-gray-700 mb-2 line-clamp-2">
+                    <p className="text-white text-sm mb-2 line-clamp-2 font-medium">
                       {image.description}
                     </p>
                   )}
                   
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-white/90">
                     <div className="flex items-center">
-                      <MapPinIcon className="w-4 h-4 mr-1" />
-                      <span>
+                      <MapPinIcon className="w-3 h-3 mr-1" />
+                      <span className="truncate max-w-[120px] sm:max-w-none">
                         {image.latitude.toFixed(4)}, {image.longitude.toFixed(4)}
                       </span>
                     </div>
                     
                     {image.reactionCount !== undefined && image.reactionCount > 0 && (
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      <span className="bg-white/20 text-white px-2 py-1 rounded text-xs">
                         ❤️ {image.reactionCount}
                       </span>
                     )}
                   </div>
 
-                  <div className="mt-2 text-xs text-gray-400">
-                    {new Date(image.createdAt).toLocaleDateString()}
+                  <div className="mt-1 text-xs text-white/80">
+                    {new Date(image.createdAt).toUTCString()}
                   </div>
                 </div>
               </div>
             </div>
           ))}
+          
+          {/* Loading More Indicator */}
+          {isLoadingMore && (
+            <div className="flex-[0_0_100%] h-full flex items-center justify-center p-4">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-gray-500 text-sm">Đang tải thêm ảnh...</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Navigation Buttons */}
-      {images.length > 1 && (
-        <>
-          <button
-            onClick={scrollPrev}
-            disabled={!prevBtnEnabled}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white transition-colors z-10"
-            aria-label="Previous"
-          >
-            <ChevronLeftIcon className="w-6 h-6 mx-auto text-gray-800" />
-          </button>
-
-          <button
-            onClick={scrollNext}
-            disabled={!nextBtnEnabled}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white transition-colors z-10"
-            aria-label="Next"
-          >
-            <ChevronRightIcon className="w-6 h-6 mx-auto text-gray-800" />
-          </button>
-        </>
-      )}
-
-      {/* Dots Indicator */}
-      {images.length > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
-          {images.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => emblaApi?.scrollTo(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === selectedIndex ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

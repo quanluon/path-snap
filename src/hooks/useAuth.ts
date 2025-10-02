@@ -34,10 +34,17 @@ export function useAuth() {
     await supabase.auth.signOut();
   };
 
+  const refreshSession = async () => {
+    const { data: { session } } = await supabase.auth.refreshSession();
+    setUser(session?.user ?? null);
+    return session;
+  };
+
   return {
     user,
     isLoading,
     signOut,
+    refreshSession,
   };
 }
 

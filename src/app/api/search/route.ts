@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
       searchParams.get('radius') || String(SEARCH_RADIUS.DEFAULT)
     );
     const limit = parseInt(searchParams.get('limit') || '20');
+    const offset = parseInt(searchParams.get('offset') || '0');
 
     // Validate coordinates
     if (!validateCoordinates(latitude, longitude)) {
@@ -71,7 +72,10 @@ export async function GET(request: NextRequest) {
           `
         )
         .orderBy(sql`distance ASC`)
-        .limit(limit);
+        .limit(limit)
+        .offset(offset);
+        console.log('PostGIS enabled');
+        
     } catch (error) {
       console.log('PostGIS not available, using fallback distance calculation:', error);
       
@@ -110,18 +114,23 @@ export async function GET(request: NextRequest) {
         }))
         .filter(img => img.distance <= radius)
         .sort((a, b) => a.distance - b.distance)
-        .slice(0, limit);
+        .slice(offset, offset + limit);
     }
 
-    return NextResponse.json({
-      images: nearbyImages,
-      searchParams: {
-        latitude,
-        longitude,
-        radius,
-      },
-      count: nearbyImages.length,
-    });
+        return NextResponse.json({
+          images: nearbyImages,
+          searchParams: {
+            latitude,
+            longitude,
+            radius,
+          },
+          count: nearbyImages.length,
+          pagination: {
+            limit,
+            offset,
+            total: nearbyImages.length,
+          },
+        });
   } catch (error) {
     console.error('Search error:', error);
     return NextResponse.json(

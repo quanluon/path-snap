@@ -3,6 +3,7 @@
 // import { Fragment } from 'react';
 import { XMarkIcon, MapPinIcon, HeartIcon } from '@heroicons/react/24/solid';
 import { HeartIcon as HeartOutlineIcon } from '@heroicons/react/24/outline';
+import OptimizedImage from '@/components/OptimizedImage';
 import type { ImageWithReactions } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -46,11 +47,14 @@ export default function ImageDetailModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
             {/* Image */}
-            <div className="relative bg-gray-100">
-              <img
+            <div className="relative bg-gray-100 h-[400px] md:h-auto">
+              <OptimizedImage
                 src={image.url}
                 alt={image.description || 'Checkpoint image'}
-                className="w-full h-full object-contain"
+                fill
+                className="object-contain"
+                objectFit="contain"
+                fallbackSrc="/placeholder-image.svg"
               />
             </div>
 
@@ -96,16 +100,13 @@ export default function ImageDetailModal({
                   {t.images.createdAt}
                 </h4>
                 <p className="text-gray-600">
-                  {new Date(image.createdAt).toLocaleString()}
+                  {new Date(image.createdAt).toUTCString()}
                 </p>
               </div>
 
               {/* Reactions */}
               {onReact && (
                 <div className="mb-6">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                    {t.images.reactions}
-                  </h4>
                   <div className="flex gap-3">
                     <button
                       onClick={() => onReact(image.id, 'like')}

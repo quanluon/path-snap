@@ -25,6 +25,15 @@ export async function GET(request: NextRequest) {
       whereConditions.push(eq(images.planId, planId));
     }
 
+    // Get total count for pagination
+    const totalCountQuery = db
+      .select({ count: sql<number>`count(*)` })
+      .from(images)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+    
+    const totalResult = await totalCountQuery;
+    const total = totalResult[0]?.count || 0;
+
     // Build query with conditions
     const result = await db
       .select({
@@ -53,6 +62,7 @@ export async function GET(request: NextRequest) {
         limit,
         offset,
         count: result.length,
+        total,
       },
     });
   } catch (error) {

@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/storage/v1/object/public/**',
       },
+      new URL('https://path-snap-images.s3.ap-southeast-1.amazonaws.com/**')
     ],
   },
   // PWA configuration
