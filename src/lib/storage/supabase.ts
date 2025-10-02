@@ -26,17 +26,56 @@ export async function uploadToSupabase(
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Process main image with Sharp
-    const processedImage = await sharp(buffer)
-      .resize(1920, 1920, { fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 85 })
-      .toBuffer();
+    // Get image metadata to determine if it needs processing
+    const metadata = await sharp(buffer).metadata();
+    const isLargeImage = (metadata.width || 0) > 1920 || (metadata.height || 0) > 1920;
+    
+    let processedImage: Buffer;
+    let processedThumbnail: Buffer;
 
-    // Process thumbnail with Sharp
-    const thumbnail = await sharp(buffer)
-      .resize(300, 300, { fit: 'cover' })
-      .jpeg({ quality: 80 })
-      .toBuffer();
+    if (isLargeImage) {
+      // For large images, resize but maintain high quality
+      processedImage = await sharp(buffer)
+        .rotate() // Auto-rotate based on EXIF data
+        .resize(1920, 1920, { 
+          fit: 'inside', 
+          withoutEnlargement: true 
+        })
+        .jpeg({ 
+          quality: 95, // Higher quality for large images
+          progressive: true,
+          mozjpeg: true // Better compression
+        })
+        .toBuffer();
+
+      processedThumbnail = await sharp(buffer)
+        .rotate() // Auto-rotate based on EXIF data
+        .resize(300, 300, { fit: 'cover' })
+        .jpeg({ 
+          quality: 90, // Higher quality for thumbnails
+          progressive: true
+        })
+        .toBuffer();
+    } else {
+      // For smaller images, keep original quality but optimize
+      processedImage = await sharp(buffer)
+        .rotate() // Auto-rotate based on EXIF data
+        .jpeg({ 
+          quality: 98, // Very high quality for smaller images
+          progressive: true,
+          mozjpeg: true
+        })
+        .toBuffer();
+
+      processedThumbnail = await sharp(buffer)
+        .rotate() // Auto-rotate based on EXIF data
+        .resize(300, 300, { fit: 'cover' })
+        .jpeg({ 
+          quality: 90,
+          progressive: true
+        })
+        .toBuffer();
+    }
 
     // Upload main image
     const { error: imageError } = await supabase.storage
@@ -59,7 +98,7 @@ export async function uploadToSupabase(
     // Upload thumbnail
     const { error: thumbnailError } = await supabase.storage
       .from('checkpoint-images')
-      .upload(thumbnailKey, thumbnail, {
+      .upload(thumbnailKey, processedThumbnail, {
         contentType: 'image/jpeg',
         metadata: {
           userId,

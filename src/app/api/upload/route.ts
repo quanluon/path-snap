@@ -25,11 +25,14 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get('image') as File;
-    const latitude = parseFloat(formData.get('latitude') as string);
-    const longitude = parseFloat(formData.get('longitude') as string);
+    const latitudeStr = formData.get('latitude') as string;
+    const longitudeStr = formData.get('longitude') as string;
     const description = formData.get('description') as string | null;
     const planId = formData.get('planId') as string | null;
 
+    // Parse coordinates (optional)
+    const latitude = latitudeStr ? parseFloat(latitudeStr) : null;
+    const longitude = longitudeStr ? parseFloat(longitudeStr) : null;
 
     // Validate required fields
     if (!file) {
@@ -39,7 +42,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!validateCoordinates(latitude, longitude)) {
+    // Validate coordinates only if provided
+    if (latitude !== null && longitude !== null && !validateCoordinates(latitude, longitude)) {
       return NextResponse.json(
         { error: 'Invalid coordinates' },
         { status: 400 }
@@ -58,8 +62,8 @@ export async function POST(request: NextRequest) {
         url: uploadResult.url,
         thumbnailUrl: uploadResult.thumbnailUrl,
         description: description || null,
-        latitude,
-        longitude,
+        latitude: latitude || 0, // Default to 0 if not provided
+        longitude: longitude || 0, // Default to 0 if not provided
       })
       .returning();
 
