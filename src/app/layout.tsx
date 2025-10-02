@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Poppins, Outfit, Geist } from "next/font/google";
+import { Open_Sans, Roboto, Poppins, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { PlanProvider } from "@/contexts/PlanContext";
@@ -9,34 +9,29 @@ import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
 import GlobalPullToRefresh from "@/components/GlobalPullToRefresh";
 
-const inter = Inter({
-  variable: "--font-inter",
+const openSans = Open_Sans({
+  variable: "--font-open-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+const roboto = Roboto({
+  variable: "--font-roboto",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
   display: "swap",
 });
 
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
 
-const geist = Geist({
-  variable: "--font-geist",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   display: "swap",
 });
@@ -75,19 +70,19 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} ${outfit.variable} ${geist.variable} antialiased bg-dark-gradient min-h-screen`}
+        className={`${openSans.variable} ${roboto.variable} ${poppins.variable} ${jetbrainsMono.variable} antialiased bg-dark-gradient min-h-screen`}
       >
         <LanguageProvider>
           <UserProvider>
             <ReactionProvider>
               <PlanProvider>
-                {/* <GlobalPullToRefresh> */}
+                <GlobalPullToRefresh>
                   <Header />
                   <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
                     {children}
                   </main>
                   <Navigation />
-                {/* </GlobalPullToRefresh> */}
+                </GlobalPullToRefresh>
               </PlanProvider>
             </ReactionProvider>
           </UserProvider>

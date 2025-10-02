@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import PullToRefresh from "./PullToRefresh";
+import PullToRefresh from "react-simple-pull-to-refresh";
 
 interface GlobalPullToRefreshProps {
   children: React.ReactNode;
@@ -10,12 +10,28 @@ interface GlobalPullToRefreshProps {
 export default function GlobalPullToRefresh({ children }: GlobalPullToRefreshProps) {
   const router = useRouter();
 
-  const handleRefresh = () => {
-    window.location.reload();
+  const handleRefresh = async () => {
+    router.refresh();
   };
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
+    <PullToRefresh
+      onRefresh={handleRefresh}
+      pullingContent={
+        <div className="flex items-center justify-center py-4 bg-black/80">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <span className="text-white ml-3 font-medium">Pull to refresh...</span>
+        </div>
+      }
+      refreshingContent={
+        <div className="flex items-center justify-center py-4 bg-black/80">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <span className="text-white ml-3 font-medium">Refreshing...</span>
+        </div>
+      }
+      canFetchMore={false}
+      className="min-h-screen"
+    >
       {children}
     </PullToRefresh>
   );

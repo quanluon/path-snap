@@ -65,7 +65,8 @@ export default function ReactionButton({
   const Icon = isActive ? config.iconSolid : config.icon;
   const colorClass = isActive ? config.activeColor : config.color;
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (disabled || isUnauthenticated) return;
     
     setIsAnimating(true);
