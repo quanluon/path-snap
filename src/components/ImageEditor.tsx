@@ -60,6 +60,26 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
     };
   }, [imageFile]);
 
+  // Handle mobile viewport and prevent zoom
+  useEffect(() => {
+    // Prevent zoom on mobile
+    const preventZoom = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+
+    // Add touch event listeners
+    document.addEventListener('touchstart', preventZoom, { passive: false });
+    document.addEventListener('touchmove', preventZoom, { passive: false });
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('touchstart', preventZoom);
+      document.removeEventListener('touchmove', preventZoom);
+    };
+  }, []);
+
   const handleRotate = (degrees: number) => {
     setRotation((prev) => (prev + degrees) % 360);
   };
@@ -97,7 +117,7 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
   };
 
   const handleSave = () => {
-    if (!completedCrop || !imgRef.current || !canvasRef.current) {
+    if (!completedCrop || !imgRef.current || !canvasRef.current || !image) {
       console.log('Missing crop data or image reference');
       return;
     }
@@ -106,22 +126,78 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size to crop size
-    canvas.width = completedCrop.width;
-    canvas.height = completedCrop.height;
+    // Get the displayed image dimensions - use getBoundingClientRect for more accurate mobile measurements
+    const displayedImg = imgRef.current;
+    const rect = displayedImg.getBoundingClientRect();
+    const displayWidth = rect.width;
+    const displayHeight = rect.height;
 
-    // Draw cropped image
-    ctx.drawImage(
-      imgRef.current,
-      completedCrop.x,
-      completedCrop.y,
-      completedCrop.width,
-      completedCrop.height,
-      0,
-      0,
-      completedCrop.width,
-      completedCrop.height
-    );
+    // Get the natural image dimensions
+    const naturalWidth = image.naturalWidth;
+    const naturalHeight = image.naturalHeight;
+
+    // Calculate scale factors
+    const scaleX = naturalWidth / displayWidth;
+    const scaleY = naturalHeight / displayHeight;
+
+    // Convert crop coordinates from display pixels to natural image pixels
+    // Ensure coordinates are within bounds
+    const cropX = Math.max(0, Math.min(completedCrop.x * scaleX, naturalWidth));
+    const cropY = Math.max(0, Math.min(completedCrop.y * scaleY, naturalHeight));
+    const cropWidth = Math.max(1, Math.min(completedCrop.width * scaleX, naturalWidth - cropX));
+    const cropHeight = Math.max(1, Math.min(completedCrop.height * scaleY, naturalHeight - cropY));
+
+    // Handle rotation - if rotated 90 or 270 degrees, swap width and height
+    let finalWidth = cropWidth;
+    let finalHeight = cropHeight;
+    if (rotation === 90 || rotation === 270) {
+      finalWidth = cropHeight;
+      finalHeight = cropWidth;
+    }
+
+    // Set canvas size to final size
+    canvas.width = finalWidth;
+    canvas.height = finalHeight;
+
+    // Apply transformations if any
+    if (rotation !== 0 || flipHorizontal || flipVertical) {
+      // Center the canvas for transformations
+      ctx.translate(finalWidth / 2, finalHeight / 2);
+      
+      // Apply rotation
+      if (rotation !== 0) {
+        ctx.rotate((rotation * Math.PI) / 180);
+      }
+      
+      // Apply flips
+      ctx.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1);
+      
+      // Draw the cropped image centered
+      ctx.drawImage(
+        image,
+        cropX,
+        cropY,
+        cropWidth,
+        cropHeight,
+        -cropWidth / 2,
+        -cropHeight / 2,
+        cropWidth,
+        cropHeight
+      );
+    } else {
+      // No transformations, draw directly
+      ctx.drawImage(
+        image,
+        cropX,
+        cropY,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        cropWidth,
+        cropHeight
+      );
+    }
 
     // Convert to blob and create file
     canvas.toBlob((blob) => {
@@ -146,7 +222,7 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
   }
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col animate-in fade-in duration-300">
+    <div className="fixed inset-0 bg-black z-50 flex flex-col animate-in fade-in duration-300 touch-none overflow-hidden">
       {/* iPhone-style Top Toolbar */}
       <div className="flex items-center justify-between px-4 py-3 bg-black/90 backdrop-blur-md animate-in slide-in-from-top duration-300">
         <button
@@ -165,15 +241,20 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
       </div>
 
       {/* Image Container - Scrollable */}
-      <div className="flex-1 overflow-auto p-4 animate-in fade-in duration-500">
+      <div className="flex-1 overflow-auto p-2 md:p-4 animate-in fade-in duration-500">
         <div className="flex items-center justify-center min-h-full">
-          <div className="relative">
+          <div className="relative w-full max-w-full">
             <ReactCrop
               crop={crop}
               onChange={(_, percentCrop) => setCrop(percentCrop)}
               onComplete={(c) => setCompletedCrop(c)}
               aspect={undefined} // Allow free-form cropping
               className="max-w-[90vw] max-h-[70vh]"
+              // Mobile-specific props
+              disabled={false}
+              keepSelection={true}
+              minWidth={50}
+              minHeight={50}
             >
               <Image
                 ref={imgRef}
@@ -188,6 +269,8 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
                   height: 'auto',
                   transform: `rotate(${rotation}deg) scaleX(${flipHorizontal ? -1 : 1}) scaleY(${flipVertical ? -1 : 1})`,
                   transformOrigin: 'center',
+                  touchAction: 'none', // Prevent default touch behaviors
+                  userSelect: 'none', // Prevent text selection
                 }}
               />
             </ReactCrop>

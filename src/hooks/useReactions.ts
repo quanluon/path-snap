@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { REACTION_TYPES, type ReactionType } from '@/lib/constants';
+import { type ReactionType } from '@/lib/constants';
 import type { ReactionCounts } from '@/types';
+import { useReactionContext } from '@/contexts/ReactionContext';
+import { useUser } from '@/contexts/UserContext';
 
 interface UseReactionsProps {
   imageId: string;
@@ -28,7 +30,7 @@ export function useReactions({
 }: UseReactionsProps): UseReactionsReturn {
   const [reactionCounts, setReactionCounts] = useState<ReactionCounts>(initialCounts);
   const [userReaction, setUserReaction] = useState<ReactionType | undefined>(initialUserReaction);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -40,48 +42,64 @@ export function useReactions({
   const [isOptimisticUpdate, setIsOptimisticUpdate] = useState(false);
 
   const supabase = createClient();
+  const { isBatchManaged } = useReactionContext();
+  const { user } = useUser();
 
-  // Check authentication status
+  // Update authentication state when user context changes
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-    };
-    
-    checkAuth();
-    
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session?.user);
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+    setIsAuthenticated(!!user);
+  }, [user]);
 
   const fetchReactionCounts = useCallback(async () => {
+    if (!imageId || imageId.trim() === '') {
+      console.log('Skipping fetchReactionCounts: empty imageId');
+      return;
+    }
+
+    // Skip if this image is being managed by batch hook
+    if (isBatchManaged(imageId)) {
+      console.log('Skipping fetchReactionCounts: image is batch managed');
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/reactions/counts?imageId=${imageId}`);
+      // Use batch API even for single image to be consistent
+      const response = await fetch(`/api/reactions/counts?imageIds=${imageId}`);
       if (!response.ok) throw new Error('Failed to fetch reaction counts');
       
       const data = await response.json();
-      setReactionCounts(data.counts);
+      // Extract counts for this specific image
+      setReactionCounts(data.counts[imageId] || { like: 0, heart: 0, wow: 0 });
     } catch (err) {
       console.error('Error fetching reaction counts:', err);
       setError('Failed to fetch reaction counts');
     }
-  }, [imageId]);
+  }, [imageId, isBatchManaged]);
 
   const fetchUserReaction = useCallback(async () => {
+    if (!imageId || imageId.trim() === '') {
+      console.log('Skipping fetchUserReaction: empty imageId');
+      return;
+    }
+
+    // Skip if this image is being managed by batch hook
+    if (isBatchManaged(imageId)) {
+      console.log('Skipping fetchUserReaction: image is batch managed');
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/reactions/user?imageId=${imageId}`);
+      // Use batch API even for single image to be consistent
+      const response = await fetch(`/api/reactions/user?imageIds=${imageId}`);
       if (!response.ok) throw new Error('Failed to fetch user reaction');
       
       const data = await response.json();
-      setUserReaction(data.reaction?.type || undefined);
+      // Extract reaction for this specific image
+      setUserReaction(data.reactions?.[imageId]?.type || undefined);
     } catch (err) {
       console.error('Error fetching user reaction:', err);
     }
-  }, [imageId]);
+  }, [imageId, isBatchManaged]);
 
   // Fetch initial data
   useEffect(() => {
@@ -132,7 +150,7 @@ export function useReactions({
       console.log('Cleaning up real-time subscription for image:', imageId);
       supabase.removeChannel(channel);
     };
-  }, [imageId, fetchReactionCounts, fetchUserReaction, isOptimisticUpdate]);
+  }, [imageId, fetchReactionCounts, fetchUserReaction, isOptimisticUpdate, supabase]);
 
   // Fallback polling mechanism (every 30 seconds) in case real-time fails
   useEffect(() => {
@@ -201,7 +219,7 @@ export function useReactions({
       setError(err instanceof Error ? err.message : 'Failed to add reaction');
       setIsOptimisticUpdate(false);
     }
-  }, [imageId, isLoading, reactionCounts, userReaction, originalCounts, originalUserReaction]);
+  }, [imageId, isLoading, reactionCounts, userReaction, originalCounts, originalUserReaction, isAuthenticated]);
 
   const removeReaction = useCallback(async () => {
     if (isLoading || !userReaction || !isAuthenticated) return;

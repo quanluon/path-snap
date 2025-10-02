@@ -1,6 +1,7 @@
 'use client';
 
-import { XMarkIcon, MapPinIcon, EyeIcon, UserIcon } from '@heroicons/react/24/solid';
+import { useState } from 'react';
+import { XMarkIcon, MapPinIcon, EyeIcon, UserIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { CalendarIcon, ShareIcon } from '@heroicons/react/24/outline';
 import OptimizedImage from '@/components/OptimizedImage';
 import ReactionBar from '@/components/ReactionBar';
@@ -8,7 +9,6 @@ import { useReactions } from '@/hooks/useReactions';
 import { useImageView } from '@/hooks/useImageView';
 import { useRouter } from 'next/navigation';
 import type { ImageWithReactions } from '@/types';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ImageDetailModalProps {
   image: ImageWithReactions | null;
@@ -22,6 +22,7 @@ export default function ImageDetailModal({
   onClose,
 }: ImageDetailModalProps) {
   const router = useRouter();
+  const [showPreview, setShowPreview] = useState(false);
 
   const { reactionCounts, userReaction, addReaction, isAuthenticated } = useReactions({
     imageId: image?.id || '',
@@ -48,20 +49,46 @@ export default function ImageDetailModal({
   };
 
   const handleShare = async () => {
+    if (!image) return;
+    
+    // Generate the direct image URL
+    const imageUrl = `${window.location.origin}/image/${image.id}`;
+    const shareText = image.description || 'Check out this checkpoint image!';
+    
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'Checkpoint Image',
-          text: image?.description || 'Check out this checkpoint!',
-          url: window.location.href,
+          text: shareText,
+          url: imageUrl,
         });
       } catch (error) {
         console.log('Error sharing:', error);
+        // Fallback to clipboard if share fails
+        try {
+          await navigator.clipboard.writeText(imageUrl);
+          // You could show a toast notification here
+        } catch (clipboardError) {
+          console.log('Clipboard error:', clipboardError);
+        }
       }
     } else {
       // Fallback to clipboard
-      navigator.clipboard.writeText(window.location.href);
+      try {
+        await navigator.clipboard.writeText(imageUrl);
+        // You could show a toast notification here
+      } catch (error) {
+        console.log('Clipboard error:', error);
+      }
     }
+  };
+
+  const handleImageClick = () => {
+    setShowPreview(true);
+  };
+
+  const handlePreviewClose = () => {
+    setShowPreview(false);
   };
 
   if (!isOpen || !image) return null;
@@ -87,7 +114,10 @@ export default function ImageDetailModal({
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[80vh]">
             {/* Image */}
-            <div className="relative bg-black flex items-center justify-center">
+            <div 
+              className="relative bg-black flex items-center justify-center cursor-pointer hover:bg-gray-900 transition-colors group"
+              onClick={handleImageClick}
+            >
               <OptimizedImage
                 src={image.url}
                 alt={image.description || 'Checkpoint image'}
@@ -95,6 +125,12 @@ export default function ImageDetailModal({
                 objectFit="contain"
                 fallbackSrc="/placeholder-image.svg"
               />
+              {/* Click to preview overlay */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+                <div className="bg-black/80 backdrop-blur-sm rounded-full p-3">
+                  <MagnifyingGlassIcon className="w-6 h-6 text-white" />
+                </div>
+              </div>
             </div>
 
             {/* Details */}
@@ -222,6 +258,44 @@ export default function ImageDetailModal({
           </div>
         </div>
       </div>
+
+      {/* Full-screen Image Preview */}
+      {showPreview && (
+        <div className="fixed inset-0 z-[60] bg-black">
+          {/* Close Button */}
+          <button
+            onClick={handlePreviewClose}
+            className="absolute top-4 right-4 z-10 p-3 bg-black/80 backdrop-blur-sm rounded-full hover:bg-white/10 transition-colors"
+          >
+            <XMarkIcon className="w-6 h-6 text-white" />
+          </button>
+
+          {/* Full-screen Image */}
+          <div className="flex items-center justify-center h-full p-4">
+            <OptimizedImage
+              src={image.url}
+              alt={image.description || 'Checkpoint image'}
+              className="object-contain max-w-full max-h-full"
+              objectFit="contain"
+              fallbackSrc="/placeholder-image.svg"
+            />
+          </div>
+
+          {/* Image Info Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6">
+            <div className="text-center">
+              <h3 className="text-white text-lg font-medium mb-2">
+                {image.description || 'Checkpoint Image'}
+              </h3>
+              {image.author && (
+                <p className="text-white/70 text-sm">
+                  by {image.author.name || image.author.email}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

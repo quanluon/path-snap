@@ -3,6 +3,7 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import ImageItem from '@/components/ImageItem';
+import { useBatchReactions } from '@/hooks/useBatchReactions';
 import type { ImageWithReactions } from '@/types';
 
 interface ImageCarouselProps {
@@ -24,6 +25,9 @@ export default function ImageCarousel({
   isLoadingMore = false 
 }: ImageCarouselProps) {
   const parentRef = useRef<HTMLDivElement>(null);
+  
+  // Use batch reactions hook for optimized API calls
+  const { reactionCounts, userReactions, fetchBatchReactions, addReaction } = useBatchReactions();
 
   // Calculate total item count (including loading state)
   const itemCount = useMemo(() => {
@@ -53,6 +57,18 @@ export default function ImageCarousel({
       onLoadMore();
     }
   }, [virtualizer, images.length, onLoadMore, hasMore, isLoadingMore]);
+
+  // Memoize image IDs to prevent unnecessary API calls
+  const imageIds = useMemo(() => {
+    return images.map(img => img.id).filter(id => id && id.trim() !== '');
+  }, [images]);
+
+  // Fetch batch reactions when image IDs change (only when images array changes)
+  useEffect(() => {
+    if (imageIds.length > 0) {
+      fetchBatchReactions(imageIds);
+    }
+  }, [imageIds, fetchBatchReactions]); // Re-added fetchBatchReactions since it's now stable
 
   if (images.length === 0) {
     return (
@@ -133,6 +149,9 @@ export default function ImageCarousel({
                 key={virtualItem.key}
                 image={image}
                 onImageClick={onImageClick}
+                reactionCounts={reactionCounts[image.id]}
+                userReaction={userReactions[image.id]}
+                onReactionChange={(type) => addReaction(image.id, type)}
                 style={{
                   position: 'absolute',
                   top: 0,

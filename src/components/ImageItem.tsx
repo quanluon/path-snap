@@ -1,27 +1,47 @@
 'use client';
 
-import { MapPinIcon, EyeIcon } from '@heroicons/react/24/solid';
-import { UserIcon as UserIconOutline } from '@heroicons/react/24/outline';
 import OptimizedImage from '@/components/OptimizedImage';
 import ReactionBar from '@/components/ReactionBar';
-import { useReactions } from '@/hooks/useReactions';
 import { useImageView } from '@/hooks/useImageView';
+import { useReactions } from '@/hooks/useReactions';
+import type { ImageWithReactions, ReactionCounts } from '@/types';
+import type { ReactionType } from '@/lib/constants';
+import { UserIcon as UserIconOutline } from '@heroicons/react/24/outline';
+import { EyeIcon } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
-import type { ImageWithReactions } from '@/types';
 
 interface ImageItemProps {
   image: ImageWithReactions;
   onImageClick?: (image: ImageWithReactions) => void;
   style?: React.CSSProperties;
+  // Optional batch reaction data
+  reactionCounts?: ReactionCounts;
+  userReaction?: ReactionType;
+  onReactionChange?: (type: ReactionType) => Promise<void>;
 }
 
-export default function ImageItem({ image, onImageClick, style }: ImageItemProps) {
+export default function ImageItem({ 
+  image, 
+  onImageClick, 
+  style,
+  reactionCounts: propReactionCounts,
+  userReaction: propUserReaction,
+  onReactionChange
+}: ImageItemProps) {
   const router = useRouter();
-  const { reactionCounts, userReaction, addReaction, isAuthenticated } = useReactions({
+  
+  // Use individual hook as fallback when batch data is not provided
+  const individualHook = useReactions({
     imageId: image.id,
     initialCounts: image.reactionCounts || { like: 0, heart: 0, wow: 0 },
     initialUserReaction: image.userReaction,
   });
+
+  // Use batch data if provided, otherwise fall back to individual hook
+  const reactionCounts = propReactionCounts || individualHook.reactionCounts;
+  const userReaction = propUserReaction !== undefined ? propUserReaction : individualHook.userReaction;
+  const addReaction = onReactionChange || individualHook.addReaction;
+  const isAuthenticated = individualHook.isAuthenticated;
 
   // Track view when image is displayed
   useImageView({ imageId: image.id });
@@ -55,7 +75,7 @@ export default function ImageItem({ image, onImageClick, style }: ImageItemProps
               src={image.thumbnailUrl || image.url}
               alt={image.description || 'Checkpoint image'}
               fill
-              className="object-contain"
+              className="object-contain p-4"
               objectFit="contain"
               fallbackSrc="/placeholder-image.svg"
             />
@@ -97,13 +117,6 @@ export default function ImageItem({ image, onImageClick, style }: ImageItemProps
                 </button>
               )}
               
-              {/* Location */}
-              {/* <div className="flex items-center">
-                <MapPinIcon className="w-4 h-4 mr-2" />
-                <span className="text-sm text-meta font-smooth truncate max-w-[200px]">
-                  {image.latitude.toFixed(4)}, {image.longitude.toFixed(4)}
-                </span>
-              </div> */}
             </div>
 
 

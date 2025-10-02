@@ -3,6 +3,8 @@ import { Inter, JetBrains_Mono, Poppins, Outfit, Geist } from "next/font/google"
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { PlanProvider } from "@/contexts/PlanContext";
+import { UserProvider } from "@/contexts/UserContext";
+import { ReactionProvider } from "@/contexts/ReactionContext";
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
 
@@ -75,13 +77,17 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} ${outfit.variable} ${geist.variable} antialiased bg-dark-gradient min-h-screen`}
       >
         <LanguageProvider>
-          <PlanProvider>
+          <UserProvider>
+            <ReactionProvider>
+              <PlanProvider>
             <Header />
             <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
               {children}
             </main>
             <Navigation />
-          </PlanProvider>
+              </PlanProvider>
+            </ReactionProvider>
+          </UserProvider>
         </LanguageProvider>
         <script
           dangerouslySetInnerHTML={{

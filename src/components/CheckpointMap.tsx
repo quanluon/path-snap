@@ -219,11 +219,6 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
                           <CalendarIcon className="w-3 h-3 mr-1" />
                           <span>{formatDate(image.createdAt.toString())}</span>
                         </div>
-                        
-                        {/* <div className="flex items-center text-xs text-gray-600">
-                          <MapPinIcon className="w-3 h-3 mr-1" />
-                          <span>{image.latitude.toFixed(4)}, {image.longitude.toFixed(4)}</span>
-                        </div> */}
                       </div>
                       
                       <div className="mt-3 flex space-x-2">
