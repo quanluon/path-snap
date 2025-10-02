@@ -5,9 +5,7 @@ export type StorageProvider = 'supabase' | 's3';
 
 export interface UploadResult {
   url: string;
-  thumbnailUrl: string;
   key: string;
-  thumbnailKey: string;
 }
 
 export async function uploadImage(

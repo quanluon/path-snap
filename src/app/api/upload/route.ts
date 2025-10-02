@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         planId: planId || null,
         url: uploadResult.url,
-        thumbnailUrl: uploadResult.thumbnailUrl,
+        thumbnailUrl: uploadResult.url, // Use same URL for thumbnail since we don't generate separate thumbnails
         description: description || null,
         latitude: latitude || 0, // Default to 0 if not provided
         longitude: longitude || 0, // Default to 0 if not provided
