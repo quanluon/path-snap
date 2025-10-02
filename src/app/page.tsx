@@ -143,7 +143,6 @@ function HomePageContent() {
         />
       )}
 
-
       <ImageDetailModal
         image={selectedImage}
         isOpen={isModalOpen}

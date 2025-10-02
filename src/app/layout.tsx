@@ -7,6 +7,7 @@ import { UserProvider } from "@/contexts/UserContext";
 import { ReactionProvider } from "@/contexts/ReactionContext";
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
+import GlobalPullToRefresh from "@/components/GlobalPullToRefresh";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -80,11 +81,13 @@ export default function RootLayout({
           <UserProvider>
             <ReactionProvider>
               <PlanProvider>
-            <Header />
-            <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
-              {children}
-            </main>
-            <Navigation />
+                <GlobalPullToRefresh>
+                  <Header />
+                  <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
+                    {children}
+                  </main>
+                  <Navigation />
+                </GlobalPullToRefresh>
               </PlanProvider>
             </ReactionProvider>
           </UserProvider>

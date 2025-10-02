@@ -141,138 +141,138 @@ function UserProfileContent() {
 
   return (
     <div className="min-h-screen bg-dark-gradient">
-      {/* Header */}
-      <div className="bg-black/50 backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="flex items-center space-x-6">
-            {/* Avatar */}
-            <div className="flex-shrink-0">
-              {user.avatarUrl ? (
-                <OptimizedImage
-                  src={user.avatarUrl}
-                  alt={user.name || user.email}
-                  width={120}
-                  height={120}
-                  className="w-30 h-30 rounded-full object-cover border-4 border-white/20"
-                />
-              ) : (
-                <div className="w-30 h-30 rounded-full bg-white/10 border-4 border-white/20 flex items-center justify-center">
-                  <UserIcon className="w-16 h-16 text-white/70" />
-                </div>
-              )}
-            </div>
+        {/* Header */}
+        <div className="bg-black/50 backdrop-blur-sm border-b border-white/10">
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="flex items-center space-x-6">
+              {/* Avatar */}
+              <div className="flex-shrink-0">
+                {user.avatarUrl ? (
+                  <OptimizedImage
+                    src={user.avatarUrl}
+                    alt={user.name || user.email}
+                    width={120}
+                    height={120}
+                    className="w-30 h-30 rounded-full object-cover border-4 border-white/20"
+                  />
+                ) : (
+                  <div className="w-30 h-30 rounded-full bg-white/10 border-4 border-white/20 flex items-center justify-center">
+                    <UserIcon className="w-16 h-16 text-white/70" />
+                  </div>
+                )}
+              </div>
 
-            {/* User Info */}
-            <div className="flex-1 min-w-0">
-              <h1 className="text-3xl font-bold text-white mb-2">
-                {user.name || user.email}
-              </h1>
-              {user.name && (
-                <p className="text-white/70 text-lg mb-4">{user.email}</p>
-              )}
+              {/* User Info */}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-3xl font-bold text-white mb-2">
+                  {user.name || user.email}
+                </h1>
+                {user.name && (
+                  <p className="text-white/70 text-lg mb-4">{user.email}</p>
+                )}
 
-              {/* Stats */}
-              <div className="flex items-center space-x-6 text-white/70">
-                <div className="flex items-center space-x-2">
-                  <MapPinIcon className="w-5 h-5" />
-                  <span className="text-lg font-semibold">{totalImages}</span>
-                  <span className="text-sm">images</span>
-                </div>
-                <div className="text-sm">
-                  {user.createdAt ? (
-                    <>
-                      Joined{" "}
-                      {new Date(user.createdAt).toLocaleDateString("en-US", {
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </>
-                  ) : (
-                    <span>Member</span>
-                  )}
+                {/* Stats */}
+                <div className="flex items-center space-x-6 text-white/70">
+                  <div className="flex items-center space-x-2">
+                    <MapPinIcon className="w-5 h-5" />
+                    <span className="text-lg font-semibold">{totalImages}</span>
+                    <span className="text-sm">images</span>
+                  </div>
+                  <div className="text-sm">
+                    {user.createdAt ? (
+                      <>
+                        Joined{" "}
+                        {new Date(user.createdAt).toLocaleDateString("en-US", {
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </>
+                    ) : (
+                      <span>Member</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Images Grid */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {images.length === 0 ? (
-          <div className="text-center py-16">
-            <MapPinIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
-            <h2 className="text-white text-xl font-semibold mb-2">
-              No Images Yet
-            </h2>
-            <p className="text-white/70">
-              This user hasn&apos;t shared any images yet.
-            </p>
-          </div>
-        ) : (
-          <>
-            <h2 className="text-white text-2xl font-semibold mb-6">
-              Images ({images.length})
-            </h2>
-            {/* Virtual Scrolling Container */}
-            <div
-              ref={parentRef}
-              className="h-[600px] overflow-auto"
-              style={{
-                contain: "strict",
-              }}
-            >
+        {/* Images Grid */}
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          {images.length === 0 ? (
+            <div className="text-center py-16">
+              <MapPinIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
+              <h2 className="text-white text-xl font-semibold mb-2">
+                No Images Yet
+              </h2>
+              <p className="text-white/70">
+                This user hasn&apos;t shared any images yet.
+              </p>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-white text-2xl font-semibold mb-6">
+                Images ({images.length})
+              </h2>
+              {/* Virtual Scrolling Container */}
               <div
+                ref={parentRef}
+                className="h-[600px] overflow-auto"
                 style={{
-                  height: `${virtualizer.getTotalSize()}px`,
-                  width: "100%",
-                  position: "relative",
+                  contain: "strict",
                 }}
               >
-                {virtualizer.getVirtualItems().map((virtualItem) => {
-                  const imageRow = imageRows[virtualItem.index];
-                  if (!imageRow) return null;
+                <div
+                  style={{
+                    height: `${virtualizer.getTotalSize()}px`,
+                    width: "100%",
+                    position: "relative",
+                  }}
+                >
+                  {virtualizer.getVirtualItems().map((virtualItem) => {
+                    const imageRow = imageRows[virtualItem.index];
+                    if (!imageRow) return null;
 
-                  return (
-                    <div
-                      key={virtualItem.key}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: `${virtualItem.size}px`,
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                    >
+                    return (
                       <div
-                        className={`grid gap-12 ${
-                          itemsPerRow === 1
-                            ? "grid-cols-1"
-                            : itemsPerRow === 2
-                            ? "grid-cols-2"
-                            : "grid-cols-3"
-                        }`}
+                        key={virtualItem.key}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: `${virtualItem.size}px`,
+                          transform: `translateY(${virtualItem.start}px)`,
+                        }}
                       >
-                        {imageRow.map((image) => (
-                          <ImageCard
-                            key={image.id}
-                            image={image}
-                            variant="grid"
-                            showAuthor={false}
-                            showReactions={false}
-                            showViewCount={false}
-                          />
-                        ))}
+                         <div
+                           className={`grid gap-12 ${
+                             itemsPerRow === 1
+                               ? "grid-cols-1"
+                               : itemsPerRow === 2
+                                 ? "grid-cols-2"
+                                 : "grid-cols-3"
+                           }`}
+                         >
+                          {imageRow.map((image) => (
+                            <ImageCard
+                              key={image.id}
+                              image={image}
+                              variant="grid"
+                              showAuthor={false}
+                              showReactions={false}
+                              showViewCount={false}
+                            />
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </>
-        )}
-      </div>
+            </>
+          )}
+        </div>
     </div>
   );
 }
