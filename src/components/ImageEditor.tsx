@@ -98,32 +98,44 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
 
   // Draw crop overlay
   const drawCropOverlay = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number, area: CropArea) => {
-    // Draw dark overlay
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    // Draw semi-transparent overlay only on the areas that will be cropped out
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     
-    // Clear crop area
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillRect(area.x, area.y, area.width, area.height);
-    ctx.globalCompositeOperation = 'source-over';
+    // Top area
+    ctx.fillRect(0, 0, canvasWidth, area.y);
+    // Bottom area
+    ctx.fillRect(0, area.y + area.height, canvasWidth, canvasHeight - (area.y + area.height));
+    // Left area
+    ctx.fillRect(0, area.y, area.x, area.height);
+    // Right area
+    ctx.fillRect(area.x + area.width, area.y, canvasWidth - (area.x + area.width), area.height);
     
-    // Draw crop border
+    // Draw crop border with shadow for better visibility
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 2;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 4;
     ctx.strokeRect(area.x, area.y, area.width, area.height);
+    ctx.shadowBlur = 0;
     
-    // Draw corner handles
-    const handleSize = 8;
+    // Draw corner handles with better visibility
+    const handleSize = 10;
     ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#007AFF';
+    ctx.lineWidth = 2;
     
     // Top-left
     ctx.fillRect(area.x - handleSize/2, area.y - handleSize/2, handleSize, handleSize);
+    ctx.strokeRect(area.x - handleSize/2, area.y - handleSize/2, handleSize, handleSize);
     // Top-right
     ctx.fillRect(area.x + area.width - handleSize/2, area.y - handleSize/2, handleSize, handleSize);
+    ctx.strokeRect(area.x + area.width - handleSize/2, area.y - handleSize/2, handleSize, handleSize);
     // Bottom-left
     ctx.fillRect(area.x - handleSize/2, area.y + area.height - handleSize/2, handleSize, handleSize);
+    ctx.strokeRect(area.x - handleSize/2, area.y + area.height - handleSize/2, handleSize, handleSize);
     // Bottom-right
     ctx.fillRect(area.x + area.width - handleSize/2, area.y + area.height - handleSize/2, handleSize, handleSize);
+    ctx.strokeRect(area.x + area.width - handleSize/2, area.y + area.height - handleSize/2, handleSize, handleSize);
   };
 
   const handleRotate = (degrees: number) => {
@@ -278,145 +290,117 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-card rounded-lg shadow-dark-secondary border border-dark-primary max-w-4xl w-full max-h-[90vh] overflow-auto">
-        {/* Header */}
-        <div className="p-4 border-b border-dark-primary">
-          <h2 className="text-xl font-bold text-dark-primary">Edit Image</h2>
+    <div className="fixed inset-0 bg-black z-50 flex flex-col animate-in fade-in duration-300">
+      {/* iPhone-style Top Toolbar */}
+      <div className="flex items-center justify-between px-4 py-3 bg-black/90 backdrop-blur-md animate-in slide-in-from-top duration-300">
+        <button
+          onClick={onCancel}
+          className="text-blue-400 font-medium text-lg hover:text-blue-300 transition-colors duration-200 active:scale-95"
+        >
+          Cancel
+        </button>
+        <h1 className="text-white font-semibold text-lg">Edit</h1>
+        <button
+          onClick={handleSave}
+          className="text-blue-400 font-medium text-lg hover:text-blue-300 transition-colors duration-200 active:scale-95"
+        >
+          Done
+        </button>
+      </div>
+
+      {/* Canvas Container - Full Screen */}
+      <div className="flex-1 flex items-center justify-center p-4 animate-in fade-in duration-500">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            className="max-w-full max-h-full object-contain cursor-crosshair transition-all duration-300"
+            style={{ display: 'block' }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          />
         </div>
+      </div>
 
-        {/* Canvas Container */}
-        <div className="p-4 flex justify-center">
-          <div className="border border-dark-primary rounded-lg overflow-hidden">
-            <canvas
-              ref={canvasRef}
-              className="max-w-full max-h-[60vh] object-contain cursor-crosshair"
-              style={{ display: 'block' }}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-            />
-          </div>
-        </div>
-
-        {/* Controls */}
-        <div className="p-4 border-t border-dark-primary">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-            {/* Rotate Left */}
-            <button
-              onClick={() => handleRotate(-90)}
-              className="px-4 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span className="hidden sm:inline">Rotate Left</span>
-              </div>
-            </button>
-
-            {/* Rotate Right */}
-            <button
-              onClick={() => handleRotate(90)}
-              className="px-4 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 4v5h-.582m-15.356 2A8.001 8.001 0 0019.418 9m0 0H15m-11 11v-5h.581m0 0a8.003 8.003 0 0015.357-2m-15.357 2H9" />
-                </svg>
-                <span className="hidden sm:inline">Rotate Right</span>
-              </div>
-            </button>
-
-            {/* Flip Horizontal */}
-            <button
-              onClick={handleFlipHorizontal}
-              className="px-4 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                </svg>
-                <span className="hidden sm:inline">Flip H</span>
-              </div>
-            </button>
-
-            {/* Flip Vertical */}
-            <button
-              onClick={handleFlipVertical}
-              className="px-4 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                </svg>
-                <span className="hidden sm:inline">Flip V</span>
-              </div>
-            </button>
-
-            {/* Crop */}
-            <button
-              onClick={handleCropMode}
-              className={`px-4 py-2 rounded-lg transition-colors border border-dark-primary ${
-                cropMode 
-                  ? 'bg-dark-primary text-dark-secondary' 
-                  : 'bg-dark-secondary text-dark-primary hover:bg-dark-hover'
-              }`}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                </svg>
-                <span className="hidden sm:inline">Crop</span>
-              </div>
-            </button>
-          </div>
-
-          {/* Crop Action Buttons */}
-          {cropMode && (
-            <div className="mb-4 flex space-x-3">
-              <button
-                onClick={handleCropApply}
-                className="px-4 py-2 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
-              >
-                Apply Crop
-              </button>
-              <button
-                onClick={handleCropCancel}
-                className="px-4 py-2 bg-dark-muted text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
-              >
-                Cancel Crop
-              </button>
+      {/* iPhone-style Bottom Controls */}
+      <div className="bg-black/90 backdrop-blur-md p-4 animate-in slide-in-from-bottom duration-300">
+        {/* Main Tool Buttons */}
+        <div className="flex justify-center space-x-8 mb-6">
+          {/* Rotate */}
+          <button
+            onClick={() => handleRotate(90)}
+            className="flex flex-col items-center space-y-2 text-white hover:text-blue-400 transition-all duration-200 active:scale-95"
+          >
+            <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-200">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
             </div>
-          )}
+            <span className="text-xs font-medium">Rotate</span>
+          </button>
 
-          {/* Reset Button */}
-          <div className="mb-4">
-            <button
-              onClick={handleReset}
-              className="px-4 py-2 bg-dark-muted text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
-            >
-              Reset
-            </button>
-          </div>
+          {/* Flip */}
+          <button
+            onClick={handleFlipHorizontal}
+            className="flex flex-col items-center space-y-2 text-white hover:text-blue-400 transition-all duration-200 active:scale-95"
+          >
+            <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-200">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </div>
+            <span className="text-xs font-medium">Flip</span>
+          </button>
 
-          {/* Action Buttons */}
-          <div className="flex space-x-3">
+          {/* Crop */}
+          <button
+            onClick={handleCropMode}
+            className={`flex flex-col items-center space-y-2 transition-all duration-200 active:scale-95 ${
+              cropMode ? 'text-blue-400' : 'text-white hover:text-blue-400'
+            }`}
+          >
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
+              cropMode ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'
+            }`}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+              </svg>
+            </div>
+            <span className="text-xs font-medium">Crop</span>
+          </button>
+
+          {/* Reset */}
+          <button
+            onClick={handleReset}
+            className="flex flex-col items-center space-y-2 text-white hover:text-blue-400 transition-all duration-200 active:scale-95"
+          >
+            <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-all duration-200">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </div>
+            <span className="text-xs font-medium">Reset</span>
+          </button>
+        </div>
+
+        {/* Crop Action Buttons - iPhone Style */}
+        {cropMode && (
+          <div className="flex justify-center space-x-4 animate-in fade-in duration-300">
             <button
-              onClick={onCancel}
-              className="flex-1 px-4 py-2 bg-dark-muted text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
+              onClick={handleCropCancel}
+              className="px-6 py-2 bg-gray-800 text-white rounded-full font-medium hover:bg-gray-700 transition-all duration-200 active:scale-95"
             >
               Cancel
             </button>
             <button
-              onClick={handleSave}
-              className="flex-1 px-4 py-2 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
+              onClick={handleCropApply}
+              className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 transition-all duration-200 active:scale-95"
             >
-              Save Changes
+              Apply
             </button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
