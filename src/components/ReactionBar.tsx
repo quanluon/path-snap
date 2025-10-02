@@ -20,18 +20,13 @@ export default function ReactionBar({
   onReactionChange,
   disabled = false
 }: ReactionBarProps) {
-  const [isLoading, setIsLoading] = useState(false);
-
   const handleReactionClick = async (type: ReactionType) => {
-    if (disabled || isLoading) return;
+    if (disabled) return;
 
     try {
-      setIsLoading(true);
       await onReactionChange(type);
     } catch (error) {
       console.error('Error updating reaction:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -42,7 +37,8 @@ export default function ReactionBar({
         count={reactionCounts.like}
         isActive={userReaction === REACTION_TYPES.LIKE}
         onClick={handleReactionClick}
-        disabled={disabled || isLoading}
+        disabled={disabled}
+        isUnauthenticated={disabled}
       />
       
       <ReactionButton
@@ -50,7 +46,8 @@ export default function ReactionBar({
         count={reactionCounts.heart}
         isActive={userReaction === REACTION_TYPES.HEART}
         onClick={handleReactionClick}
-        disabled={disabled || isLoading}
+        disabled={disabled}
+        isUnauthenticated={disabled}
       />
       
       <ReactionButton
@@ -58,7 +55,8 @@ export default function ReactionBar({
         count={reactionCounts.wow}
         isActive={userReaction === REACTION_TYPES.WOW}
         onClick={handleReactionClick}
-        disabled={disabled || isLoading}
+        disabled={disabled}
+        isUnauthenticated={disabled}
       />
     </div>
   );

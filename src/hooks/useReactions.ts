@@ -16,6 +16,7 @@ interface UseReactionsReturn {
   userReaction?: ReactionType;
   isLoading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
   addReaction: (type: ReactionType) => Promise<void>;
   removeReaction: () => Promise<void>;
 }
@@ -29,8 +30,30 @@ export function useReactions({
   const [userReaction, setUserReaction] = useState<ReactionType | undefined>(initialUserReaction);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Store original values for rollback
+  const [originalCounts, setOriginalCounts] = useState<ReactionCounts>(initialCounts);
+  const [originalUserReaction, setOriginalUserReaction] = useState<ReactionType | undefined>(initialUserReaction);
 
   const supabase = createClient();
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+    
+    checkAuth();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session?.user);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
 
   // Subscribe to real-time updates for reactions
   useEffect(() => {
@@ -88,11 +111,26 @@ export function useReactions({
   }, [fetchReactionCounts, fetchUserReaction]);
 
   const addReaction = useCallback(async (type: ReactionType) => {
-    if (isLoading) return;
+    if (isLoading || !isAuthenticated) return;
 
-    setIsLoading(true);
+    // Store current state for rollback
+    setOriginalCounts(reactionCounts);
+    setOriginalUserReaction(userReaction);
+
+    // Optimistic update - update UI immediately
+    const newCounts = { ...reactionCounts };
+    if (userReaction && userReaction !== type) {
+      // Remove old reaction count
+      newCounts[userReaction] = Math.max(0, newCounts[userReaction] - 1);
+    }
+    // Add new reaction count
+    newCounts[type] = newCounts[type] + 1;
+    
+    setReactionCounts(newCounts);
+    setUserReaction(type);
     setError(null);
 
+    // Make API call in background
     try {
       const response = await fetch('/api/reactions', {
         method: 'POST',
@@ -110,32 +148,33 @@ export function useReactions({
         throw new Error(errorData.error || 'Failed to add reaction');
       }
 
-      const data = await response.json();
-      setUserReaction(data.reaction.type);
-      
-      // Update counts optimistically
-      const newCounts = { ...reactionCounts };
-      if (userReaction && userReaction !== type) {
-        // Remove old reaction count
-        newCounts[userReaction] = Math.max(0, newCounts[userReaction] - 1);
-      }
-      // Add new reaction count
-      newCounts[type] = newCounts[type] + 1;
-      setReactionCounts(newCounts);
+      // API call successful, no need to update UI again
+      // Real-time subscription will handle any server-side changes
 
     } catch (err) {
+      // Rollback on error
+      setReactionCounts(originalCounts);
+      setUserReaction(originalUserReaction);
       setError(err instanceof Error ? err.message : 'Failed to add reaction');
-    } finally {
-      setIsLoading(false);
     }
-  }, [imageId, isLoading, reactionCounts, userReaction]);
+  }, [imageId, isLoading, reactionCounts, userReaction, originalCounts, originalUserReaction]);
 
   const removeReaction = useCallback(async () => {
-    if (isLoading || !userReaction) return;
+    if (isLoading || !userReaction || !isAuthenticated) return;
 
-    setIsLoading(true);
+    // Store current state for rollback
+    setOriginalCounts(reactionCounts);
+    setOriginalUserReaction(userReaction);
+
+    // Optimistic update - update UI immediately
+    const newCounts = { ...reactionCounts };
+    newCounts[userReaction] = Math.max(0, newCounts[userReaction] - 1);
+    
+    setReactionCounts(newCounts);
+    setUserReaction(undefined);
     setError(null);
 
+    // Make API call in background
     try {
       const response = await fetch('/api/reactions', {
         method: 'DELETE',
@@ -152,24 +191,23 @@ export function useReactions({
         throw new Error(errorData.error || 'Failed to remove reaction');
       }
 
-      // Update counts optimistically
-      const newCounts = { ...reactionCounts };
-      newCounts[userReaction] = Math.max(0, newCounts[userReaction] - 1);
-      setReactionCounts(newCounts);
-      setUserReaction(undefined);
+      // API call successful, no need to update UI again
+      // Real-time subscription will handle any server-side changes
 
     } catch (err) {
+      // Rollback on error
+      setReactionCounts(originalCounts);
+      setUserReaction(originalUserReaction);
       setError(err instanceof Error ? err.message : 'Failed to remove reaction');
-    } finally {
-      setIsLoading(false);
     }
-  }, [imageId, isLoading, userReaction, reactionCounts]);
+  }, [imageId, isLoading, userReaction, reactionCounts, originalCounts, originalUserReaction, isAuthenticated]);
 
   return {
     reactionCounts,
     userReaction,
     isLoading,
     error,
+    isAuthenticated,
     addReaction,
     removeReaction,
   };

@@ -23,7 +23,7 @@ export default function ImageDetailModal({
 }: ImageDetailModalProps) {
   const router = useRouter();
 
-  const { reactionCounts, userReaction, addReaction } = useReactions({
+  const { reactionCounts, userReaction, addReaction, isAuthenticated } = useReactions({
     imageId: image?.id || '',
     initialCounts: image?.reactionCounts || { like: 0, heart: 0, wow: 0 },
     initialUserReaction: image?.userReaction,
@@ -187,6 +187,7 @@ export default function ImageDetailModal({
                   reactionCounts={reactionCounts}
                   userReaction={userReaction}
                   onReactionChange={handleReactionChange}
+                  disabled={!isAuthenticated}
                 />
               </div>
 
