@@ -370,7 +370,6 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
               <ImageCarousel
                 images={carouselImages}
                 onImageClick={handleImageClick}
-                startIndex={carouselStartIndex}
               />
             </div>
           </div>
