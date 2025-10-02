@@ -6,9 +6,10 @@ import { useImageView } from '@/hooks/useImageView';
 import { useReactions } from '@/hooks/useReactions';
 import type { ImageWithReactions, ReactionCounts } from '@/types';
 import type { ReactionType } from '@/lib/constants';
-import { UserIcon as UserIconOutline } from '@heroicons/react/24/outline';
+import { UserIcon as UserIconOutline, MapPinIcon } from '@heroicons/react/24/outline';
 import { EyeIcon } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
+import { formatImageDate } from '@/lib/utils/date';
 
 interface ImageItemProps {
   image: ImageWithReactions;
@@ -84,6 +85,14 @@ export default function ImageItem({
         
         {/* Text Content Section */}
         <div className="bg-black p-6 flex-shrink-0">
+          {/* Address */}
+          {image.address && (
+            <div className="text-white/70 text-sm text-meta font-smooth mb-3 flex items-center">
+              <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+              <span className="truncate">{image.address}</span>
+            </div>
+          )}
+
           {/* Description */}
           {image.description && (
             <p className="text-white text-base mb-4 text-story font-smooth break-words line-clamp-3">
@@ -133,11 +142,7 @@ export default function ImageItem({
 
            {/* Timestamp */}
            <div className="text-white/70 text-sm text-meta font-smooth mb-3">
-            {new Date(image.createdAt).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
-            })}
+            {formatImageDate(image.createdAt)}
           </div>
 
           {/* Reaction Bar */}

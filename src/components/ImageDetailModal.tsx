@@ -9,6 +9,7 @@ import { useReactions } from '@/hooks/useReactions';
 import { useImageView } from '@/hooks/useImageView';
 import { useRouter } from 'next/navigation';
 import type { ImageWithReactions } from '@/types';
+import { formatImageDate } from '@/lib/utils/date';
 
 interface ImageDetailModalProps {
   image: ImageWithReactions | null;
@@ -182,6 +183,16 @@ export default function ImageDetailModal({
                 )}
               </div>
 
+              {/* Address */}
+              {image.address && (
+                <div className="mb-4">
+                  <div className="flex items-center text-white/70 text-sm">
+                    <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">{image.address}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Description */}
               {image.description && (
                 <div className="mb-6">
@@ -207,11 +218,7 @@ export default function ImageDetailModal({
                 <div className="flex items-center text-white/70">
                   <CalendarIcon className="w-5 h-5 mr-2" />
                   <span className="text-meta">
-                    {new Date(image.createdAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
+                    {formatImageDate(image.createdAt)}
                   </span>
                 </div>
               </div>

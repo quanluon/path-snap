@@ -40,6 +40,7 @@ export const images = pgTable('images', {
   description: text('description'),
   latitude: real('latitude').notNull(),
   longitude: real('longitude').notNull(),
+  address: text('address'), // Reverse geocoded address from coordinates
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

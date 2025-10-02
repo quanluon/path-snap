@@ -4,6 +4,7 @@ import { images } from '@/db/schema';
 import { validateCoordinates } from '@/lib/utils/location';
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadImage } from '@/lib/storage';
+import { getAddressFromCoordinates } from '@/lib/locationService';
 
 /**
  * POST /api/upload
@@ -53,6 +54,17 @@ export async function POST(request: NextRequest) {
     // Upload image using storage provider (Supabase or S3)
     const uploadResult = await uploadImage(file, user.id, planId!);
 
+    // Get address from coordinates if available
+    let address = null;
+    if (latitude !== null && longitude !== null && latitude !== 0 && longitude !== 0) {
+      try {
+        address = await getAddressFromCoordinates(latitude, longitude);
+      } catch (error) {
+        console.error('Failed to get address:', error);
+        // Continue without address if geocoding fails
+      }
+    }
+
     // Save to database
     const [newImage] = await db
       .insert(images)
@@ -64,6 +76,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         latitude: latitude || 0, // Default to 0 if not provided
         longitude: longitude || 0, // Default to 0 if not provided
+        address: address, // Add reverse geocoded address
       })
       .returning();
 
