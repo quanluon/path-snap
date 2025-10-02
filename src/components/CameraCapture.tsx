@@ -2,10 +2,11 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { CameraIcon, MapPinIcon } from '@heroicons/react/24/solid';
+import { CameraIcon, MapPinIcon, PencilIcon } from '@heroicons/react/24/solid';
 import { validateImageFile } from '@/lib/utils/client-image';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePlan } from '@/contexts/PlanContext';
+import ImageEditor from './ImageEditor';
 
 interface Location {
   latitude: number;
@@ -26,6 +27,8 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
   const [description, setDescription] = useState('');
   const [preview, setPreview] = useState<string>('');
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get user's current location
@@ -66,6 +69,9 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
       return;
     }
 
+    // Store selected file
+    setSelectedFile(file);
+
     // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -85,10 +91,33 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
     }
   };
 
+  const handleEditImage = () => {
+    if (selectedFile) {
+      setShowEditor(true);
+    }
+  };
+
+  const handleEditorSave = (editedFile: File) => {
+    setSelectedFile(editedFile);
+    
+    // Update preview with edited image
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(editedFile);
+    
+    setShowEditor(false);
+  };
+
+  const handleEditorCancel = () => {
+    setShowEditor(false);
+  };
+
   const handleUpload = async () => {
     setMessage(null);
     
-    if (!fileInputRef.current?.files?.[0]) {
+    if (!selectedFile) {
       setMessage({ type: 'error', text: t.camera.selectImageError });
       return;
     }
@@ -97,11 +126,12 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
 
     setIsCapturing(true);
     try {
-      await onCapture(fileInputRef.current.files[0], location, description);
+      await onCapture(selectedFile, location, description);
       // Reset form
       setPreview('');
       setDescription('');
       setLocation(null);
+      setSelectedFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -121,16 +151,30 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
       <div className="mb-6">
         <label
           htmlFor="image-upload"
-          className="flex items-center justify-center w-full h-48 border-2 border-dashed border-dark-primary rounded-lg cursor-pointer hover:border-dark-secondary transition-colors"
+          className="flex items-center justify-center w-full h-48 border-2 border-dashed border-dark-primary rounded-lg cursor-pointer hover:border-dark-secondary transition-colors relative"
         >
           {preview ? (
-            <Image
-              src={preview}
-              alt="Preview"
-              width={400}
-              height={300}
-              className="w-full h-full object-cover rounded-lg"
-            />
+            <>
+              <Image
+                src={preview}
+                alt="Preview"
+                width={400}
+                height={300}
+                className="w-full h-full object-cover rounded-lg"
+              />
+              {/* Edit Button Overlay */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleEditImage();
+                }}
+                className="absolute top-2 right-2 p-2 bg-dark-primary text-dark-secondary rounded-full hover:bg-dark-hover transition-colors shadow-lg"
+                title="Edit Image"
+              >
+                <PencilIcon className="w-5 h-5" />
+              </button>
+            </>
           ) : (
             <div className="text-center">
               <CameraIcon className="w-12 h-12 mx-auto text-dark-muted mb-2" />
@@ -223,6 +267,15 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
         <p className="mt-4 text-sm text-dark-muted text-center">
           {t.camera.addedToPlan}
         </p>
+      )}
+
+      {/* Image Editor Modal */}
+      {showEditor && selectedFile && (
+        <ImageEditor
+          imageFile={selectedFile}
+          onSave={handleEditorSave}
+          onCancel={handleEditorCancel}
+        />
       )}
     </div>
   );
