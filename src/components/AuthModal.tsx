@@ -69,22 +69,22 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
         {/* Overlay */}
         <div
-          className="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75"
+          className="fixed inset-0 transition-opacity bg-black bg-opacity-80"
           onClick={onClose}
         />
 
         {/* Modal */}
-        <div className="relative inline-block w-full max-w-md overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+        <div className="relative inline-block w-full max-w-md overflow-hidden text-left align-middle transition-all transform bg-dark-card rounded-lg shadow-dark-secondary border border-dark-primary">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">
+          <div className="flex items-center justify-between p-6 border-b border-dark-primary">
+            <h3 className="text-lg font-semibold text-dark-primary">
               {mode === 'login' ? t.auth.login : t.auth.signup}
             </h3>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-dark-hover rounded-lg transition-colors"
             >
-              <XMarkIcon className="w-5 h-5 text-gray-500" />
+              <XMarkIcon className="w-5 h-5 text-dark-primary" />
             </button>
           </div>
 

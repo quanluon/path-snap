@@ -72,7 +72,7 @@ export default function PlanList({ onPlanSelect }: PlanListProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <div className="text-gray-500">{t.common.loading}</div>
+        <div className="text-dark-muted">{t.common.loading}</div>
       </div>
     );
   }
@@ -80,10 +80,10 @@ export default function PlanList({ onPlanSelect }: PlanListProps) {
   if (error) {
     return (
       <div className="text-center py-20">
-        <p className="text-red-600 mb-4">{error}</p>
+        <p className="text-dark-primary mb-4">{error}</p>
         <button
           onClick={fetchPlans}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="px-4 py-2 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover border border-dark-primary"
         >
           Thử lại
         </button>
@@ -94,11 +94,11 @@ export default function PlanList({ onPlanSelect }: PlanListProps) {
   if (plans.length === 0) {
     return (
       <div className="text-center py-20">
-        <MapIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <MapIcon className="w-16 h-16 text-dark-muted mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-dark-primary mb-2">
           {t.plan.noPlans}
         </h3>
-        <p className="text-gray-600">
+        <p className="text-dark-secondary">
           {t.plan.startCreating}
         </p>
       </div>
@@ -107,7 +107,7 @@ export default function PlanList({ onPlanSelect }: PlanListProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">
+      <h2 className="text-xl font-semibold text-dark-primary mb-6">
         {t.plan.myPlans} ({plans.length})
       </h2>
       
@@ -116,14 +116,14 @@ export default function PlanList({ onPlanSelect }: PlanListProps) {
           <div
             key={plan.id}
             onClick={() => onPlanSelect(plan)}
-            className="bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+            className="bg-dark-card rounded-lg border border-dark-primary p-4 hover:border-dark-secondary hover:shadow-dark-secondary transition-all cursor-pointer hover-dark-card"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                <h3 className="text-lg font-semibold text-dark-primary mb-1">
                   {plan.name}
                 </h3>
-                <div className="flex items-center text-sm text-gray-600 space-x-4">
+                <div className="flex items-center text-sm text-dark-secondary space-x-4">
                   <div className="flex items-center">
                     <CalendarIcon className="w-4 h-4 mr-1" />
                     <span>{formatDate(plan.startTime.toString())}</span>
@@ -137,7 +137,7 @@ export default function PlanList({ onPlanSelect }: PlanListProps) {
                 </div>
               </div>
               
-              <div className="flex items-center text-sm text-gray-500">
+              <div className="flex items-center text-sm text-dark-muted">
                 <PhotoIcon className="w-4 h-4 mr-1" />
                 <span>{plan.imageCount || 0} {t.plan.images}</span>
               </div>
@@ -146,14 +146,14 @@ export default function PlanList({ onPlanSelect }: PlanListProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className={`w-2 h-2 rounded-full mr-2 ${
-                  plan.endTime ? 'bg-gray-400' : 'bg-green-500'
+                  plan.endTime ? 'bg-dark-muted' : 'bg-dark-primary'
                 }`} />
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-dark-secondary">
                   {plan.endTime ? t.plan.ended : t.plan.ongoing}
                 </span>
               </div>
               
-              <div className="text-sm text-blue-600 font-medium">
+              <div className="text-sm text-dark-primary font-medium">
                 {t.plan.viewDetails} →
               </div>
             </div>

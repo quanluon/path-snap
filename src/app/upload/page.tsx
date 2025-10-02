@@ -56,7 +56,7 @@ export default function UploadPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-center items-center py-20">
-          <div className="text-gray-500">{t.common.loading}</div>
+          <div className="text-dark-muted">{t.common.loading}</div>
         </div>
       </div>
     );
@@ -66,15 +66,15 @@ export default function UploadPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-2xl mx-auto text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl font-bold text-dark-primary mb-4">
             {t.auth.unauthorized}
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-dark-secondary mb-6">
             Please login to upload photos and create checkpoints.
           </p>
           <button
             onClick={() => setAuthModalOpen(true)}
-            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-6 py-3 bg-dark-primary text-dark-secondary font-medium rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
           >
             {t.auth.login}
           </button>

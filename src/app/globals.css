@@ -5,11 +5,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Modern font optimization */
+/* Modern Dark Theme Variables */
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1a1a1a;
+  --bg-card: #1f1f1f;
+  --bg-hover: #2a2a2a;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --border-primary: #27272a;
+  --border-secondary: #3f3f46;
+  --accent-primary: #ffffff;
+  --accent-secondary: #e4e4e7;
+  --gradient-primary: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  --gradient-secondary: linear-gradient(135deg, #111111 0%, #2a2a2a 100%);
+  --gradient-accent: linear-gradient(135deg, #ffffff 0%, #e4e4e7 100%);
+  --shadow-primary: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-secondary: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Modern Dark Theme Base Styles */
 @layer base {
   html {
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     font-variation-settings: normal;
+    background: var(--gradient-primary);
+    color: var(--text-primary);
   }
   
   body {
@@ -17,23 +40,89 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background: var(--gradient-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
   }
   
   /* Modern typography improvements */
   h1, h2, h3, h4, h5, h6 {
     font-feature-settings: "ss01", "ss02";
     letter-spacing: -0.025em;
+    color: var(--text-primary);
   }
   
   /* Better text contrast and spacing */
   p, span, div {
     line-height: 1.6;
+    color: var(--text-secondary);
   }
   
   /* Modern button typography */
   button {
     font-weight: 500;
     letter-spacing: 0.025em;
+  }
+}
+
+/* Modern Dark Theme Utility Classes */
+@layer components {
+  .bg-dark-primary {
+    background: var(--bg-primary);
+  }
+  
+  .bg-dark-secondary {
+    background: var(--bg-secondary);
+  }
+  
+  .bg-dark-card {
+    background: var(--bg-card);
+  }
+  
+  .bg-dark-gradient {
+    background: var(--gradient-primary);
+  }
+  
+  .bg-dark-gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .text-dark-primary {
+    color: var(--text-primary);
+  }
+  
+  .text-dark-secondary {
+    color: var(--text-secondary);
+  }
+  
+  .text-dark-muted {
+    color: var(--text-muted);
+  }
+  
+  .border-dark-primary {
+    border-color: var(--border-primary);
+  }
+  
+  .border-dark-secondary {
+    border-color: var(--border-secondary);
+  }
+  
+  .shadow-dark-primary {
+    box-shadow: var(--shadow-primary);
+  }
+  
+  .shadow-dark-secondary {
+    box-shadow: var(--shadow-secondary);
+  }
+  
+  .hover-dark-card {
+    transition: all 0.2s ease;
+  }
+  
+  .hover-dark-card:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-secondary);
   }
 }
 
@@ -44,22 +133,22 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+/* Modern Dark Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-secondary);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--text-muted);
 }
 
 /* Line clamp utility */

@@ -45,24 +45,24 @@ export default function SearchImages({ onSearch, results, isLoading }: SearchIma
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">{t.search.title}</h2>
+      <div className="bg-dark-card rounded-lg shadow-dark-primary p-6 mb-6 border border-dark-primary">
+        <h2 className="text-2xl font-bold mb-6 text-dark-primary">{t.search.title}</h2>
 
         {/* Search Form */}
         <div className="space-y-4">
           {/* Message Display */}
           {message && (
-            <div className={`p-4 rounded-lg ${
-              message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' :
-              message.type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' :
-              'bg-blue-50 border border-blue-200 text-blue-800'
+            <div className={`p-4 rounded-lg border ${
+              message.type === 'success' ? 'bg-dark-secondary border-dark-primary text-dark-primary' :
+              message.type === 'error' ? 'bg-dark-secondary border-dark-primary text-dark-primary' :
+              'bg-dark-secondary border-dark-primary text-dark-primary'
             }`}>
               <p className="text-sm font-medium">{message.text}</p>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark-secondary mb-2">
               {t.search.radius} ({radius}m)
             </label>
             <input
@@ -71,9 +71,9 @@ export default function SearchImages({ onSearch, results, isLoading }: SearchIma
               max={SEARCH_RADIUS.MAX}
               value={radius}
               onChange={(e) => setRadius(parseInt(e.target.value))}
-              className="w-full"
+              className="w-full accent-dark-primary"
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <div className="flex justify-between text-xs text-dark-muted mt-1">
               <span>{SEARCH_RADIUS.MIN}m</span>
               <span>{SEARCH_RADIUS.MAX}m</span>
             </div>
@@ -83,7 +83,7 @@ export default function SearchImages({ onSearch, results, isLoading }: SearchIma
             <button
               onClick={handleCurrentLocation}
               disabled={isGettingLocation || isLoading}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium"
+              className="flex items-center gap-2 px-6 py-3 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors disabled:opacity-50 font-medium border border-dark-primary"
             >
               <MapPinIcon className="w-5 h-5" />
               {isGettingLocation || isLoading ? t.common.loading : t.search.currentLocation}

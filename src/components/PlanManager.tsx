@@ -54,37 +54,33 @@ export default function PlanManager({ activePlan, onStartPlan, onEndPlan }: Plan
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+    <div className="w-full max-w-2xl mx-auto bg-dark-card rounded-lg shadow-dark-primary border border-dark-primary p-6">
       <div className="flex items-center gap-3 mb-6">
-        <MapIcon className="w-8 h-8 text-blue-600" />
-        <h2 className="text-2xl font-bold text-gray-800">{t.plan.title}</h2>
+        <MapIcon className="w-8 h-8 text-dark-primary" />
+        <h2 className="text-2xl font-bold text-dark-primary">{t.plan.title}</h2>
       </div>
 
       {/* Message Display */}
       {message && (
-        <div className={`mb-4 p-4 rounded-lg ${
-          message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' :
-          message.type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' :
-          'bg-blue-50 border border-blue-200 text-blue-800'
-        }`}>
-          <p className="text-sm font-medium">{message.text}</p>
+        <div className="mb-4 p-4 rounded-lg bg-dark-secondary border border-dark-primary">
+          <p className="text-sm font-medium text-dark-primary">{message.text}</p>
         </div>
       )}
 
       {activePlan ? (
         <div className="space-y-4">
           {/* Active Plan Info */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="bg-dark-secondary border border-dark-primary rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-semibold text-green-800">
+              <h3 className="text-lg font-semibold text-dark-primary">
                 {t.plan.activePlan}
               </h3>
-              <span className="px-3 py-1 bg-green-600 text-white text-sm rounded-full">
+              <span className="px-3 py-1 bg-dark-primary text-dark-secondary text-sm rounded-full">
                 Active
               </span>
             </div>
-            <p className="text-green-700 font-medium mb-2">{activePlan.name}</p>
-            <p className="text-sm text-green-600">
+            <p className="text-dark-primary font-medium mb-2">{activePlan.name}</p>
+            <p className="text-sm text-dark-secondary">
               Started: {new Date(activePlan.startTime).toLocaleString()}
             </p>
           </div>
@@ -93,7 +89,7 @@ export default function PlanManager({ activePlan, onStartPlan, onEndPlan }: Plan
           <button
             onClick={handleEnd}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-dark-primary text-dark-secondary font-medium rounded-lg hover:bg-dark-hover disabled:opacity-50 transition-colors border border-dark-primary"
             title={isLoading ? t.common.loading : t.plan.endPlan}
           >
             <StopIcon className="w-5 h-5" />
@@ -105,13 +101,13 @@ export default function PlanManager({ activePlan, onStartPlan, onEndPlan }: Plan
       ) : (
         <div className="space-y-4">
           {/* No Active Plan */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-            <p className="text-gray-600">{t.plan.noPlan}</p>
+          <div className="bg-dark-secondary border border-dark-primary rounded-lg p-4 text-center">
+            <p className="text-dark-secondary">{t.plan.noPlan}</p>
           </div>
 
           {/* Start Plan Form */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-dark-secondary mb-2">
               {t.plan.planName}
             </label>
             <input
@@ -119,13 +115,13 @@ export default function PlanManager({ activePlan, onStartPlan, onEndPlan }: Plan
               value={planName}
               onChange={(e) => setPlanName(e.target.value)}
               placeholder={t.plan.planNamePlaceholder}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
+              className="w-full px-4 py-2 border border-dark-primary rounded-lg focus:ring-2 focus:ring-dark-primary focus:border-transparent mb-4 bg-dark-secondary text-dark-primary placeholder-dark-muted"
             />
 
             <button
               onClick={handleStart}
               disabled={isLoading || !planName.trim()}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-dark-primary text-dark-secondary font-medium rounded-lg hover:bg-dark-hover disabled:opacity-50 transition-colors border border-dark-primary"
             >
               <PlayIcon className="w-5 h-5" />
               {isLoading ? t.common.loading : t.plan.startPlan}

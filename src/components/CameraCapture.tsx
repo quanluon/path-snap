@@ -114,14 +114,14 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">{t.camera.title}</h2>
+    <div className="w-full max-w-2xl mx-auto p-6 bg-dark-card rounded-lg shadow-dark-primary border border-dark-primary">
+      <h2 className="text-2xl font-bold mb-6 text-dark-primary">{t.camera.title}</h2>
 
       {/* File Input */}
       <div className="mb-6">
         <label
           htmlFor="image-upload"
-          className="flex items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors"
+          className="flex items-center justify-center w-full h-48 border-2 border-dashed border-dark-primary rounded-lg cursor-pointer hover:border-dark-secondary transition-colors"
         >
           {preview ? (
             <Image
@@ -133,8 +133,8 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
             />
           ) : (
             <div className="text-center">
-              <CameraIcon className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-              <p className="text-gray-600">{t.camera.selectImage}</p>
+              <CameraIcon className="w-12 h-12 mx-auto text-dark-muted mb-2" />
+              <p className="text-dark-secondary">{t.camera.selectImage}</p>
             </div>
           )}
         </label>
@@ -150,58 +150,54 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
 
       {/* Message Display */}
       {message && (
-        <div className={`mb-4 p-4 rounded-lg ${
-          message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' :
-          message.type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' :
-          'bg-blue-50 border border-blue-200 text-blue-800'
-        }`}>
-          <p className="text-sm font-medium">{message.text}</p>
+        <div className="mb-4 p-4 rounded-lg bg-dark-secondary border border-dark-primary">
+          <p className="text-sm font-medium text-dark-primary">{message.text}</p>
         </div>
       )}
 
       {/* Active Plan Indicator */}
       {activePlan && (
-        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center text-blue-800">
-            <div className="w-2 h-2 bg-blue-600 rounded-full mr-2"></div>
+        <div className="mb-4 p-4 bg-dark-secondary border border-dark-primary rounded-lg">
+          <div className="flex items-center text-dark-primary">
+            <div className="w-2 h-2 bg-dark-primary rounded-full mr-2"></div>
             <span className="font-medium text-sm">{t.camera.addedToPlan}</span>
           </div>
-          <p className="text-blue-700 text-sm mt-1">{activePlan.name}</p>
+          <p className="text-dark-secondary text-sm mt-1">{activePlan.name}</p>
         </div>
       )}
 
       {/* Location Display */}
       {location ? (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <div className="flex items-center text-green-800">
+        <div className="mb-4 p-4 bg-dark-secondary border border-dark-primary rounded-lg">
+          <div className="flex items-center text-dark-primary">
             <MapPinIcon className="w-5 h-5 mr-2" />
             <span className="font-medium">{t.camera.locationCaptured}</span>
           </div>
-          <p className="text-sm text-green-700 mt-1">
+          <p className="text-sm text-dark-secondary mt-1">
             Lat: {location.latitude.toFixed(6)}, Lng: {location.longitude.toFixed(6)}
           </p>
         </div>
       ) : (
-        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center text-yellow-800">
+        <div className="mb-4 p-4 bg-dark-secondary border border-dark-primary rounded-lg">
+          <div className="flex items-center text-dark-primary">
             <MapPinIcon className="w-5 h-5 mr-2" />
             <span className="font-medium">Vị trí không có sẵn</span>
           </div>
-          <p className="text-yellow-700 text-sm mt-1">
+          <p className="text-dark-muted text-sm mt-1">
             Ảnh sẽ được lưu mà không có thông tin vị trí
           </p>
         </div>
       )}
 
       {locationError && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm">{locationError}</p>
+        <div className="mb-4 p-4 bg-dark-secondary border border-dark-primary rounded-lg">
+          <p className="text-dark-primary text-sm">{locationError}</p>
         </div>
       )}
 
       {/* Description Input */}
       <div className="mb-6">
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="description" className="block text-sm font-medium text-dark-secondary mb-2">
           {t.camera.description}
         </label>
         <textarea
@@ -210,7 +206,7 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
           onChange={(e) => setDescription(e.target.value)}
           placeholder={t.camera.descriptionPlaceholder}
           rows={3}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-dark-primary rounded-lg focus:ring-2 focus:ring-dark-primary focus:border-transparent bg-dark-secondary text-dark-primary placeholder-dark-muted"
         />
       </div>
 
@@ -218,13 +214,13 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
       <button
         onClick={handleUpload}
         disabled={isCapturing || !preview || !location}
-        className="w-full py-3 px-6 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        className="w-full py-3 px-6 bg-dark-primary text-dark-secondary font-medium rounded-lg hover:bg-dark-hover disabled:bg-dark-muted disabled:cursor-not-allowed transition-colors border border-dark-primary"
       >
         {isCapturing ? t.camera.uploading : t.camera.uploadButton}
       </button>
 
       {planId && (
-        <p className="mt-4 text-sm text-gray-600 text-center">
+        <p className="mt-4 text-sm text-dark-muted text-center">
           {t.camera.addedToPlan}
         </p>
       )}

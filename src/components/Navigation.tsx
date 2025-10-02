@@ -48,7 +48,7 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 bg-dark-card/90 backdrop-blur-md border-t border-dark-primary shadow-dark-primary z-40 md:hidden">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -58,8 +58,8 @@ export default function Navigation() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full transition-colors ${
-                isActive ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'
+              className={`flex flex-col items-center justify-center w-full h-full transition-all duration-200 hover:bg-dark-hover ${
+                isActive ? 'text-dark-primary' : 'text-dark-secondary hover:text-dark-primary'
               }`}
             >
               <Icon className="w-6 h-6" />

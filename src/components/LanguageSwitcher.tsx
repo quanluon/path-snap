@@ -13,11 +13,11 @@ export default function LanguageSwitcher() {
   return (
     <button
       onClick={toggleLanguage}
-      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
+      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-dark-card border border-dark-primary hover:bg-dark-hover transition-colors"
       aria-label="Switch language"
     >
-      <LanguageIcon className="w-5 h-5 text-gray-700" />
-      <span className="font-medium text-gray-700">
+      <LanguageIcon className="w-5 h-5 text-dark-primary" />
+      <span className="font-medium text-dark-primary">
         {locale === 'en' ? 'EN' : 'VI'}
       </span>
     </button>

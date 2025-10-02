@@ -31,23 +31,23 @@ export default function ImageDetailModal({
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
         {/* Overlay */}
         <div
-          className="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75"
+          className="fixed inset-0 transition-opacity bg-black bg-opacity-80"
           onClick={onClose}
         />
 
         {/* Modal */}
-        <div className="relative inline-block w-full max-w-4xl overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+        <div className="relative inline-block w-full max-w-4xl overflow-hidden text-left align-middle transition-all transform bg-dark-card rounded-lg shadow-dark-secondary">
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+            className="absolute top-4 right-4 z-10 p-2 bg-dark-card rounded-full shadow-dark-primary hover:bg-dark-hover transition-colors"
           >
-            <XMarkIcon className="w-6 h-6 text-gray-700" />
+            <XMarkIcon className="w-6 h-6 text-dark-primary" />
           </button>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
             {/* Image */}
-            <div className="relative bg-gray-100 h-[400px] md:h-auto">
+            <div className="relative bg-dark-secondary h-[400px] md:h-auto">
               <OptimizedImage
                 src={image.url}
                 alt={image.description || 'Checkpoint image'}
@@ -63,31 +63,31 @@ export default function ImageDetailModal({
               {/* Description */}
               {image.description && (
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold text-dark-primary mb-2">
                     {t.images.viewDetails}
                   </h3>
-                  <p className="text-gray-700">{image.description}</p>
+                  <p className="text-dark-secondary">{image.description}</p>
                 </div>
               )}
 
               {/* Location */}
               <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                  <MapPinIcon className="w-5 h-5 mr-2 text-blue-600" />
+                <h4 className="text-sm font-semibold text-dark-secondary mb-2 flex items-center">
+                  <MapPinIcon className="w-5 h-5 mr-2 text-dark-primary" />
                   {t.images.location}
                 </h4>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">
+                <div className="bg-dark-secondary p-4 rounded-lg border border-dark-primary">
+                  <p className="text-sm text-dark-secondary mb-1">
                     <strong>Latitude:</strong> {image.latitude.toFixed(6)}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-dark-secondary">
                     <strong>Longitude:</strong> {image.longitude.toFixed(6)}
                   </p>
                   <a
                     href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    className="inline-block mt-2 text-dark-primary hover:text-dark-secondary text-sm font-medium transition-colors"
                   >
                     Open in Google Maps →
                   </a>
@@ -96,10 +96,10 @@ export default function ImageDetailModal({
 
               {/* Timestamp */}
               <div className="mb-6">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                <h4 className="text-sm font-semibold text-dark-secondary mb-2">
                   {t.images.createdAt}
                 </h4>
-                <p className="text-gray-600">
+                <p className="text-dark-muted">
                   {new Date(image.createdAt).toUTCString()}
                 </p>
               </div>
@@ -112,12 +112,12 @@ export default function ImageDetailModal({
                       onClick={() => onReact(image.id, 'like')}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
                         userReaction === 'like'
-                          ? 'bg-red-50 border-red-300 text-red-700'
-                          : 'bg-white border-gray-300 hover:border-red-300'
+                          ? 'bg-dark-hover border-dark-primary text-dark-primary'
+                          : 'bg-dark-card border-dark-primary hover:bg-dark-hover text-dark-secondary'
                       }`}
                     >
                       {userReaction === 'like' ? (
-                        <HeartIcon className="w-5 h-5 text-red-600" />
+                        <HeartIcon className="w-5 h-5 text-dark-primary" />
                       ) : (
                         <HeartOutlineIcon className="w-5 h-5" />
                       )}
@@ -127,8 +127,8 @@ export default function ImageDetailModal({
                       onClick={() => onReact(image.id, 'love')}
                       className={`px-4 py-2 rounded-lg border transition-colors ${
                         userReaction === 'love'
-                          ? 'bg-pink-50 border-pink-300'
-                          : 'bg-white border-gray-300 hover:border-pink-300'
+                          ? 'bg-dark-hover border-dark-primary text-dark-primary'
+                          : 'bg-dark-card border-dark-primary hover:bg-dark-hover text-dark-secondary'
                       }`}
                     >
                       ❤️
@@ -137,15 +137,15 @@ export default function ImageDetailModal({
                       onClick={() => onReact(image.id, 'wow')}
                       className={`px-4 py-2 rounded-lg border transition-colors ${
                         userReaction === 'wow'
-                          ? 'bg-yellow-50 border-yellow-300'
-                          : 'bg-white border-gray-300 hover:border-yellow-300'
+                          ? 'bg-dark-hover border-dark-primary text-dark-primary'
+                          : 'bg-dark-card border-dark-primary hover:bg-dark-hover text-dark-secondary'
                       }`}
                     >
                       😮
                     </button>
                   </div>
                   {image.reactionCount !== undefined && image.reactionCount > 0 && (
-                    <p className="mt-3 text-sm text-gray-600">
+                    <p className="mt-3 text-sm text-dark-muted">
                       {image.reactionCount} {t.images.reactions}
                     </p>
                   )}

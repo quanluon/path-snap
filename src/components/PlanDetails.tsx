@@ -137,7 +137,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <div className="text-gray-500">{t.common.loading}</div>
+        <div className="text-dark-muted">{t.common.loading}</div>
       </div>
     );
   }
@@ -145,10 +145,10 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
   if (error) {
     return (
       <div className="text-center py-20">
-        <p className="text-red-600 mb-4">{error}</p>
+        <p className="text-dark-primary mb-4">{error}</p>
         <button
           onClick={fetchPlanDetails}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="px-4 py-2 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover border border-dark-primary"
         >
           Thử lại
         </button>
@@ -159,7 +159,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
   if (!plan) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-600">Không tìm thấy kế hoạch</p>
+        <p className="text-dark-secondary">Không tìm thấy kế hoạch</p>
       </div>
     );
   }
@@ -170,7 +170,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
+          className="flex items-center text-dark-primary hover:text-dark-secondary font-medium"
         >
           <ArrowLeftIcon className="w-5 h-5 mr-2" />
           Quay lại
@@ -181,7 +181,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
           <button
             onClick={handleEndPlan}
             disabled={isEndingPlan}
-            className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+            className="flex items-center px-4 py-2 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover disabled:opacity-50 transition-colors border border-dark-primary"
           >
             <StopIcon className="w-4 h-4 mr-2" />
             {isEndingPlan ? t.plan.ending : t.plan.endPlanButton}
@@ -191,23 +191,19 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
 
       {/* Message Display */}
       {message && (
-        <div className={`p-4 rounded-lg ${
-          message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' :
-          message.type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' :
-          'bg-blue-50 border border-blue-200 text-blue-800'
-        }`}>
-          <p className="text-sm font-medium">{message.text}</p>
+        <div className="p-4 rounded-lg bg-dark-secondary border border-dark-primary">
+          <p className="text-sm font-medium text-dark-primary">{message.text}</p>
         </div>
       )}
 
       {/* Plan Info */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-dark-card rounded-lg border border-dark-primary p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-dark-primary mb-2">
               {plan.name}
             </h1>
-            <div className="flex items-center space-x-6 text-sm text-gray-600">
+            <div className="flex items-center space-x-6 text-sm text-dark-secondary">
               <div className="flex items-center">
                 <CalendarIcon className="w-4 h-4 mr-1" />
                 <span>{t.plan.started}: {formatDate(plan.startTime)}</span>
@@ -222,11 +218,11 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
           </div>
           
           <div className="text-right">
-            <div className="flex items-center text-sm text-gray-600 mb-1">
+            <div className="flex items-center text-sm text-dark-secondary mb-1">
               <PhotoIcon className="w-4 h-4 mr-1" />
               <span>{plan.imageCount} {t.plan.images}</span>
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-dark-secondary">
               {getDuration(plan.startTime, plan.endTime)}
             </div>
           </div>
@@ -234,9 +230,9 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
 
         <div className="flex items-center">
           <div className={`w-3 h-3 rounded-full mr-2 ${
-            plan.endTime ? 'bg-gray-400' : 'bg-green-500'
+            plan.endTime ? 'bg-dark-muted' : 'bg-dark-primary'
           }`} />
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-dark-primary">
             {plan.endTime ? t.plan.ended : t.plan.ongoing}
           </span>
         </div>
@@ -249,8 +245,8 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
             onClick={() => setViewMode('timeline')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               viewMode === 'timeline'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-dark-primary text-dark-secondary'
+                : 'bg-dark-card text-dark-secondary hover:bg-dark-hover border border-dark-primary'
             }`}
           >
             {t.plan.timeline}
@@ -259,8 +255,8 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
             onClick={() => setViewMode('map')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               viewMode === 'map'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-dark-primary text-dark-secondary'
+                : 'bg-dark-card text-dark-secondary hover:bg-dark-hover border border-dark-primary'
             }`}
           >
             {t.plan.map}
@@ -271,7 +267,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
       {/* Images Timeline or Map */}
       {plan.images.length > 0 ? (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-dark-primary">
             Hành trình ({plan.images.length} ảnh)
           </h2>
           
@@ -283,8 +279,8 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
               />
               
               {/* Timeline List */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <div className="bg-dark-card rounded-lg border border-dark-primary p-6">
+                <h3 className="text-lg font-semibold text-dark-primary mb-4">
                   Chi tiết theo thời gian
                 </h3>
                 <div className="space-y-4">
@@ -303,22 +299,22 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-dark-primary truncate">
                             {image.description || 'Không có mô tả'}
                           </p>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-dark-muted">
                             {formatDate(image.createdAt.toString())}
                           </span>
                         </div>
                         
-                        <div className="flex items-center text-xs text-gray-600">
+                        <div className="flex items-center text-xs text-dark-secondary">
                           <MapPinIcon className="w-3 h-3 mr-1" />
                           <span>
                             {image.latitude.toFixed(4)}, {image.longitude.toFixed(4)}
                           </span>
                           <button
                             onClick={() => openGoogleMaps(image.latitude, image.longitude)}
-                            className="ml-2 text-blue-600 hover:text-blue-700 text-xs underline"
+                            className="ml-2 text-dark-primary hover:text-dark-secondary text-xs underline"
                           >
                             {t.plan.openGoogleMaps}
                           </button>
@@ -339,12 +335,12 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
           )}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <PhotoIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <div className="text-center py-12 bg-dark-secondary rounded-lg border border-dark-primary">
+          <PhotoIcon className="w-12 h-12 text-dark-muted mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-dark-primary mb-2">
             Chưa có ảnh nào
           </h3>
-          <p className="text-gray-600">
+          <p className="text-dark-secondary">
             Kế hoạch này chưa có ảnh nào được thêm vào
           </p>
         </div>
@@ -359,13 +355,13 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
 
       {/* Carousel Modal */}
       {showCarousel && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-4xl max-h-[90vh] w-full mx-4 overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-semibold">Tất cả ảnh trong kế hoạch</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+          <div className="bg-dark-card rounded-lg max-w-4xl max-h-[90vh] w-full mx-4 overflow-hidden border border-dark-primary">
+            <div className="flex items-center justify-between p-4 border-b border-dark-primary">
+              <h3 className="text-lg font-semibold text-dark-primary">Tất cả ảnh trong kế hoạch</h3>
               <button
                 onClick={handleCloseCarousel}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-dark-secondary hover:text-dark-primary"
               >
                 <XMarkIcon className="w-6 h-6" />
               </button>

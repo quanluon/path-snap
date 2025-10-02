@@ -79,7 +79,7 @@ export default function ImageCarousel({
   if (images.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">No images found</p>
+        <p className="text-dark-muted">No images found</p>
       </div>
     );
   }
@@ -95,7 +95,7 @@ export default function ImageCarousel({
               className="flex-[0_0_100%] h-full flex items-center justify-center p-4"
             >
               <div
-                className="relative group cursor-pointer bg-gray-100 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow w-full max-w-md mx-auto h-full"
+                className="relative group cursor-pointer bg-dark-card rounded-lg overflow-hidden shadow-dark-primary hover:shadow-dark-secondary transition-all duration-200 w-full max-w-md mx-auto h-full hover-dark-card"
                 onClick={() => onImageClick?.(image)}
               >
                 {/* Image */}
@@ -148,8 +148,8 @@ export default function ImageCarousel({
           {isLoadingMore && (
             <div className="flex-[0_0_100%] h-full flex items-center justify-center p-4">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-gray-500 text-sm">Đang tải thêm ảnh...</p>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-dark-primary mx-auto mb-2"></div>
+                <p className="text-dark-muted text-sm">Đang tải thêm ảnh...</p>
               </div>
             </div>
           )}

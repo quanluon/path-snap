@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2563eb",
+  themeColor: "#0a0a0a",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -52,12 +52,12 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-gray-50`}
+        className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-dark-gradient min-h-screen`}
       >
         <LanguageProvider>
           <PlanProvider>
             <Header />
-            <main className="min-h-screen pb-20 md:pb-8">
+            <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient">
               {children}
             </main>
             <Navigation />
