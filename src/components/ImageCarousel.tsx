@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
-import { MapPinIcon } from '@heroicons/react/24/solid';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { MapPinIcon, HeartIcon } from '@heroicons/react/24/solid';
 import OptimizedImage from '@/components/OptimizedImage';
 import type { ImageWithReactions } from '@/types';
 
@@ -23,58 +22,82 @@ export default function ImageCarousel({
   hasMore = false, 
   isLoadingMore = false 
 }: ImageCarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
-    loop: false, 
-    align: 'start',
-    axis: 'y', // Vertical scrolling
-    dragFree: false, // Snap to each image
-    containScroll: 'trimSnaps',
-    skipSnaps: false
-  });
-  const [selectedIndex, setSelectedIndex] = useState(startIndex);
+  const [currentIndex, setCurrentIndex] = useState(startIndex);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isScrolling = useRef(false);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Scroll to startIndex when component mounts or startIndex changes
-  useEffect(() => {
-    if (emblaApi && startIndex !== undefined && startIndex < images.length) {
-      emblaApi.scrollTo(startIndex);
-      setSelectedIndex(startIndex);
-    }
-  }, [emblaApi, startIndex, images.length]);
-
-  // Keep current position when new images are loaded
-  useEffect(() => {
-    if (emblaApi && images.length > 0) {
-      // Don't scroll if we're just adding more images (infinite scroll)
-      // Only scroll if it's a fresh load or explicit startIndex change
-      const currentSlideCount = emblaApi.slideNodes().length;
-      if (currentSlideCount > 0 && selectedIndex < currentSlideCount) {
-        // Maintain current position
-        emblaApi.scrollTo(selectedIndex, false); // false = don't animate
-      }
-    }
-  }, [emblaApi, images.length, selectedIndex]);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    const currentIndex = emblaApi.selectedScrollSnap();
-    setSelectedIndex(currentIndex);
+  // Handle scroll events for infinite scroll
+  const handleScroll = useCallback(() => {
+    if (isScrolling.current) return;
     
-    // Check if we're near the end and should load more
-    if (onLoadMore && hasMore && !isLoadingMore) {
-      const totalSlides = emblaApi.slideNodes().length;
-      // Load more when we're within 2 slides of the end
-      if (currentIndex >= totalSlides - 2) {
+    isScrolling.current = true;
+    
+    // Clear existing timeout
+    if (scrollTimeout.current) {
+      clearTimeout(scrollTimeout.current);
+    }
+    
+    // Set new timeout to detect scroll end
+    scrollTimeout.current = setTimeout(() => {
+      isScrolling.current = false;
+      
+      if (!containerRef.current) return;
+      
+      const container = containerRef.current;
+      const scrollTop = container.scrollTop;
+      const containerHeight = container.clientHeight;
+      const scrollHeight = container.scrollHeight;
+      
+      // Calculate current image index based on scroll position
+      const newIndex = Math.round(scrollTop / containerHeight);
+      setCurrentIndex(newIndex);
+      
+      // Check if we need to load more images (when 80% scrolled)
+      const scrollPercentage = (scrollTop + containerHeight) / scrollHeight;
+      
+      if (scrollPercentage >= 0.8 && onLoadMore && hasMore && !isLoadingMore) {
         onLoadMore();
       }
-    }
-  }, [emblaApi, onLoadMore, hasMore, isLoadingMore]);
+    }, 150);
+  }, [onLoadMore, hasMore, isLoadingMore]);
 
+  // Scroll to specific index
+  const scrollToIndex = useCallback((index: number) => {
+    if (!containerRef.current || index < 0 || index >= images.length) return;
+    
+    const container = containerRef.current;
+    const containerHeight = container.clientHeight;
+    const scrollTop = index * containerHeight;
+    
+    container.scrollTo({
+      top: scrollTop,
+      behavior: 'smooth'
+    });
+  }, [images.length]);
+
+  // Initialize scroll position
   useEffect(() => {
-    if (!emblaApi) return;
-    onSelect();
-    emblaApi.on('select', onSelect);
-    emblaApi.on('reInit', onSelect);
-  }, [emblaApi, onSelect]);
+    if (startIndex !== currentIndex && images.length > 0) {
+      scrollToIndex(startIndex);
+      setCurrentIndex(startIndex);
+    }
+  }, [startIndex, scrollToIndex, currentIndex, images.length]);
+
+  // Scroll event listener
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+    };
+  }, [handleScroll]);
 
   if (images.length === 0) {
     return (
@@ -85,21 +108,25 @@ export default function ImageCarousel({
   }
 
   return (
-    <div className="relative w-full h-[70vh] sm:h-[600px]">
-      {/* Carousel */}
-      <div className="overflow-hidden h-full" ref={emblaRef}>
-        <div className="flex flex-col h-full">
+    <div className="relative w-full h-screen overflow-hidden bg-black">
+      {/* Instagram-style Feed Container */}
+      <div 
+        ref={containerRef}
+        className="h-full overflow-y-auto scrollbar-hide snap-y snap-mandatory"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        <div className="flex flex-col">
           {images.map((image, index) => (
             <div
               key={`${image.id}-${index}`}
-              className="flex-[0_0_100%] h-full flex items-center justify-center p-4"
+              className="flex-shrink-0 w-full h-screen snap-start snap-always relative"
             >
-              <div
-                className="relative group cursor-pointer bg-dark-card rounded-lg overflow-hidden shadow-dark-primary hover:shadow-dark-secondary transition-all duration-200 w-full max-w-md mx-auto h-full hover-dark-card"
-                onClick={() => onImageClick?.(image)}
-              >
-                {/* Image */}
-                <div className="relative h-full">
+              {/* Full Screen Image Container */}
+              <div className="relative w-full h-full bg-black flex items-center justify-center">
+                <div 
+                  className="relative w-full h-full cursor-pointer"
+                  onClick={() => onImageClick?.(image)}
+                >
                   <OptimizedImage
                     src={image.thumbnailUrl || image.url}
                     alt={image.description || 'Checkpoint image'}
@@ -108,36 +135,67 @@ export default function ImageCarousel({
                     objectFit="contain"
                     fallbackSrc="/placeholder-image.svg"
                   />
-                  
-                  {/* Overlay on hover */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity" />
                 </div>
-
-                {/* Image Info - Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                
+                {/* Instagram-style Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6">
+                  {/* Description */}
                   {image.description && (
-                    <p className="text-white text-sm mb-2 line-clamp-2 font-medium">
+                    <p className="text-white text-base mb-4 font-medium leading-relaxed">
                       {image.description}
                     </p>
                   )}
                   
-                  <div className="flex items-center justify-between text-xs text-white/90">
+                  {/* Location and Reactions */}
+                  <div className="flex items-center justify-between text-white/90 mb-2">
                     <div className="flex items-center">
-                      <MapPinIcon className="w-3 h-3 mr-1" />
-                      <span className="truncate max-w-[120px] sm:max-w-none">
+                      <MapPinIcon className="w-4 h-4 mr-2" />
+                      <span className="text-sm font-medium">
                         {image.latitude.toFixed(4)}, {image.longitude.toFixed(4)}
                       </span>
                     </div>
                     
                     {image.reactionCount !== undefined && image.reactionCount > 0 && (
-                      <span className="bg-white/20 text-white px-2 py-1 rounded text-xs">
-                        ❤️ {image.reactionCount}
-                      </span>
+                      <div className="flex items-center bg-white/20 px-3 py-1 rounded-full">
+                        <HeartIcon className="w-4 h-4 mr-1" />
+                        <span className="text-sm font-medium">
+                          {image.reactionCount}
+                        </span>
+                      </div>
                     )}
                   </div>
 
-                  <div className="mt-1 text-xs text-white/80">
-                    {new Date(image.createdAt).toUTCString()}
+                  {/* Timestamp */}
+                  <div className="text-white/70 text-sm">
+                    {new Date(image.createdAt).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </div>
+                </div>
+
+                {/* Progress Indicator (Instagram-style dots) */}
+                <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
+                  <div className="flex space-x-1">
+                    {images.slice(0, Math.min(10, images.length)).map((_, dotIndex) => (
+                      <div
+                        key={dotIndex}
+                        className={`w-1 h-1 rounded-full transition-all duration-300 ${
+                          dotIndex === index ? 'bg-white' : 'bg-white/30'
+                        }`}
+                      />
+                    ))}
+                    {images.length > 10 && (
+                      <div className="w-1 h-1 rounded-full bg-white/30" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Current Image Counter */}
+                <div className="absolute top-6 right-6">
+                  <div className="bg-black/50 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    {index + 1} / {images.length}
                   </div>
                 </div>
               </div>
@@ -146,10 +204,21 @@ export default function ImageCarousel({
           
           {/* Loading More Indicator */}
           {isLoadingMore && (
-            <div className="flex-[0_0_100%] h-full flex items-center justify-center p-4">
+            <div className="flex-shrink-0 w-full h-screen flex items-center justify-center bg-black">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-dark-primary mx-auto mb-2"></div>
-                <p className="text-dark-muted text-sm">Đang tải thêm ảnh...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                <p className="text-white/80 text-lg font-medium">Loading more images...</p>
+              </div>
+            </div>
+          )}
+          
+          {/* End of Feed */}
+          {!hasMore && images.length > 0 && (
+            <div className="flex-shrink-0 w-full h-screen flex items-center justify-center bg-black">
+              <div className="text-center">
+                <div className="text-white/60 text-6xl mb-4">✨</div>
+                <p className="text-white/80 text-lg font-medium">You've reached the end!</p>
+                <p className="text-white/60 text-sm mt-2">No more images to show</p>
               </div>
             </div>
           )}
