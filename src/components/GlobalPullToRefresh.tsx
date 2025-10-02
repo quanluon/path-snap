@@ -12,6 +12,7 @@ export default function GlobalPullToRefresh({ children }: GlobalPullToRefreshPro
 
   const handleRefresh = async () => {
     router.refresh();
+    window?.location?.reload();
   };
 
   return (
