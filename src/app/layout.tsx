@@ -81,13 +81,13 @@ export default function RootLayout({
           <UserProvider>
             <ReactionProvider>
               <PlanProvider>
-                <GlobalPullToRefresh>
+                {/* <GlobalPullToRefresh> */}
                   <Header />
                   <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
                     {children}
                   </main>
                   <Navigation />
-                </GlobalPullToRefresh>
+                {/* </GlobalPullToRefresh> */}
               </PlanProvider>
             </ReactionProvider>
           </UserProvider>
