@@ -29,6 +29,8 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+  const [dragType, setDragType] = useState<'move' | 'resize' | 'resize-nw' | 'resize-ne' | 'resize-sw' | 'resize-se' | 'resize-n' | 'resize-s' | 'resize-w' | 'resize-e' | null>(null);
+  const [initialCropArea, setInitialCropArea] = useState<CropArea | null>(null);
 
   // Load image
   useEffect(() => {
@@ -118,24 +120,37 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
     ctx.strokeRect(area.x, area.y, area.width, area.height);
     ctx.shadowBlur = 0;
     
-    // Draw corner handles with better visibility
-    const handleSize = 10;
+    // Draw corner handles
+    const handleSize = 12;
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#007AFF';
     ctx.lineWidth = 2;
     
-    // Top-left
-    ctx.fillRect(area.x - handleSize/2, area.y - handleSize/2, handleSize, handleSize);
-    ctx.strokeRect(area.x - handleSize/2, area.y - handleSize/2, handleSize, handleSize);
-    // Top-right
-    ctx.fillRect(area.x + area.width - handleSize/2, area.y - handleSize/2, handleSize, handleSize);
-    ctx.strokeRect(area.x + area.width - handleSize/2, area.y - handleSize/2, handleSize, handleSize);
-    // Bottom-left
-    ctx.fillRect(area.x - handleSize/2, area.y + area.height - handleSize/2, handleSize, handleSize);
-    ctx.strokeRect(area.x - handleSize/2, area.y + area.height - handleSize/2, handleSize, handleSize);
-    // Bottom-right
-    ctx.fillRect(area.x + area.width - handleSize/2, area.y + area.height - handleSize/2, handleSize, handleSize);
-    ctx.strokeRect(area.x + area.width - handleSize/2, area.y + area.height - handleSize/2, handleSize, handleSize);
+    // Corner handles
+    const corners = [
+      { x: area.x - handleSize/2, y: area.y - handleSize/2, type: 'nw' }, // Top-left
+      { x: area.x + area.width - handleSize/2, y: area.y - handleSize/2, type: 'ne' }, // Top-right
+      { x: area.x - handleSize/2, y: area.y + area.height - handleSize/2, type: 'sw' }, // Bottom-left
+      { x: area.x + area.width - handleSize/2, y: area.y + area.height - handleSize/2, type: 'se' }, // Bottom-right
+    ];
+    
+    corners.forEach(corner => {
+      ctx.fillRect(corner.x, corner.y, handleSize, handleSize);
+      ctx.strokeRect(corner.x, corner.y, handleSize, handleSize);
+    });
+    
+    // Draw edge handles
+    const edgeSize = 8;
+    ctx.fillStyle = '#007AFF';
+    
+    // Top edge
+    ctx.fillRect(area.x + area.width/2 - edgeSize/2, area.y - edgeSize/2, edgeSize, edgeSize);
+    // Bottom edge
+    ctx.fillRect(area.x + area.width/2 - edgeSize/2, area.y + area.height - edgeSize/2, edgeSize, edgeSize);
+    // Left edge
+    ctx.fillRect(area.x - edgeSize/2, area.y + area.height/2 - edgeSize/2, edgeSize, edgeSize);
+    // Right edge
+    ctx.fillRect(area.x + area.width - edgeSize/2, area.y + area.height/2 - edgeSize/2, edgeSize, edgeSize);
   };
 
   const handleRotate = (degrees: number) => {
@@ -224,6 +239,55 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
     setCropArea(null);
   };
 
+  // Helper function to get which handle is being clicked
+  const getHandleType = (x: number, y: number, area: CropArea): string | null => {
+    const handleSize = 12;
+    const edgeSize = 8;
+    
+    // Check corner handles
+    if (x >= area.x - handleSize/2 && x <= area.x + handleSize/2 && 
+        y >= area.y - handleSize/2 && y <= area.y + handleSize/2) {
+      return 'resize-nw';
+    }
+    if (x >= area.x + area.width - handleSize/2 && x <= area.x + area.width + handleSize/2 && 
+        y >= area.y - handleSize/2 && y <= area.y + handleSize/2) {
+      return 'resize-ne';
+    }
+    if (x >= area.x - handleSize/2 && x <= area.x + handleSize/2 && 
+        y >= area.y + area.height - handleSize/2 && y <= area.y + area.height + handleSize/2) {
+      return 'resize-sw';
+    }
+    if (x >= area.x + area.width - handleSize/2 && x <= area.x + area.width + handleSize/2 && 
+        y >= area.y + area.height - handleSize/2 && y <= area.y + area.height + handleSize/2) {
+      return 'resize-se';
+    }
+    
+    // Check edge handles
+    if (x >= area.x + area.width/2 - edgeSize/2 && x <= area.x + area.width/2 + edgeSize/2 && 
+        y >= area.y - edgeSize/2 && y <= area.y + edgeSize/2) {
+      return 'resize-n';
+    }
+    if (x >= area.x + area.width/2 - edgeSize/2 && x <= area.x + area.width/2 + edgeSize/2 && 
+        y >= area.y + area.height - edgeSize/2 && y <= area.y + area.height + edgeSize/2) {
+      return 'resize-s';
+    }
+    if (x >= area.x - edgeSize/2 && x <= area.x + edgeSize/2 && 
+        y >= area.y + area.height/2 - edgeSize/2 && y <= area.y + area.height/2 + edgeSize/2) {
+      return 'resize-w';
+    }
+    if (x >= area.x + area.width - edgeSize/2 && x <= area.x + area.width + edgeSize/2 && 
+        y >= area.y + area.height/2 - edgeSize/2 && y <= area.y + area.height/2 + edgeSize/2) {
+      return 'resize-e';
+    }
+    
+    // Check if clicking inside crop area (for moving)
+    if (x >= area.x && x <= area.x + area.width && y >= area.y && y <= area.y + area.height) {
+      return 'move';
+    }
+    
+    return null;
+  };
+
   // Mouse event handlers for crop area
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!cropMode || !cropArea) return;
@@ -235,12 +299,17 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
+    const handleType = getHandleType(x, y, cropArea);
+    if (!handleType) return;
+
     setIsDragging(true);
+    setDragType(handleType as any);
     setDragStart({ x, y });
+    setInitialCropArea(cropArea);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!cropMode || !cropArea || !isDragging) return;
+    if (!cropMode || !cropArea || !isDragging || !initialCropArea || !dragType) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -252,17 +321,67 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
     const deltaX = x - dragStart.x;
     const deltaY = y - dragStart.y;
 
-    setCropArea({
-      ...cropArea,
-      x: Math.max(0, Math.min(canvasSize.width - cropArea.width, cropArea.x + deltaX)),
-      y: Math.max(0, Math.min(canvasSize.height - cropArea.height, cropArea.y + deltaY)),
-    });
+    let newArea = { ...initialCropArea };
 
-    setDragStart({ x, y });
+    if (dragType === 'move') {
+      // Move the entire crop area
+      newArea.x = Math.max(0, Math.min(canvasSize.width - newArea.width, initialCropArea.x + deltaX));
+      newArea.y = Math.max(0, Math.min(canvasSize.height - newArea.height, initialCropArea.y + deltaY));
+    } else if (dragType.startsWith('resize-')) {
+      // Resize based on handle type
+      const minSize = 50; // Minimum crop size
+      
+      switch (dragType) {
+        case 'resize-nw': // Top-left corner
+          newArea.x = Math.max(0, initialCropArea.x + deltaX);
+          newArea.y = Math.max(0, initialCropArea.y + deltaY);
+          newArea.width = Math.max(minSize, initialCropArea.width - deltaX);
+          newArea.height = Math.max(minSize, initialCropArea.height - deltaY);
+          break;
+        case 'resize-ne': // Top-right corner
+          newArea.y = Math.max(0, initialCropArea.y + deltaY);
+          newArea.width = Math.max(minSize, initialCropArea.width + deltaX);
+          newArea.height = Math.max(minSize, initialCropArea.height - deltaY);
+          break;
+        case 'resize-sw': // Bottom-left corner
+          newArea.x = Math.max(0, initialCropArea.x + deltaX);
+          newArea.width = Math.max(minSize, initialCropArea.width - deltaX);
+          newArea.height = Math.max(minSize, initialCropArea.height + deltaY);
+          break;
+        case 'resize-se': // Bottom-right corner
+          newArea.width = Math.max(minSize, initialCropArea.width + deltaX);
+          newArea.height = Math.max(minSize, initialCropArea.height + deltaY);
+          break;
+        case 'resize-n': // Top edge
+          newArea.y = Math.max(0, initialCropArea.y + deltaY);
+          newArea.height = Math.max(minSize, initialCropArea.height - deltaY);
+          break;
+        case 'resize-s': // Bottom edge
+          newArea.height = Math.max(minSize, initialCropArea.height + deltaY);
+          break;
+        case 'resize-w': // Left edge
+          newArea.x = Math.max(0, initialCropArea.x + deltaX);
+          newArea.width = Math.max(minSize, initialCropArea.width - deltaX);
+          break;
+        case 'resize-e': // Right edge
+          newArea.width = Math.max(minSize, initialCropArea.width + deltaX);
+          break;
+      }
+      
+      // Ensure crop area stays within canvas bounds
+      newArea.x = Math.max(0, Math.min(canvasSize.width - newArea.width, newArea.x));
+      newArea.y = Math.max(0, Math.min(canvasSize.height - newArea.height, newArea.y));
+      newArea.width = Math.min(canvasSize.width - newArea.x, newArea.width);
+      newArea.height = Math.min(canvasSize.height - newArea.y, newArea.height);
+    }
+
+    setCropArea(newArea);
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    setDragType(null);
+    setInitialCropArea(null);
   };
 
   const handleSave = () => {
@@ -313,7 +432,15 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
         <div className="relative">
           <canvas
             ref={canvasRef}
-            className="max-w-full max-h-full object-contain cursor-crosshair transition-all duration-300"
+            className={`max-w-full max-h-full object-contain transition-all duration-300 ${
+              cropMode 
+                ? isDragging 
+                  ? dragType === 'move' 
+                    ? 'cursor-grabbing' 
+                    : 'cursor-resize'
+                  : 'cursor-crosshair'
+                : 'cursor-default'
+            }`}
             style={{ display: 'block' }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
