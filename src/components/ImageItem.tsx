@@ -72,13 +72,13 @@ export default function ImageItem({ image, onImageClick, style }: ImageItemProps
           )}
           
           {/* Author and Location */}
-          <div className="flex items-center justify-between text-white/90 mb-3">
+          <div className="flex items-center justify-between text-white/90">
             <div className="flex items-center space-x-4">
               {/* Author */}
               {image.author && (
                 <button
                   onClick={handleAuthorClick}
-                  className="flex items-center space-x-2 hover:bg-white/10 px-2 py-1 rounded-lg transition-colors"
+                  className="flex items-center space-x-2 hover:bg-white/10 rounded-lg transition-colors"
                 >
                   {image.author.avatarUrl ? (
                     <OptimizedImage
@@ -98,17 +98,18 @@ export default function ImageItem({ image, onImageClick, style }: ImageItemProps
               )}
               
               {/* Location */}
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <MapPinIcon className="w-4 h-4 mr-2" />
                 <span className="text-sm text-meta font-smooth truncate max-w-[200px]">
                   {image.latitude.toFixed(4)}, {image.longitude.toFixed(4)}
                 </span>
-              </div>
+              </div> */}
             </div>
+
 
             {/* View Count */}
             {image.viewCount !== undefined && image.viewCount > 0 && (
-              <div className="flex items-center text-white/70">
+              <div className="flex items-center text-white/70 py-5">
                 <EyeIcon className="w-4 h-4 mr-1" />
                 <span className="text-sm text-meta font-smooth">
                   {image.viewCount}
@@ -117,8 +118,17 @@ export default function ImageItem({ image, onImageClick, style }: ImageItemProps
             )}
           </div>
 
+           {/* Timestamp */}
+           <div className="text-white/70 text-sm text-meta font-smooth mb-3">
+            {new Date(image.createdAt).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric'
+            })}
+          </div>
+
           {/* Reaction Bar */}
-          <div className="mb-3">
+          <div>
             <ReactionBar
               imageId={image.id}
               reactionCounts={reactionCounts}
@@ -127,14 +137,7 @@ export default function ImageItem({ image, onImageClick, style }: ImageItemProps
             />
           </div>
 
-          {/* Timestamp */}
-          <div className="text-white/70 text-sm text-meta font-smooth">
-            {new Date(image.createdAt).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
-            })}
-          </div>
+         
         </div>
       </div>
     </div>

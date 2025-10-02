@@ -220,10 +220,10 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
                           <span>{formatDate(image.createdAt.toString())}</span>
                         </div>
                         
-                        <div className="flex items-center text-xs text-gray-600">
+                        {/* <div className="flex items-center text-xs text-gray-600">
                           <MapPinIcon className="w-3 h-3 mr-1" />
                           <span>{image.latitude.toFixed(4)}, {image.longitude.toFixed(4)}</span>
-                        </div>
+                        </div> */}
                       </div>
                       
                       <div className="mt-3 flex space-x-2">
@@ -232,7 +232,6 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              console.log('Image clicked:', image);
                               handleMarkerClick(image);
                             }}
                             className="flex items-center px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"

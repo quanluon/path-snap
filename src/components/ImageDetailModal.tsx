@@ -91,7 +91,6 @@ export default function ImageDetailModal({
               <OptimizedImage
                 src={image.url}
                 alt={image.description || 'Checkpoint image'}
-                fill
                 className="object-contain p-4"
                 objectFit="contain"
                 fallbackSrc="/placeholder-image.svg"
@@ -101,7 +100,7 @@ export default function ImageDetailModal({
             {/* Details */}
             <div className="p-8 overflow-y-auto max-h-[80vh] bg-gradient-to-b from-black to-gray-900">
               {/* Header */}
-              <div className="mb-6">
+              <div className="">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-display text-white text-2xl font-bold">
                     Checkpoint Details
@@ -118,7 +117,7 @@ export default function ImageDetailModal({
                 {image.author && (
                   <button
                     onClick={handleAuthorClick}
-                    className="flex items-center space-x-3 hover:bg-white/10 p-3 rounded-xl transition-colors mb-4"
+                    className="flex items-center space-x-3 hover:bg-white/10 mb-3 rounded-xl transition-colors"
                   >
                     {image.author.avatarUrl ? (
                       <OptimizedImage
@@ -201,12 +200,12 @@ export default function ImageDetailModal({
                     </h4>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-meta text-white/80">
+                    {/* <p className="text-meta text-white/80">
                       <span className="font-medium">Latitude:</span> {image.latitude.toFixed(6)}
                     </p>
                     <p className="text-meta text-white/80">
                       <span className="font-medium">Longitude:</span> {image.longitude.toFixed(6)}
-                    </p>
+                    </p> */}
                     <a
                       href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
                       target="_blank"

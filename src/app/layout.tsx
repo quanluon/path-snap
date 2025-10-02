@@ -77,7 +77,7 @@ export default function RootLayout({
         <LanguageProvider>
           <PlanProvider>
             <Header />
-            <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient">
+            <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
               {children}
             </main>
             <Navigation />
