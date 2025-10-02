@@ -35,6 +35,7 @@ export async function GET(
         authorEmail: users.email,
         authorName: users.name,
         authorAvatar: users.avatarUrl,
+        address: images.address,
       })
       .from(images)
       .leftJoin(imageViews, eq(imageViews.imageId, images.id))

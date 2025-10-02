@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
         authorEmail: users.email,
         authorName: users.name,
         authorAvatar: users.avatarUrl,
+        address: images.address,
       })
       .from(images)
       .leftJoin(reactions, sql`${reactions.imageId} = ${images.id}`)

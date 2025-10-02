@@ -1,15 +1,10 @@
 'use client';
 
-import OptimizedImage from '@/components/OptimizedImage';
-import ReactionBar from '@/components/ReactionBar';
+import ImageCard from '@/components/ImageCard';
 import { useImageView } from '@/hooks/useImageView';
 import { useReactions } from '@/hooks/useReactions';
 import type { ImageWithReactions, ReactionCounts } from '@/types';
 import type { ReactionType } from '@/lib/constants';
-import { UserIcon as UserIconOutline, MapPinIcon } from '@heroicons/react/24/outline';
-import { EyeIcon } from '@heroicons/react/24/solid';
-import { useRouter } from 'next/navigation';
-import { formatImageDate } from '@/lib/utils/date';
 
 interface ImageItemProps {
   image: ImageWithReactions;
@@ -19,6 +14,7 @@ interface ImageItemProps {
   reactionCounts?: ReactionCounts;
   userReaction?: ReactionType;
   onReactionChange?: (type: ReactionType) => Promise<void>;
+  isAuthenticated?: boolean;
 }
 
 export default function ImageItem({ 
@@ -27,138 +23,52 @@ export default function ImageItem({
   style,
   reactionCounts: propReactionCounts,
   userReaction: propUserReaction,
-  onReactionChange
+  onReactionChange,
+  isAuthenticated = true
 }: ImageItemProps) {
-  const router = useRouter();
-  
   // Use individual hook as fallback when batch data is not provided
   const individualHook = useReactions({
     imageId: image.id,
-    initialCounts: image.reactionCounts || { like: 0, heart: 0, wow: 0 },
-    initialUserReaction: image.userReaction,
+    initialCounts: propReactionCounts ? undefined : image.reactionCounts,
+    initialUserReaction: propReactionCounts ? undefined : image.userReaction,
   });
 
   // Use batch data if provided, otherwise fall back to individual hook
   const reactionCounts = propReactionCounts || individualHook.reactionCounts;
   const userReaction = propUserReaction !== undefined ? propUserReaction : individualHook.userReaction;
   const addReaction = onReactionChange || individualHook.addReaction;
-  const isAuthenticated = individualHook.isAuthenticated;
+  const removeReaction = individualHook.removeReaction;
+  const finalIsAuthenticated = isAuthenticated !== undefined ? isAuthenticated : individualHook.isAuthenticated;
 
   // Track view when image is displayed
   useImageView({ imageId: image.id });
 
-  const handleReactionChange = async (type: string) => {
-    if (userReaction === type) {
-      // If clicking the same reaction, remove it
-      return;
-    }
-    await addReaction(type as 'like' | 'heart' | 'wow');
-  };
-
-  const handleAuthorClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (image.author?.id) {
-      router.push(`/profile/${image.author.id}`);
+  const handleReactionChange = async (type: ReactionType) => {
+    if (onReactionChange) {
+      await onReactionChange(type);
+    } else {
+      // Use individual hook if no batch handler provided
+      if (userReaction === type) {
+        await removeReaction();
+      } else {
+        await addReaction(type);
+      }
     }
   };
 
   return (
-    <div style={style} className="w-full bg-black">
-      {/* Image and Content Container */}
-      <div className="w-full h-full bg-black flex flex-col">
-        {/* Image Section */}
-        <div className="relative w-full flex-1 bg-black flex items-center justify-center">
-          <div 
-            className="relative w-full h-full cursor-pointer"
-            onClick={() => onImageClick?.(image)}
-          >
-            <OptimizedImage
-              src={image.thumbnailUrl || image.url}
-              alt={image.description || 'Checkpoint image'}
-              fill
-              className="object-contain p-4"
-              objectFit="contain"
-              fallbackSrc="/placeholder-image.svg"
-            />
-          </div>
-        </div>
-        
-        {/* Text Content Section */}
-        <div className="bg-black p-6 flex-shrink-0">
-          {/* Address */}
-          {image.address && (
-            <div className="text-white/70 text-sm text-meta font-smooth mb-3 flex items-center">
-              <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0" />
-              <span className="truncate">{image.address}</span>
-            </div>
-          )}
-
-          {/* Description */}
-          {image.description && (
-            <p className="text-white text-base mb-4 text-story font-smooth break-words line-clamp-3">
-              {image.description}
-            </p>
-          )}
-          
-          {/* Author and Location */}
-          <div className="flex items-center justify-between text-white/90">
-            <div className="flex items-center space-x-4">
-              {/* Author */}
-              {image.author && (
-                <button
-                  onClick={handleAuthorClick}
-                  className="flex items-center space-x-2 hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  {image.author.avatarUrl ? (
-                    <OptimizedImage
-                      src={image.author.avatarUrl}
-                      alt={image.author.name || 'Author'}
-                      width={24}
-                      height={24}
-                      className="w-6 h-6 rounded-full object-cover"
-                    />
-                  ) : (
-                    <UserIconOutline className="w-6 h-6" />
-                  )}
-                  <span className="text-sm text-meta font-smooth">
-                    {image.author.name || image.author.email}
-                  </span>
-                </button>
-              )}
-              
-            </div>
-
-
-            {/* View Count */}
-            {image.viewCount !== undefined && image.viewCount > 0 && (
-              <div className="flex items-center text-white/70 py-5">
-                <EyeIcon className="w-4 h-4 mr-1" />
-                <span className="text-sm text-meta font-smooth">
-                  {image.viewCount}
-                </span>
-              </div>
-            )}
-          </div>
-
-           {/* Timestamp */}
-           <div className="text-white/70 text-sm text-meta font-smooth mb-3">
-            {formatImageDate(image.createdAt)}
-          </div>
-
-          {/* Reaction Bar */}
-          <div>
-            <ReactionBar
-              imageId={image.id}
-              reactionCounts={reactionCounts}
-              userReaction={userReaction}
-              onReactionChange={handleReactionChange}
-              disabled={!isAuthenticated}
-            />
-          </div>
-
-         
-        </div>
-      </div>
-    </div>
+    <ImageCard
+      image={image}
+      onImageClick={onImageClick}
+      style={style}
+      reactionCounts={reactionCounts}
+      userReaction={userReaction}
+      onReactionChange={handleReactionChange}
+      isAuthenticated={finalIsAuthenticated}
+      variant="carousel"
+      showAuthor={true}
+      showReactions={true}
+      showViewCount={true}
+    />
   );
 }

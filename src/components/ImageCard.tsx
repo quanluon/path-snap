@@ -1,0 +1,243 @@
+"use client";
+
+import {
+  MapPinIcon,
+  UserIcon as UserIconOutline,
+  EyeIcon,
+} from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+import OptimizedImage from "@/components/OptimizedImage";
+import ReactionBar from "@/components/ReactionBar";
+import { formatImageDate } from "@/lib/utils/date";
+import type { ImageWithReactions, ReactionCounts } from "@/types";
+import type { ReactionType } from "@/lib/constants";
+import Link from "next/link";
+
+interface ImageCardProps {
+  image: ImageWithReactions;
+  onImageClick?: (image: ImageWithReactions) => void;
+  style?: React.CSSProperties;
+  // Reaction data (optional - for batch optimization)
+  reactionCounts?: ReactionCounts;
+  userReaction?: ReactionType;
+  onReactionChange?: (type: ReactionType) => Promise<void>;
+  isAuthenticated?: boolean;
+  // Layout variants
+  variant?: "carousel" | "grid";
+  showAuthor?: boolean;
+  showReactions?: boolean;
+  showViewCount?: boolean;
+}
+
+export default function ImageCard({
+  image,
+  onImageClick,
+  style,
+  reactionCounts,
+  userReaction,
+  onReactionChange,
+  isAuthenticated = true,
+  variant = "carousel",
+  showAuthor = true,
+  showReactions = true,
+  showViewCount = true,
+}: ImageCardProps) {
+  const router = useRouter();
+
+  const handleAuthorClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (image.author?.id) {
+      router.push(`/profile/${image.author.id}`);
+    }
+  };
+
+  const handleImageClick = () => {
+    if (onImageClick) {
+      onImageClick(image);
+    }
+  };
+
+  // Determine layout classes based on variant
+  const containerClasses =
+    variant === "carousel"
+      ? "w-full bg-black"
+      : "bg-black/50 rounded-xl overflow-hidden hover:bg-black/70 transition-colors group cursor-pointer";
+
+  const imageClasses =
+    variant === "carousel"
+      ? "w-full h-full object-cover"
+      : "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300";
+
+  const contentClasses =
+    variant === "carousel" ? "bg-black p-6 flex-shrink-0" : "p-4";
+
+  const descriptionClasses =
+    variant === "carousel"
+      ? "text-white text-base mb-4 text-story font-smooth break-words line-clamp-3"
+      : "text-white text-sm mb-3 line-clamp-2";
+
+  const addressClasses =
+    variant === "carousel"
+      ? "text-white/70 text-sm text-meta font-smooth mb-3 flex items-center"
+      : "flex items-center text-white/60 text-xs mb-3";
+
+  const addressIconSize = variant === "carousel" ? "w-4 h-4" : "w-3 h-3";
+  const addressIconMargin = variant === "carousel" ? "mr-2" : "mr-1";
+
+  const dateClasses =
+    variant === "carousel"
+      ? "text-white/70 text-sm text-meta font-smooth mb-3"
+      : "text-white/50 text-xs";
+
+  return (
+    <div style={style} className={containerClasses} onClick={handleImageClick}>
+      {variant === "carousel" ? (
+        <>
+          {/* Full-screen carousel layout */}
+          <div className="relative w-full h-screen flex flex-col">
+            {/* Image Section */}
+            <div className="flex-1 relative overflow-hidden">
+              <OptimizedImage
+                src={image.url}
+                alt={image.description || "Checkpoint image"}
+                className={imageClasses}
+                objectFit="contain"
+                fallbackSrc="/placeholder-image.svg"
+              />
+            </div>
+
+            {/* Text Content Section */}
+            <div className={contentClasses}>
+              {/* Address */}
+              {image.latitude && image.longitude && (
+                <Link
+                  href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors my-2"
+                >
+                  <MapPinIcon
+                    className={`${addressIconSize} ${addressIconMargin} flex-shrink-0`}
+                  />
+                  <span className="text-blue-400">
+                    {image.address || "Open in Google Maps →"}
+                  </span>
+                </Link>
+              )}
+
+              {/* Description */}
+              {image.description && (
+                <p className={descriptionClasses}>{image.description}</p>
+              )}
+
+              {/* Author and View Count */}
+              <div className="flex items-center justify-between text-white/90">
+                <div className="flex items-center space-x-4">
+                  {/* Author */}
+                  {showAuthor && image.author && (
+                    <button
+                      onClick={handleAuthorClick}
+                      className="flex items-center space-x-2 hover:bg-white/10 rounded-lg transition-colors"
+                    >
+                      {image.author.avatarUrl ? (
+                        <OptimizedImage
+                          src={image.author.avatarUrl}
+                          alt={image.author.name || "Author"}
+                          width={24}
+                          height={24}
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      ) : (
+                        <UserIconOutline className="w-6 h-6" />
+                      )}
+                      <span className="text-sm text-meta font-smooth">
+                        {image.author.name || image.author.email}
+                      </span>
+                    </button>
+                  )}
+                </div>
+
+                {/* View Count */}
+                {showViewCount &&
+                  image.viewCount !== undefined &&
+                  image.viewCount > 0 && (
+                    <div className="flex items-center text-white/70 py-5">
+                      <EyeIcon className="w-4 h-4 mr-1" />
+                      <span className="text-sm text-meta font-smooth">
+                        {image.viewCount}
+                      </span>
+                    </div>
+                  )}
+              </div>
+
+              {/* Timestamp */}
+              <div className={dateClasses}>
+                {formatImageDate(image.createdAt)}
+              </div>
+
+              {/* Reaction Bar */}
+              {showReactions && (
+                <div>
+                  <ReactionBar
+                    imageId={image.id}
+                    reactionCounts={
+                      reactionCounts || { like: 0, heart: 0, wow: 0 }
+                    }
+                    userReaction={userReaction}
+                    onReactionChange={onReactionChange || (async () => {})}
+                    disabled={!isAuthenticated}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Grid layout */}
+          <div>
+            {/* Image */}
+            <div className="aspect-square relative overflow-hidden">
+              <OptimizedImage
+                src={image.url}
+                alt={image.description || "User image"}
+                className={imageClasses}
+                fallbackSrc="/placeholder-image.svg"
+              />
+            </div>
+
+            {/* Content */}
+            <div className={contentClasses}>
+              {/* Description */}
+              {image.description && (
+                <p className={descriptionClasses}>{image.description}</p>
+              )}
+
+              {/* Address */}
+              {image.latitude && image.longitude && (
+                <Link
+                  href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors my-2"
+                >
+                  <MapPinIcon
+                    className={`${addressIconSize} ${addressIconMargin} flex-shrink-0`}
+                  />
+                  <span className="text-blue-400">
+                    {image.address || "Open in Google Maps →"}
+                  </span>
+                </Link>
+              )}
+
+              {/* Date */}
+              <div className={dateClasses}>
+                {formatImageDate(image.createdAt)}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

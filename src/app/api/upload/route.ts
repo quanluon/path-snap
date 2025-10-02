@@ -4,7 +4,7 @@ import { images } from '@/db/schema';
 import { validateCoordinates } from '@/lib/utils/location';
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadImage } from '@/lib/storage';
-import { getAddressFromCoordinates } from '@/lib/locationService';
+import { getAddressFromCoordinatesServer } from '@/lib/locationServiceServer';
 
 /**
  * POST /api/upload
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     let address = null;
     if (latitude !== null && longitude !== null && latitude !== 0 && longitude !== 0) {
       try {
-        address = await getAddressFromCoordinates(latitude, longitude);
+        address = await getAddressFromCoordinatesServer(latitude, longitude);
       } catch (error) {
         console.error('Failed to get address:', error);
         // Continue without address if geocoding fails

@@ -1,15 +1,22 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { XMarkIcon, MapPinIcon, EyeIcon, UserIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
-import { CalendarIcon, ShareIcon } from '@heroicons/react/24/outline';
-import OptimizedImage from '@/components/OptimizedImage';
-import ReactionBar from '@/components/ReactionBar';
-import { useReactions } from '@/hooks/useReactions';
-import { useImageView } from '@/hooks/useImageView';
-import { useRouter } from 'next/navigation';
-import type { ImageWithReactions } from '@/types';
-import { formatImageDate } from '@/lib/utils/date';
+import { useState, useEffect } from "react";
+import {
+  XMarkIcon,
+  MapPinIcon,
+  EyeIcon,
+  UserIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/solid";
+import { CalendarIcon, ShareIcon } from "@heroicons/react/24/outline";
+import OptimizedImage from "@/components/OptimizedImage";
+import ReactionBar from "@/components/ReactionBar";
+import { useReactions } from "@/hooks/useReactions";
+import { useImageView } from "@/hooks/useImageView";
+import { useRouter } from "next/navigation";
+import type { ImageWithReactions } from "@/types";
+import { formatImageDate } from "@/lib/utils/date";
+import Link from "next/link";
 
 interface ImageDetailModalProps {
   image: ImageWithReactions | null;
@@ -25,21 +32,29 @@ export default function ImageDetailModal({
   const router = useRouter();
   const [showPreview, setShowPreview] = useState(false);
 
-  const { reactionCounts, userReaction, addReaction, isAuthenticated } = useReactions({
-    imageId: image?.id || '',
-    initialCounts: image?.reactionCounts || { like: 0, heart: 0, wow: 0 },
-    initialUserReaction: image?.userReaction,
-  });
+  // Reset preview state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setShowPreview(false);
+    }
+  }, [isOpen]);
+
+  const { reactionCounts, userReaction, addReaction, isAuthenticated } =
+    useReactions({
+      imageId: image?.id || "",
+      initialCounts: image?.reactionCounts || { like: 0, heart: 0, wow: 0 },
+      initialUserReaction: image?.userReaction,
+    });
 
   // Track view when modal is opened
-  useImageView({ imageId: image?.id || '', enabled: isOpen && !!image });
+  useImageView({ imageId: image?.id || "", enabled: isOpen && !!image });
 
   const handleReactionChange = async (type: string) => {
     if (userReaction === type) {
       // If clicking the same reaction, remove it
       return;
     }
-    await addReaction(type as 'like' | 'heart' | 'wow');
+    await addReaction(type as "like" | "heart" | "wow");
   };
 
   const handleAuthorClick = () => {
@@ -51,26 +66,26 @@ export default function ImageDetailModal({
 
   const handleShare = async () => {
     if (!image) return;
-    
+
     // Generate the direct image URL
     const imageUrl = `${window.location.origin}/image/${image.id}`;
-    const shareText = image.description || 'Check out this checkpoint image!';
-    
+    const shareText = image.description || "Check out this checkpoint image!";
+
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Checkpoint Image',
+          title: "Checkpoint Image",
           text: shareText,
           url: imageUrl,
         });
       } catch (error) {
-        console.log('Error sharing:', error);
+        console.log("Error sharing:", error);
         // Fallback to clipboard if share fails
         try {
           await navigator.clipboard.writeText(imageUrl);
           // You could show a toast notification here
         } catch (clipboardError) {
-          console.log('Clipboard error:', clipboardError);
+          console.log("Clipboard error:", clipboardError);
         }
       }
     } else {
@@ -79,7 +94,7 @@ export default function ImageDetailModal({
         await navigator.clipboard.writeText(imageUrl);
         // You could show a toast notification here
       } catch (error) {
-        console.log('Clipboard error:', error);
+        console.log("Clipboard error:", error);
       }
     }
   };
@@ -113,15 +128,15 @@ export default function ImageDetailModal({
             <XMarkIcon className="w-6 h-6 text-white" />
           </button>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[80vh]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[90vh]">
             {/* Image */}
-            <div 
+            <div
               className="relative bg-black flex items-center justify-center cursor-pointer hover:bg-gray-900 transition-colors group"
               onClick={handleImageClick}
             >
               <OptimizedImage
                 src={image.url}
-                alt={image.description || 'Checkpoint image'}
+                alt={image.description || "Checkpoint image"}
                 className="object-contain p-4"
                 objectFit="contain"
                 fallbackSrc="/placeholder-image.svg"
@@ -159,7 +174,7 @@ export default function ImageDetailModal({
                     {image.author.avatarUrl ? (
                       <OptimizedImage
                         src={image.author.avatarUrl}
-                        alt={image.author.name || 'Author'}
+                        alt={image.author.name || "Author"}
                         className="w-12 h-12 rounded-full object-cover"
                         objectFit="cover"
                         fallbackSrc="/placeholder-image.svg"
@@ -173,7 +188,7 @@ export default function ImageDetailModal({
                     )}
                     <div className="text-left">
                       <p className="text-white font-medium">
-                        {image.author.name || 'Anonymous'}
+                        {image.author.name || "Anonymous"}
                       </p>
                       <p className="text-white/60 text-sm">
                         {image.author.email}
@@ -184,13 +199,19 @@ export default function ImageDetailModal({
               </div>
 
               {/* Address */}
-              {image.address && (
-                <div className="mb-4">
-                  <div className="flex items-center text-white/70 text-sm">
-                    <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span className="truncate">{image.address}</span>
-                  </div>
-                </div>
+              {image.latitude && image.longitude && (
+                <Link
+                  href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors my-2"
+                >
+                  <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+
+                  <span className="text-blue-400">
+                    {image.address || "Open in Google Maps →"}
+                  </span>
+                </Link>
               )}
 
               {/* Description */}
@@ -233,34 +254,6 @@ export default function ImageDetailModal({
                   disabled={!isAuthenticated}
                 />
               </div>
-
-              {/* Location */}
-              <div className="mb-6">
-                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                  <div className="flex items-center mb-3">
-                    <MapPinIcon className="w-5 h-5 mr-2 text-white" />
-                    <h4 className="text-heading text-white font-medium">
-                      Location
-                    </h4>
-                  </div>
-                  <div className="space-y-2">
-                    {/* <p className="text-meta text-white/80">
-                      <span className="font-medium">Latitude:</span> {image.latitude.toFixed(6)}
-                    </p>
-                    <p className="text-meta text-white/80">
-                      <span className="font-medium">Longitude:</span> {image.longitude.toFixed(6)}
-                    </p> */}
-                    <a
-                      href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
-                    >
-                      Open in Google Maps →
-                    </a>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -281,7 +274,7 @@ export default function ImageDetailModal({
           <div className="flex items-center justify-center h-full p-4">
             <OptimizedImage
               src={image.url}
-              alt={image.description || 'Checkpoint image'}
+              alt={image.description || "Checkpoint image"}
               className="object-contain max-w-full max-h-full"
               objectFit="contain"
               fallbackSrc="/placeholder-image.svg"
@@ -292,7 +285,7 @@ export default function ImageDetailModal({
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6">
             <div className="text-center">
               <h3 className="text-white text-lg font-medium mb-2">
-                {image.description || 'Checkpoint Image'}
+                {image.description || "Checkpoint Image"}
               </h3>
               {image.author && (
                 <p className="text-white/70 text-sm">
@@ -306,4 +299,3 @@ export default function ImageDetailModal({
     </div>
   );
 }
-
