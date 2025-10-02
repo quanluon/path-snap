@@ -16,6 +16,7 @@ import { useImageView } from "@/hooks/useImageView";
 import { useRouter } from "next/navigation";
 import type { ImageWithReactions } from "@/types";
 import { formatImageDate } from "@/lib/utils/date";
+import { renderFormattedDescription } from "@/lib/utils/text";
 import Link from "next/link";
 
 interface ImageDetailModalProps {
@@ -259,8 +260,8 @@ export default function ImageDetailModal({
               {/* Description */}
               {image.description && (
                 <div className="mb-6">
-                  <p className="text-story text-white leading-relaxed">
-                    {image.description}
+                  <p className="text-story text-white leading-relaxed whitespace-pre-line">
+                    {renderFormattedDescription(image.description)}
                   </p>
                 </div>
               )}

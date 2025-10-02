@@ -23,7 +23,7 @@ export function usePullToRefresh({
   const [state, setState] = useState<PullToRefreshState>({
     isPulling: false,
     isRefreshing: false,
-    pullDistance: 0,
+    pullDistance: 100,
     canRefresh: false
   });
 

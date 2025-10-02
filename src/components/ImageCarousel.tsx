@@ -3,6 +3,7 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import ImageItem from '@/components/ImageItem';
+import { CarouselSkeleton } from '@/components/Skeleton';
 import { useBatchReactions } from '@/hooks/useBatchReactions';
 import type { ImageWithReactions } from '@/types';
 
@@ -109,12 +110,8 @@ export default function ImageCarousel({
                       height: `${virtualItem.size}px`,
                       transform: `translateY(${virtualItem.start}px)`,
                     }}
-                    className="w-full flex items-center justify-center bg-black"
                   >
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-                      <p className="text-white/80 text-lg font-secondary font-medium">Loading more images...</p>
-                    </div>
+                    <CarouselSkeleton />
                   </div>
                 );
               } else if (!hasMore && images.length > 0) {

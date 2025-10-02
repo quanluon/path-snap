@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import OptimizedImage from "@/components/OptimizedImage";
 import ReactionBar from "@/components/ReactionBar";
 import { formatImageDate } from "@/lib/utils/date";
+import { renderFormattedDescription } from "@/lib/utils/text";
 import type { ImageWithReactions, ReactionCounts } from "@/types";
 import type { ReactionType } from "@/lib/constants";
 import Link from "next/link";
@@ -73,8 +74,8 @@ export default function ImageCard({
 
   const descriptionClasses =
     variant === "carousel"
-      ? "text-white text-base mb-4 text-story font-smooth break-words line-clamp-3"
-      : "text-white text-sm mb-3 line-clamp-2";
+      ? "text-white text-base mb-4 text-story font-smooth break-words line-clamp-3 whitespace-pre-line"
+      : "text-white text-sm mb-3 line-clamp-2 whitespace-pre-line";
 
   const addressClasses =
     variant === "carousel"
@@ -127,7 +128,9 @@ export default function ImageCard({
 
               {/* Description */}
               {image.description && (
-                <p className={descriptionClasses}>{image.description}</p>
+                <p className={descriptionClasses}>
+                  {renderFormattedDescription(image.description)}
+                </p>
               )}
 
               {/* Author and View Count */}

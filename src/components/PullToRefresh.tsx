@@ -33,34 +33,38 @@ export default function PullToRefresh({
   return (
     <div className={`relative ${className}`}>
       {/* Pull to refresh indicator */}
-      {(isPulling || isRefreshing) && (
+      {isPulling && !isRefreshing && (
         <div
-          className="absolute top-0 left-0 right-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          className="absolute top-10 left-0 right-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
           style={{
             height: `${Math.min(pullDistance, 80)}px`,
             transform: `translateY(-${Math.min(pullDistance, 80)}px)`,
-            transition: isRefreshing ? 'none' : 'transform 0.1s ease-out'
+            transition: 'transform 0.1s ease-out'
           }}
         >
           <div className="flex items-center space-x-3">
             <div
-              className={`transition-transform duration-200 ${
-                isRefreshing ? 'animate-spin' : ''
-              }`}
+              className="transition-transform duration-200"
               style={{
-                transform: isRefreshing ? 'none' : `rotate(${rotation}deg)`
+                transform: `rotate(${rotation}deg)`
               }}
             >
               <ArrowPathIcon className="w-6 h-6 text-white" />
             </div>
             <span className="text-white text-sm font-medium">
-              {isRefreshing 
-                ? 'Refreshing...' 
-                : canRefresh 
-                  ? 'Release to refresh' 
-                  : 'Pull to refresh'
-              }
+              {canRefresh ? 'Release to refresh' : 'Pull to refresh'}
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Full-screen refreshing overlay */}
+      {isRefreshing && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md">
+          <div className="flex flex-col items-center justify-center min-h-screen w-full">
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-white/20 border-t-white mx-auto mb-6"></div>
+            <p className="text-white text-xl font-semibold">Refreshing...</p>
+            <p className="text-white/70 text-sm mt-2">Please wait</p>
           </div>
         </div>
       )}
@@ -70,8 +74,8 @@ export default function PullToRefresh({
         ref={containerRef}
         className="h-full overflow-auto"
         style={{
-          transform: isPulling ? `translateY(${Math.min(pullDistance, 80)}px)` : 'none',
-          transition: isPulling ? 'none' : 'transform 0.3s ease-out'
+          transform: isPulling && !isRefreshing ? `translateY(${Math.min(pullDistance, 80)}px)` : 'none',
+          transition: isPulling && !isRefreshing ? 'none' : 'transform 0.3s ease-out'
         }}
       >
         {children}

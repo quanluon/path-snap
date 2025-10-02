@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import SearchImages from "@/components/SearchImages";
 import ImageCarousel from "@/components/ImageCarousel";
 import ImageDetailModal from "@/components/ImageDetailModal";
+import { CarouselSkeleton } from "@/components/Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { ImageWithReactions } from "@/types";
 
@@ -92,7 +93,15 @@ export default function SearchPage() {
         isLoading={isLoading}
       />
 
-      {results.length > 0 && (
+      {isLoading && results.length === 0 ? (
+        <div className="mt-8">
+          <div className="mb-4">
+            <div className="h-6 bg-white/10 rounded w-48 mb-2"></div>
+            <div className="h-4 bg-white/10 rounded w-32"></div>
+          </div>
+          <CarouselSkeleton />
+        </div>
+      ) : results.length > 0 ? (
         <div className="mt-8">
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-dark-primary">
@@ -107,7 +116,7 @@ export default function SearchPage() {
             isLoadingMore={isLoadingMore}
           />
         </div>
-      )}
+      ) : null}
 
       <ImageDetailModal
         image={selectedImage}

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import ImageCard from "@/components/ImageCard";
 import OptimizedImage from "@/components/OptimizedImage";
+import { CardSkeleton, AvatarSkeleton, TextSkeleton } from "@/components/Skeleton";
 import { UserIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import type { ImageWithReactions, User } from "@/types";
 import Link from "next/link";
@@ -98,10 +99,32 @@ function UserProfileContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-dark-gradient flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white/70">Loading profile...</p>
+      <div className="min-h-screen bg-dark-gradient">
+        {/* Header Skeleton */}
+        <div className="bg-black/50 backdrop-blur-sm border-b border-white/10">
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="flex items-center space-x-6">
+              <AvatarSkeleton size={120} />
+              <div className="flex-1 min-w-0">
+                <div className="h-8 bg-white/10 rounded mb-2 w-3/4"></div>
+                <div className="h-5 bg-white/10 rounded mb-4 w-1/2"></div>
+                <div className="flex items-center space-x-6">
+                  <div className="h-4 bg-white/10 rounded w-20"></div>
+                  <div className="h-4 bg-white/10 rounded w-24"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Images Grid Skeleton */}
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="h-8 bg-white/10 rounded mb-6 w-32"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <CardSkeleton key={index} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -281,10 +304,32 @@ export default function UserProfilePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-dark-gradient flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-            <p className="text-white/70">Loading...</p>
+        <div className="min-h-screen bg-dark-gradient">
+          {/* Header Skeleton */}
+          <div className="bg-black/50 backdrop-blur-sm border-b border-white/10">
+            <div className="max-w-4xl mx-auto px-4 py-8">
+              <div className="flex items-center space-x-6">
+                <AvatarSkeleton size={120} />
+                <div className="flex-1 min-w-0">
+                  <div className="h-8 bg-white/10 rounded mb-2 w-3/4"></div>
+                  <div className="h-5 bg-white/10 rounded mb-4 w-1/2"></div>
+                  <div className="flex items-center space-x-6">
+                    <div className="h-4 bg-white/10 rounded w-20"></div>
+                    <div className="h-4 bg-white/10 rounded w-24"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Images Grid Skeleton */}
+          <div className="max-w-6xl mx-auto px-4 py-8">
+            <div className="h-8 bg-white/10 rounded mb-6 w-32"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <CardSkeleton key={index} />
+              ))}
+            </div>
           </div>
         </div>
       }

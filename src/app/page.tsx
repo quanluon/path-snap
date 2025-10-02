@@ -2,6 +2,7 @@
 
 import ImageCarousel from "@/components/ImageCarousel";
 import ImageDetailModal from "@/components/ImageDetailModal";
+import { CarouselSkeleton } from "@/components/Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { ImageWithReactions } from "@/types";
 import { useEffect, useState, Suspense } from "react";
@@ -125,14 +126,7 @@ function HomePageContent() {
     <div className="relative">
       {/* Main Content */}
       {isLoading ? (
-        <div className="h-screen flex justify-center items-center bg-black">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-            <p className="text-white/80 text-lg font-secondary font-medium">
-              {t.common.loading}
-            </p>
-          </div>
-        </div>
+        <CarouselSkeleton />
       ) : (
         <ImageCarousel
           images={images}
@@ -154,18 +148,7 @@ function HomePageContent() {
 
 export default function HomePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="h-screen flex justify-center items-center bg-black">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-            <p className="text-white/80 text-lg font-secondary font-medium">
-              Loading...
-            </p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<CarouselSkeleton />}>
       <HomePageContent />
     </Suspense>
   );
