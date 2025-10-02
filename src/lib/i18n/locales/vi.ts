@@ -34,7 +34,7 @@ export const vi = {
     unauthorized: 'Vui lòng đăng nhập để tiếp tục',
   },
   camera: {
-    title: 'Chụp Checkpoint',
+    title: 'Thêm Checkpoint',
     selectImage: 'Nhấn để chọn ảnh',
     description: 'Mô tả (tùy chọn)',
     descriptionPlaceholder: 'Thêm mô tả cho checkpoint này...',

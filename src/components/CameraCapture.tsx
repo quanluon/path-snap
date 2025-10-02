@@ -284,7 +284,7 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
         {/* Upload Button */}
         <button
           onClick={handleUpload}
-          disabled={isCapturing || !preview || !location}
+          disabled={isCapturing || !preview}
           className="w-full py-3 px-6 bg-dark-primary text-dark-secondary font-medium rounded-lg hover:bg-dark-hover disabled:bg-dark-muted disabled:cursor-not-allowed transition-colors border border-dark-primary"
         >
           {isCapturing ? t.camera.uploading : t.camera.uploadButton}
