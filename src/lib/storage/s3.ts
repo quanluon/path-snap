@@ -4,7 +4,7 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import sharp from "sharp";
+import { processImage } from './index';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || "ap-southeast-1",
@@ -32,36 +32,8 @@ export async function uploadToS3(
     const fileExtension = file.name.split(".").pop() || "jpg";
     const key = `images/${userId}/${timestamp}.${fileExtension}`;
 
-    // Convert File to Buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    // Get image metadata to determine if it needs processing
-    const metadata = await sharp(buffer).metadata();
-    const isLargeImage = (metadata.width || 0) > 1920 || (metadata.height || 0) > 1920;
-    
-    let processedImage: Buffer;
-
-    if (isLargeImage) {
-      // For large images, resize but maintain high quality
-      processedImage = await sharp(buffer)
-        .resize(1920, 1920, { fit: "inside", withoutEnlargement: true })
-        .jpeg({ 
-          quality: 95, // Higher quality for large images
-          progressive: true,
-          mozjpeg: true // Better compression
-        })
-        .toBuffer();
-    } else {
-      // For smaller images, keep original quality but optimize
-      processedImage = await sharp(buffer)
-        .jpeg({ 
-          quality: 98, // Very high quality for smaller images
-          progressive: true,
-          mozjpeg: true
-        })
-        .toBuffer();
-    }
+    // Process image using common function
+    const { buffer: processedImage } = await processImage(file);
 
     // Upload image
     const uploadCommand = new PutObjectCommand({
