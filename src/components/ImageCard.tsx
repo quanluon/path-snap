@@ -1,16 +1,18 @@
 "use client";
 
+import {
+  MapPinIcon,
+  UserIcon as UserIconOutline,
+  EyeIcon,
+} from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 import OptimizedImage from "@/components/OptimizedImage";
 import ReactionBar from "@/components/ReactionBar";
-import type { ReactionType } from "@/lib/constants";
 import { formatImageDate } from "@/lib/utils/date";
 import { renderFormattedDescription } from "@/lib/utils/text";
 import type { ImageWithReactions, ReactionCounts } from "@/types";
-import {
-  EyeIcon,
-  UserIcon as UserIconOutline
-} from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
+import type { ReactionType } from "@/lib/constants";
+import Link from "next/link";
 import { Address } from "./Address";
 
 interface ImageCardProps {
