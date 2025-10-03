@@ -19,17 +19,15 @@ export async function GET(
     const { id: planId } = await params;
 
     // Get plan details
-    const planDetails = await db
+    const [plan] = await db
       .select()
       .from(plans)
       .where(and(eq(plans.id, planId), eq(plans.userId, user.id)))
       .limit(1);
 
-    if (planDetails.length === 0) {
+    if (!plan) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
     }
-
-    const plan = planDetails[0];
 
     // Get images for this plan
     const planImages = await db

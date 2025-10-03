@@ -4,10 +4,15 @@ import {
   MapPinIcon,
   UserIcon as UserIconOutline,
   EyeIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import OptimizedImage from "@/components/OptimizedImage";
 import ReactionBar from "@/components/ReactionBar";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useDeleteImage } from "@/hooks/useDeleteImage";
+import { useUser } from "@/contexts/UserContext";
 import { formatImageDate } from "@/lib/utils/date";
 import { renderFormattedDescription } from "@/lib/utils/text";
 import type { ImageWithReactions, ReactionCounts } from "@/types";
@@ -45,6 +50,23 @@ export default function ImageCard({
   showViewCount = true,
 }: ImageCardProps) {
   const router = useRouter();
+  const { user, isLoading: userLoading } = useUser();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
+  const { deleteImage, isDeleting } = useDeleteImage({
+    onSuccess: () => {
+      setShowDeleteModal(false);
+      // The router.refresh() in the hook will update the UI
+    },
+    onError: (error) => {
+      console.error('Delete error:', error);
+      // You could show a toast notification here
+    },
+  });
+
+  // Check if current user owns this image
+  // Also check if we're still loading user data
+  const isOwner = !userLoading && user && image.author?.id === user.id;
 
   const handleAuthorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -56,6 +78,19 @@ export default function ImageCard({
   const handleImageClick = () => {
     if (onImageClick) {
       onImageClick(image);
+    }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteImage(image.id);
+    } catch (error) {
+      // Error is handled in the hook
     }
   };
 
@@ -106,6 +141,17 @@ export default function ImageCard({
                 objectFit="contain"
                 fallbackSrc="/placeholder-image.svg"
               />
+              
+              {/* Delete Button - Only show if user owns the image */}
+              {isOwner && (
+                <button
+                  onClick={handleDeleteClick}
+                  className="absolute top-4 left-4 p-2 bg-red-600/80 hover:bg-red-600 backdrop-blur-sm rounded-full transition-colors z-10"
+                  title="Delete image"
+                >
+                  <TrashIcon className="w-5 h-5 text-white" />
+                </button>
+              )}
             </div>
 
             {/* Text Content Section */}
@@ -141,7 +187,7 @@ export default function ImageCard({
                         <UserIconOutline className="w-6 h-6" />
                       )}
                       <span className="text-sm text-meta font-smooth">
-                        {image.author.name || image.author.email}
+                        {image.author.name || "Member"}
                       </span>
                     </button>
                   )}
@@ -194,6 +240,17 @@ export default function ImageCard({
                 className={imageClasses}
                 fallbackSrc="/placeholder-image.svg"
               />
+              
+              {/* Delete Button - Only show if user owns the image */}
+              {isOwner && (
+                <button
+                  onClick={handleDeleteClick}
+                  className="absolute top-2 right-2 p-1.5 bg-red-600/80 hover:bg-red-600 backdrop-blur-sm rounded-full transition-colors z-10"
+                  title="Delete image"
+                >
+                  <TrashIcon className="w-4 h-4 text-white" />
+                </button>
+              )}
             </div>
 
             {/* Content */}
@@ -214,6 +271,19 @@ export default function ImageCard({
           </div>
         </>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Image"
+        message="Are you sure you want to delete this image? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

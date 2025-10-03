@@ -3,21 +3,22 @@
 import { useState, useEffect } from "react";
 import {
   XMarkIcon,
-  MapPinIcon,
   EyeIcon,
   UserIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/solid";
-import { CalendarIcon, ShareIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { CalendarIcon, ShareIcon, ArrowDownTrayIcon, TrashIcon } from "@heroicons/react/24/outline";
 import OptimizedImage from "@/components/OptimizedImage";
 import ReactionBar from "@/components/ReactionBar";
 import { useReactions } from "@/hooks/useReactions";
 import { useImageView } from "@/hooks/useImageView";
+import { useUser } from "@/contexts/UserContext";
+import { useDeleteImage } from "@/hooks/useDeleteImage";
+import ConfirmModal from "@/components/ConfirmModal";
 import { useRouter } from "next/navigation";
 import type { ImageWithReactions } from "@/types";
 import { formatImageDate } from "@/lib/utils/date";
 import { renderFormattedDescription } from "@/lib/utils/text";
-import Link from "next/link";
 import { Address } from "./Address";
 
 interface ImageDetailModalProps {
@@ -32,7 +33,26 @@ export default function ImageDetailModal({
   onClose,
 }: ImageDetailModalProps) {
   const router = useRouter();
+  const { user, isLoading: userLoading } = useUser();
   const [showPreview, setShowPreview] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  console.log('user',user);
+  
+  const { deleteImage, isDeleting } = useDeleteImage({
+    onSuccess: () => {
+      setShowDeleteModal(false);
+      // The window.location.reload() in the hook will handle the refresh
+      // No need to close modal manually as the page will reload
+    },
+    onError: (error) => {
+      console.error('Delete error:', error);
+      // You could show a toast notification here
+    },
+  });
+
+  // Check if current user owns this image
+  // Also check if we're still loading user data
+  const isOwner = !userLoading && user && image?.author?.id === user.id;
 
   // Reset preview state when modal closes
   useEffect(() => {
@@ -63,6 +83,22 @@ export default function ImageDetailModal({
     if (image?.author?.id) {
       router.push(`/profile/${image.author.id}`);
       onClose();
+    }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!image) return;
+    try {
+      await deleteImage(image.id);
+    } catch {
+      // Error is handled in the hook
+    }finally {
+      window?.location?.reload();
     }
   };
 
@@ -154,13 +190,27 @@ export default function ImageDetailModal({
 
         {/* Modal */}
         <div className="relative inline-block w-full max-w-6xl overflow-hidden text-left align-middle transition-all transform bg-black rounded-2xl shadow-2xl border border-white/10">
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-3 bg-black/80 backdrop-blur-sm rounded-full hover:bg-white/10 transition-colors"
-          >
-            <XMarkIcon className="w-6 h-6 text-white" />
-          </button>
+          {/* Action Buttons */}
+          <div className="absolute top-4 right-4 z-10 flex space-x-2">
+            {/* Delete Button - Only show if user owns the image */}
+            {isOwner && (
+              <button
+                onClick={handleDeleteClick}
+                className="p-3 bg-red-600/80 backdrop-blur-sm rounded-full hover:bg-red-600 transition-colors"
+                title="Delete image"
+              >
+                <TrashIcon className="w-6 h-6 text-white" />
+              </button>
+            )}
+            
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="p-3 bg-black/80 backdrop-blur-sm rounded-full hover:bg-white/10 transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6 text-white" />
+            </button>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[90vh]">
             {/* Image */}
@@ -235,7 +285,7 @@ export default function ImageDetailModal({
                         {image.author.name || "Anonymous"}
                       </p>
                       <p className="text-white/60 text-sm">
-                        {image.author.email}
+                        Member
                       </p>
                     </div>
                   </button>
@@ -320,13 +370,26 @@ export default function ImageDetailModal({
               </h3>
               {image.author && (
                 <p className="text-white/70 text-sm">
-                  by {image.author.name || image.author.email}
+                  by {image.author.name || "Member"}
                 </p>
               )}
             </div>
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Image"
+        message="Are you sure you want to delete this image? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

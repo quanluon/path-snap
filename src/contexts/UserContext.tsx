@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 interface User {
@@ -23,7 +23,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (authUser) {
@@ -42,7 +42,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
             avatarUrl: profile.avatarUrl,
           });
         } else {
-          setUser(null);
+          // Use authUser data if profile doesn't exist in database
+          setUser({
+            id: authUser.id,
+            email: authUser.email || '',
+            name: authUser.user_metadata?.name || null,
+            avatarUrl: authUser.user_metadata?.avatar_url || null,
+          });
         }
       } else {
         setUser(null);
@@ -53,9 +59,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [supabase]);
 
   useEffect(() => {
+    // Always refresh user on mount and when auth state changes
     refreshUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -65,7 +72,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+  }, [supabase.auth, refreshUser]);
 
   return (
     <UserContext.Provider value={{ user, isLoading, refreshUser }}>

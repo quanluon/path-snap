@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/db';
-import { imageViews } from '@/db/schema';
-import { sql } from 'drizzle-orm';
+import { imageViews, images } from '@/db/schema';
+import { sql, eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -27,6 +27,20 @@ export async function POST(
                      request.headers.get('x-real-ip') || 
                      'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
+
+    // First, check if the image exists
+    const imageExists = await db
+      .select({ id: images.id })
+      .from(images)
+      .where(eq(images.id, imageId))
+      .limit(1);
+
+    if (imageExists.length === 0) {
+      return NextResponse.json(
+        { error: 'Image not found' },
+        { status: 404 }
+      );
+    }
 
     // Check if this view should be counted (basic duplicate prevention)
     const existingView = await db
