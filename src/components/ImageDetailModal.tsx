@@ -1,22 +1,23 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import {
+  XMarkIcon,
+  MapPinIcon,
+  EyeIcon,
+  UserIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/solid";
+import { CalendarIcon, ShareIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import OptimizedImage from "@/components/OptimizedImage";
 import ReactionBar from "@/components/ReactionBar";
-import ImageSEO from "@/components/ImageSEO";
-import { useImageView } from "@/hooks/useImageView";
 import { useReactions } from "@/hooks/useReactions";
+import { useImageView } from "@/hooks/useImageView";
+import { useRouter } from "next/navigation";
+import type { ImageWithReactions } from "@/types";
 import { formatImageDate } from "@/lib/utils/date";
 import { renderFormattedDescription } from "@/lib/utils/text";
-import type { ImageWithReactions } from "@/types";
-import { ArrowDownTrayIcon, CalendarIcon, ShareIcon } from "@heroicons/react/24/outline";
-import {
-  EyeIcon,
-  MagnifyingGlassIcon,
-  UserIcon,
-  XMarkIcon
-} from "@heroicons/react/24/solid";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Address } from "./Address";
 
 interface ImageDetailModalProps {
@@ -143,9 +144,7 @@ export default function ImageDetailModal({
   if (!isOpen || !image) return null;
 
   return (
-    <>
-      <ImageSEO image={image} />
-      <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
         {/* Overlay */}
         <div
@@ -328,7 +327,6 @@ export default function ImageDetailModal({
           </div>
         </div>
       )}
-      </div>
-    </>
+    </div>
   );
 }

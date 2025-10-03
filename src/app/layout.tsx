@@ -38,12 +38,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Checkpoint - Location Photo App",
-  description: "Capture and share photos with location tags. Discover amazing places through community photos.",
-  keywords: ["photo sharing", "location", "checkpoint", "travel", "photography", "social"],
-  authors: [{ name: "Checkpoint Team" }],
-  creator: "Checkpoint",
-  publisher: "Checkpoint",
-  robots: "index, follow",
+  description: "Capture and share photos with location tags",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -52,29 +47,6 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://path-snap.vercel.app/",
-    siteName: "Checkpoint",
-    title: "Checkpoint - Location Photo App",
-    description: "Capture and share photos with location tags. Discover amazing places through community photos.",
-    images: [
-      {
-        url: "/icon-512.png",
-        width: 512,
-        height: 512,
-        alt: "Checkpoint App Icon",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Checkpoint - Location Photo App",
-    description: "Capture and share photos with location tags. Discover amazing places through community photos.",
-    images: ["/icon-512.png"],
-    creator: "@checkpoint",
   },
 };
 
