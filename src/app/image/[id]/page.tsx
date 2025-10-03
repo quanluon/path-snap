@@ -1,118 +1,120 @@
-'use client';
+import { Metadata } from "next";
+import ImageSEO from "@/components/ImageSEO";
+import ImageDetailModal from "@/components/ImageDetailModal";
+import { CarouselSkeleton } from "@/components/Skeleton";
+import type { ImageWithReactions } from "@/types";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import ImageDetailModal from '@/components/ImageDetailModal';
-import type { ImageWithReactions } from '@/types';
-
-export default function ImagePage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter();
-  const [image, setImage] = useState<ImageWithReactions | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [imageId, setImageId] = useState<string>('');
-
-  // Handle async params
-  useEffect(() => {
-    params.then(({ id }) => {
-      setImageId(id);
-    });
-  }, [params]);
-
-  useEffect(() => {
-    if (!imageId) {
-      setError('No image ID provided');
-      setIsLoading(false);
-      return;
-    }
-
-    const fetchImage = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const response = await fetch(`/api/images/${imageId}`);
-        
-        if (!response.ok) {
-          if (response.status === 404) {
-            setError('Image not found');
-          } else {
-            setError('Failed to load image');
-          }
-          return;
-        }
-        
-        const data = await response.json();
-        setImage(data.image);
-      } catch (err) {
-        console.error('Error fetching image:', err);
-        setError('Failed to load image');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchImage();
-  }, [imageId]);
-
-  const handleClose = () => {
-    // Navigate back to home page
-    router.push('/');
+interface ImagePageProps {
+  params: {
+    id: string;
   };
+}
 
-  if (isLoading) {
-    return (
-      <div className="h-screen flex justify-center items-center bg-black">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white/80 text-lg font-secondary font-medium">Loading image...</p>
-        </div>
-      </div>
-    );
+async function getImage(id: string): Promise<ImageWithReactions | null> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/images/${id}`, {
+      cache: 'no-store' // Always fetch fresh data for SEO
+    });
+    
+    if (!response.ok) {
+      return null;
+    }
+    
+    const data = await response.json();
+    return data.image;
+  } catch (error) {
+    console.error('Error fetching image:', error);
+    return null;
+  }
+}
+
+export async function generateMetadata({ params }: ImagePageProps): Promise<Metadata> {
+  const image = await getImage(params.id);
+  
+  if (!image) {
+    return {
+      title: "Image Not Found - Checkpoint",
+      description: "The requested image could not be found.",
+    };
   }
 
-  if (error) {
-    return (
-      <div className="h-screen flex justify-center items-center bg-black">
-        <div className="text-center">
-          <div className="text-white/60 text-6xl mb-4">😞</div>
-          <h1 className="text-white text-2xl font-bold mb-2">Oops!</h1>
-          <p className="text-white/70 text-lg mb-6">{error}</p>
-          <button
-            onClick={() => router.push('/')}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-          >
-            Go Home
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const title = image.description 
+    ? `${image.description} - Checkpoint Photo`
+    : `Checkpoint Photo by ${image.author?.name || image.author?.email || "Anonymous"}`;
+  
+  const description = image.description 
+    ? `${image.description} - Discovered at ${image.address || "an amazing location"}`
+    : `Amazing photo captured at ${image.address || "a beautiful location"} by ${image.author?.name || image.author?.email || "Anonymous"}`;
+
+  const imageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}${image.url}`;
+  const pageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/image/${params.id}`;
+
+  return {
+    title,
+    description,
+    keywords: [`photo, ${image.address || "location"}, checkpoint, travel, photography, ${image.author?.name || image.author?.email || "Anonymous"}`],
+    authors: [{ name: image.author?.name || image.author?.email || "Anonymous" }],
+    openGraph: {
+      type: "article",
+      title,
+      description,
+      url: pageUrl,
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: image.description || "Checkpoint photo",
+        },
+      ],
+      siteName: "Checkpoint",
+      publishedTime: new Date(image.createdAt).toISOString(),
+      authors: [image.author?.name || image.author?.email || "Anonymous"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+      creator: "@checkpoint",
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    alternates: {
+      canonical: pageUrl,
+    },
+  };
+}
+
+export default async function ImagePage({ params }: ImagePageProps) {
+  const image = await getImage(params.id);
 
   if (!image) {
     return (
-      <div className="h-screen flex justify-center items-center bg-black">
+      <div className="min-h-screen bg-dark-gradient flex items-center justify-center">
         <div className="text-center">
-          <div className="text-white/60 text-6xl mb-4">🤔</div>
-          <h1 className="text-white text-2xl font-bold mb-2">Something went wrong</h1>
-          <p className="text-white/70 text-lg mb-6">Unable to load image</p>
-          <button
-            onClick={() => router.push('/')}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-          >
-            Go Home
-          </button>
+          <div className="text-red-400 text-6xl mb-4">⚠️</div>
+          <h1 className="text-white text-2xl font-semibold mb-2">Image Not Found</h1>
+          <p className="text-white/70">The requested image could not be found.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-black">
+    <div className="min-h-screen bg-dark-gradient">
+      <ImageSEO image={image} />
       <ImageDetailModal
         image={image}
         isOpen={true}
-        onClose={handleClose}
+        onClose={() => {
+          // Redirect to home page when modal is closed
+          if (typeof window !== 'undefined') {
+            window.location.href = '/';
+          }
+        }}
       />
     </div>
   );
