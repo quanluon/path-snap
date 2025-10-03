@@ -13,6 +13,7 @@ import { renderFormattedDescription } from "@/lib/utils/text";
 import type { ImageWithReactions, ReactionCounts } from "@/types";
 import type { ReactionType } from "@/lib/constants";
 import Link from "next/link";
+import { Address } from "./Address";
 
 interface ImageCardProps {
   image: ImageWithReactions;
@@ -110,21 +111,7 @@ export default function ImageCard({
             {/* Text Content Section */}
             <div className={contentClasses}>
               {/* Address */}
-              {image.latitude && image.longitude && (
-                <Link
-                  href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors my-2"
-                >
-                  <MapPinIcon
-                    className={`${addressIconSize} ${addressIconMargin} flex-shrink-0`}
-                  />
-                  <span className="text-blue-400">
-                    {image.address || "Open in Google Maps →"}
-                  </span>
-                </Link>
-              )}
+              <Address image={image} addressIconSize={addressIconSize} addressIconMargin={addressIconMargin} />
 
               {/* Description */}
               {image.description && (
@@ -217,21 +204,7 @@ export default function ImageCard({
               )}
 
               {/* Address */}
-              {image.latitude && image.longitude && (
-                <Link
-                  href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors my-2"
-                >
-                  <MapPinIcon
-                    className={`${addressIconSize} ${addressIconMargin} flex-shrink-0`}
-                  />
-                  <span className="text-blue-400">
-                    {image.address || "Open in Google Maps →"}
-                  </span>
-                </Link>
-              )}
+              <Address image={image} addressIconSize={addressIconSize} addressIconMargin={addressIconMargin} />
 
               {/* Date */}
               <div className={dateClasses}>

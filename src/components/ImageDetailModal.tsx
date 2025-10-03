@@ -18,6 +18,7 @@ import type { ImageWithReactions } from "@/types";
 import { formatImageDate } from "@/lib/utils/date";
 import { renderFormattedDescription } from "@/lib/utils/text";
 import Link from "next/link";
+import { Address } from "./Address";
 
 interface ImageDetailModalProps {
   image: ImageWithReactions | null;
@@ -242,20 +243,7 @@ export default function ImageDetailModal({
               </div>
 
               {/* Address */}
-              {image.latitude && image.longitude && (
-                <Link
-                  href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors my-2"
-                >
-                  <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0" />
-
-                  <span className="text-blue-400">
-                    {image.address || "Open in Google Maps →"}
-                  </span>
-                </Link>
-              )}
+              <Address image={image} addressIconSize="w-4 h-4 mr-2 flex-shrink-0" addressIconMargin="mr-2" />
 
               {/* Description */}
               {image.description && (
