@@ -56,11 +56,15 @@ export interface SearchParams extends Location {
 
 export interface CommentWithUser extends Comment {
   user?: User;
+  isGuest?: boolean;
+  displayName?: string;
 }
 
 export interface CommentCreateRequest {
   imageId: string;
   content: string;
+  guestName?: string;
+  guestEmail?: string;
 }
 
 export interface CommentListResponse {

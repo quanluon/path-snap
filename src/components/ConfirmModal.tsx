@@ -8,8 +8,8 @@ interface ConfirmModalProps {
   onConfirm: () => void;
   title: string;
   message: string;
-  confirmText?: string;
-  cancelText?: string;
+  confirmText: string;
+  cancelText: string;
   type?: "danger" | "warning" | "info";
   isLoading?: boolean;
 }
@@ -20,8 +20,8 @@ export default function ConfirmModal({
   onConfirm,
   title,
   message,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText,
+  cancelText,
   type = "danger",
   isLoading = false,
 }: ConfirmModalProps) {

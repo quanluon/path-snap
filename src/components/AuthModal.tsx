@@ -165,8 +165,8 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
                 className="text-sm text-blue-600 hover:text-blue-800"
               >
                 {mode === 'login' 
-                  ? "Don't have an account? Sign up" 
-                  : "Already have an account? Login"
+                  ? t.profile.dontHaveAccount
+                  : t.profile.alreadyHaveAccount
                 }
               </button>
             </div>

@@ -19,6 +19,7 @@ import type { ImageWithReactions, ReactionCounts } from "@/types";
 import type { ReactionType } from "@/lib/constants";
 import Link from "next/link";
 import { Address } from "./Address";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ImageCardProps {
   image: ImageWithReactions;
@@ -49,7 +50,8 @@ export default function ImageCard({
   showReactions = true,
   showViewCount = true,
 }: ImageCardProps) {
-  const router = useRouter();
+  const { t } = useLanguage();
+  const router = useRouter(); 
   const { user, isLoading: userLoading } = useUser();
 
   // Check if current user owns this image
@@ -111,7 +113,7 @@ export default function ImageCard({
             <div className="flex-1 relative overflow-hidden">
               <OptimizedImage
                 src={image.url}
-                alt={image.description || "Checkpoint image"}
+                alt={image.description || t.profile.checkpointImage}
                 className={imageClasses}
                 objectFit="contain"
                 fallbackSrc="/placeholder-image.svg"
@@ -142,7 +144,7 @@ export default function ImageCard({
                       {image.author.avatarUrl ? (
                         <OptimizedImage
                           src={image.author.avatarUrl}
-                          alt={image.author.name || "Author"}
+                          alt={image.author.name || t.profile.author}
                           width={24}
                           height={24}
                           className="w-6 h-6 rounded-full object-cover"
@@ -151,7 +153,7 @@ export default function ImageCard({
                         <UserIconOutline className="w-6 h-6" />
                       )}
                       <span className="text-sm text-meta font-smooth">
-                        {isOwner ? "You" : (image.author.name || "Member")}
+                        {isOwner ? t.profile.you : (image.author.name || t.profile.member)}
                       </span>
                     </button>
                   )}
@@ -200,7 +202,7 @@ export default function ImageCard({
             <div className="aspect-square relative overflow-hidden">
               <OptimizedImage
                 src={image.url}
-                alt={image.description || "User image"}
+                alt={image.description || t.profile.userImage}
                 className={imageClasses}
                 fallbackSrc="/placeholder-image.svg"
               />

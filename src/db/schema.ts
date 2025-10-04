@@ -68,7 +68,9 @@ export const imageViews = pgTable('image_views', {
 export const comments = pgTable('comments', {
   id: uuid('id').primaryKey().defaultRandom(),
   imageId: uuid('image_id').references(() => images.id).notNull(),
-  userId: uuid('user_id').references(() => users.id).notNull(),
+  userId: uuid('user_id').references(() => users.id), // nullable for guest comments
+  guestName: text('guest_name'), // for guest comments
+  guestEmail: text('guest_email'), // optional for guest comments
   content: text('content').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

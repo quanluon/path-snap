@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect, Suspense, useMemo, useRef } from "react";
-import { useParams } from "next/navigation";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import ImageCard from "@/components/ImageCard";
 import OptimizedImage from "@/components/OptimizedImage";
-import { CardSkeleton, AvatarSkeleton, TextSkeleton } from "@/components/Skeleton";
-import { UserIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { AvatarSkeleton, CardSkeleton } from "@/components/Skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { ImageWithReactions, User } from "@/types";
+import { MapPinIcon, UserIcon } from "@heroicons/react/24/outline";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 
 interface UserProfileData {
   user: User;
@@ -19,6 +20,8 @@ interface UserProfileData {
 function UserProfileContent() {
   const params = useParams();
   const userId = params.id as string;
+
+  const { t } = useLanguage();
 
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -202,10 +205,10 @@ function UserProfileContent() {
               {/* User Info */}
               <div className="flex-1 min-w-0">
                 <h1 className="text-3xl font-bold text-white mb-2">
-                  {user.name || "No name"}
+                  {user.name || t.profile.noName}
                 </h1>
                 {user.name && (
-                  <p className="text-white/70 text-lg mb-4">Member</p>
+                  <p className="text-white/70 text-lg mb-4">{t.profile.member}</p>
                 )}
 
                 {/* Stats */}

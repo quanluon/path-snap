@@ -259,7 +259,7 @@ export default function ImageEditor({ imageFile, onSave, onCancel }: ImageEditor
               <Image
                 ref={imgRef}
                 src={imageUrl}
-                alt="Crop me"
+                alt={t.profile.cropMe}
                 width={800}
                 height={600}
                 style={{

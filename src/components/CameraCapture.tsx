@@ -157,7 +157,7 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
             <>
               <Image
                 src={preview}
-                alt="Preview"
+                alt={t.profile.preview}
                 width={400}
                 height={300}
                 className="w-full h-full object-cover rounded-lg"

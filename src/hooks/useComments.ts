@@ -14,7 +14,8 @@ interface UseCommentsReturn {
   hasMore: boolean;
   totalCount: number;
   loadComments: (page?: number) => Promise<void>;
-  createComment: (content: string) => Promise<CommentWithUser | null>;
+  loadMore: () => Promise<void>;
+  createComment: (content: string, guestName?: string, guestEmail?: string) => Promise<CommentWithUser | null>;
   refreshComments: () => Promise<void>;
 }
 
@@ -64,7 +65,7 @@ export function useComments({ imageId, enabled = true }: UseCommentsProps): UseC
     }
   }, [imageId, enabled]);
 
-  const createComment = useCallback(async (content: string): Promise<CommentWithUser | null> => {
+  const createComment = useCallback(async (content: string, guestName?: string, guestEmail?: string): Promise<CommentWithUser | null> => {
     if (!imageId?.trim() || !content?.trim()) {
       return null;
     }
@@ -78,9 +79,11 @@ export function useComments({ imageId, enabled = true }: UseCommentsProps): UseC
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          imageId,
+        body: JSON.stringify({ 
+          imageId, 
           content: content.trim(),
+          ...(guestName && { guestName }),
+          ...(guestEmail && { guestEmail })
         } as CommentCreateRequest),
       });
 
@@ -121,7 +124,7 @@ export function useComments({ imageId, enabled = true }: UseCommentsProps): UseC
     if (enabled) {
       refreshComments();
     }
-  }, [enabled, imageId]);
+  }, [enabled, imageId, refreshComments]);
 
   return {
     comments,
@@ -131,6 +134,7 @@ export function useComments({ imageId, enabled = true }: UseCommentsProps): UseC
     hasMore,
     totalCount,
     loadComments,
+    loadMore,
     createComment,
     refreshComments,
   };

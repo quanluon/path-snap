@@ -34,10 +34,10 @@ export default function ProfilePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-2xl font-bold text-dark-primary mb-4">
-            Access Denied
+            {t.profile.accessDenied}
           </h1>
           <p className="text-dark-secondary mb-6">
-            Please login to view your profile.
+            {t.profile.loginPrompt}
           </p>
         </div>
       </div>
@@ -49,10 +49,10 @@ export default function ProfilePage() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-dark-primary mb-2">
-            Profile
+            {t.profile.title}
           </h1>
           <p className="text-dark-secondary">
-            Manage your account information and preferences
+            {t.profile.subtitle}
           </p>
         </div>
 
@@ -63,7 +63,7 @@ export default function ProfilePage() {
               <UserCircleIcon className="w-8 h-8 text-dark-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-dark-primary">{user.user_metadata?.name || 'No name'}</h2>
+              <h2 className="text-xl font-semibold text-dark-primary">{user.user_metadata?.name || t.profile.noName}</h2>
               <p className="text-dark-muted">{user.email}</p>
             </div>
           </div>
@@ -73,7 +73,7 @@ export default function ProfilePage() {
             <div>
               <label className="block text-sm font-medium text-dark-secondary mb-2">
                 <UserIcon className="w-4 h-4 inline mr-2" />
-                Full Name
+{t.profile.fullName}
               </label>
               <input
                 type="text"
@@ -87,7 +87,7 @@ export default function ProfilePage() {
             <div>
               <label className="block text-sm font-medium text-dark-secondary mb-2">
                 <EnvelopeIcon className="w-4 h-4 inline mr-2" />
-                Email Address
+{t.profile.emailAddress}
               </label>
               <input
                 type="email"
@@ -100,7 +100,7 @@ export default function ProfilePage() {
 
             <div>
               <label className="block text-sm font-medium text-dark-secondary mb-2">
-                User ID
+{t.profile.userId}
               </label>
               <input
                 type="text"
@@ -117,7 +117,7 @@ export default function ProfilePage() {
                   onClick={() => setIsEditing(true)}
                   className="px-6 py-2 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors font-medium"
                 >
-                  Edit Profile
+{t.profile.editProfile}
                 </button>
               ) : (
                 <>
@@ -128,7 +128,7 @@ export default function ProfilePage() {
                     }}
                     className="px-6 py-2 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors font-medium"
                   >
-                    Save Changes
+{t.profile.saveChanges}
                   </button>
                   <button
                     onClick={() => {
@@ -138,7 +138,7 @@ export default function ProfilePage() {
                     }}
                     className="px-6 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors font-medium border border-dark-primary"
                   >
-                    Cancel
+{t.profile.cancel}
                   </button>
                 </>
               )}

@@ -1,14 +1,20 @@
 import { formatDistanceToNow } from 'date-fns';
 import type { CommentWithUser } from '@/types';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CommentItemProps {
   comment: CommentWithUser;
 }
 
 export default function CommentItem({ comment }: CommentItemProps) {
-  const { user, content, createdAt } = comment;
+  const { user, content, createdAt, guestName, guestEmail } = comment;
+  const { t } = useLanguage();
   
-  const userName = user?.name || user?.email || 'Anonymous';
+  // Determine display name based on user type
+  const isGuest = !user && guestName;
+  const userName = isGuest 
+    ? guestName 
+    : (user?.name || user?.email || t.comments.anonymous);
   const userInitial = userName.charAt(0).toUpperCase();
   
   return (
@@ -22,7 +28,11 @@ export default function CommentItem({ comment }: CommentItemProps) {
             className="w-8 h-8 rounded-full object-cover"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
+            isGuest 
+              ? 'bg-gradient-to-br from-green-500 to-teal-600' 
+              : 'bg-gradient-to-br from-blue-500 to-purple-600'
+          }`}>
             {userInitial}
           </div>
         )}
@@ -34,6 +44,11 @@ export default function CommentItem({ comment }: CommentItemProps) {
           <span className="text-sm font-medium text-white truncate">
             {userName}
           </span>
+          {isGuest && (
+            <span className="text-xs text-green-400 bg-green-400/20 px-2 py-0.5 rounded-full">
+              {t.comments.anonymous}
+            </span>
+          )}
           <span className="text-xs text-gray-400">
             {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
           </span>

@@ -19,20 +19,18 @@ export default function CommentsSection({ imageId, className = '' }: CommentsSec
     error,
     hasMore,
     totalCount,
-    loadComments,
+    loadMore,
     createComment,
-    refreshComments,
   } = useComments({ imageId });
 
   const [showComments, setShowComments] = useState(false);
 
-  const handleCreateComment = async (content: string) => {
-    await createComment(content);
+  const handleCreateComment = async (content: string, guestName?: string, guestEmail?: string) => {
+    await createComment(content, guestName, guestEmail);
   };
 
   const handleLoadMore = async () => {
-    const nextPage = Math.floor(comments.length / 20) + 1;
-    await loadComments(nextPage);
+    await loadMore();
   };
 
   return (

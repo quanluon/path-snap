@@ -59,6 +59,8 @@ export async function GET(request: NextRequest) {
         id: comments.id,
         imageId: comments.imageId,
         userId: comments.userId,
+        guestName: comments.guestName,
+        guestEmail: comments.guestEmail,
         content: comments.content,
         createdAt: comments.createdAt,
         updatedAt: comments.updatedAt,
@@ -101,12 +103,8 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
     const body: CommentCreateRequest = await request.json();
-    const { imageId, content } = body;
+    const { imageId, content, guestName, guestEmail } = body;
 
     if (!imageId || !content?.trim()) {
       return NextResponse.json({ error: 'Image ID and content are required' }, { status: 400 });
@@ -114,6 +112,11 @@ export async function POST(request: NextRequest) {
 
     if (content.length > 1000) {
       return NextResponse.json({ error: 'Comment too long (max 1000 characters)' }, { status: 400 });
+    }
+
+    // For guest comments, validate guest name
+    if (!user && !guestName?.trim()) {
+      return NextResponse.json({ error: 'Guest name is required for anonymous comments' }, { status: 400 });
     }
 
     // Get image author and commenter information
@@ -128,14 +131,15 @@ export async function POST(request: NextRequest) {
         .leftJoin(users, eq(images.userId, users.id))
         .where(eq(images.id, imageId))
         .limit(1),
-      db
+      // Only fetch commenter info if user is authenticated
+      user ? db
         .select({
           name: users.name,
           email: users.email,
         })
         .from(users)
         .where(eq(users.id, user.id))
-        .limit(1),
+        .limit(1) : Promise.resolve([{ name: null, email: null }]),
     ]);
 
     if (!imageWithAuthor.length) {
@@ -145,12 +149,14 @@ export async function POST(request: NextRequest) {
     const imageData = imageWithAuthor[0];
     const commenterData = commenterUser[0];
 
-    // Create the comment
+    // Create the comment (authenticated or guest)
     const [newComment] = await db
       .insert(comments)
       .values({
         imageId,
-        userId: user.id,
+        userId: user?.id || null,
+        guestName: user ? null : guestName?.trim(),
+        guestEmail: user ? null : guestEmail?.trim(),
         content: content.trim(),
       })
       .returning();
@@ -161,6 +167,8 @@ export async function POST(request: NextRequest) {
         id: comments.id,
         imageId: comments.imageId,
         userId: comments.userId,
+        guestName: comments.guestName,
+        guestEmail: comments.guestEmail,
         content: comments.content,
         createdAt: comments.createdAt,
         updatedAt: comments.updatedAt,
@@ -175,8 +183,8 @@ export async function POST(request: NextRequest) {
       .leftJoin(users, eq(comments.userId, users.id))
       .where(eq(comments.id, newComment.id));
 
-    // Send notification to image author (if not commenting on own image)
-    if (imageData.authorId && imageData.authorId !== user.id) {
+    // Send notification to image author (if not commenting on own image and user is authenticated)
+    if (user && imageData.authorId && imageData.authorId !== user.id) {
       await sendCommentNotification({
         imageId,
         commenterUserId: user.id,
