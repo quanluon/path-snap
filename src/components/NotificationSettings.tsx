@@ -133,27 +133,6 @@ export default function NotificationSettings({
         </div>
       )}
 
-      {permission === 'granted' && onTestNotification && (
-        <div className="mt-6 pt-4 border-t border-dark-primary">
-          <p className="text-white font-medium mb-3">Test Notifications</p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onTestNotification('reaction')}
-              disabled={isTestingNotification}
-              className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Test Reaction
-            </button>
-            <button
-              onClick={() => onTestNotification('comment')}
-              disabled={isTestingNotification}
-              className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Test Comment
-            </button>
-          </div>
-        </div>
-      )}
 
       {!isSupported && (
         <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
