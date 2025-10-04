@@ -15,8 +15,8 @@ interface ImageCarouselProps {
   isLoadingMore?: boolean;
 }
 
-// Virtual scrolling configuration
-const ITEM_HEIGHT = typeof window !== 'undefined' ? window.innerHeight : 800;
+// Virtual scrolling configuration - use a default height for SSR
+const DEFAULT_ITEM_HEIGHT = 800;
 
 export default function ImageCarousel({ 
   images, 
@@ -30,6 +30,14 @@ export default function ImageCarousel({
   // Use batch reactions hook for optimized API calls
   const { reactionCounts, userReactions, fetchBatchReactions, addReaction } = useBatchReactions();
 
+  // Get dynamic item height on client side
+  const itemHeight = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerHeight;
+    }
+    return DEFAULT_ITEM_HEIGHT;
+  }, []);
+
   // Calculate total item count (including loading state)
   const itemCount = useMemo(() => {
     return hasMore ? images.length + 1 : images.length;
@@ -39,7 +47,7 @@ export default function ImageCarousel({
   const virtualizer = useVirtualizer({
     count: itemCount,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => ITEM_HEIGHT,
+    estimateSize: () => itemHeight,
     overscan: 3, // Render 3 extra items outside viewport
   });
 

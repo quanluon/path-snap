@@ -23,15 +23,29 @@ function UserProfileContent() {
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [itemsPerRow, setItemsPerRow] = useState(3); // Default for SSR
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // Calculate items per row based on screen size
-  const itemsPerRow = useMemo(() => {
-    if (typeof window === "undefined") return 3;
-    const width = window.innerWidth;
-    if (width < 768) return 1; // Mobile
-    if (width < 1024) return 2; // Tablet
-    return 3; // Desktop
+  // Calculate items per row based on screen size - client side only
+  useEffect(() => {
+    const calculateItemsPerRow = () => {
+      if (typeof window !== "undefined") {
+        const width = window.innerWidth;
+        if (width < 768) return 1; // Mobile
+        if (width < 1024) return 2; // Tablet
+        return 3; // Desktop
+      }
+      return 3; // Default
+    };
+
+    setItemsPerRow(calculateItemsPerRow());
+
+    const handleResize = () => {
+      setItemsPerRow(calculateItemsPerRow());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Group images into rows for virtual scrolling

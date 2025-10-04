@@ -10,6 +10,7 @@ import {
 import { CalendarIcon, ShareIcon, ArrowDownTrayIcon, TrashIcon } from "@heroicons/react/24/outline";
 import OptimizedImage from "@/components/OptimizedImage";
 import ReactionBar from "@/components/ReactionBar";
+import CommentsSection from "@/components/CommentsSection";
 import { useReactions } from "@/hooks/useReactions";
 import { useImageView } from "@/hooks/useImageView";
 import { useUser } from "@/contexts/UserContext";
@@ -343,6 +344,11 @@ export default function ImageDetailModal({
                   onReactionChange={handleReactionChange}
                   disabled={!isAuthenticated}
                 />
+              </div>
+
+              {/* Comments */}
+              <div className="mb-6">
+                <CommentsSection imageId={image.id} />
               </div>
             </div>
           </div>

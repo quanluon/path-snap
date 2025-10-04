@@ -64,12 +64,23 @@ export const imageViews = pgTable('image_views', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Comments table for image comments
+export const comments = pgTable('comments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  imageId: uuid('image_id').references(() => images.id).notNull(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   images: many(images),
   plans: many(plans),
   reactions: many(reactions),
   imageViews: many(imageViews),
+  comments: many(comments),
 }));
 
 export const plansRelations = relations(plans, ({ one, many }) => ({
@@ -91,6 +102,7 @@ export const imagesRelations = relations(images, ({ one, many }) => ({
   }),
   reactions: many(reactions),
   views: many(imageViews),
+  comments: many(comments),
 }));
 
 export const reactionsRelations = relations(reactions, ({ one }) => ({
@@ -111,6 +123,17 @@ export const imageViewsRelations = relations(imageViews, ({ one }) => ({
   }),
   image: one(images, {
     fields: [imageViews.imageId],
+    references: [images.id],
+  }),
+}));
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  user: one(users, {
+    fields: [comments.userId],
+    references: [users.id],
+  }),
+  image: one(images, {
+    fields: [comments.imageId],
     references: [images.id],
   }),
 }));

@@ -17,7 +17,7 @@ export class NotificationService {
   private permission: NotificationPermission = 'default';
 
   private constructor() {
-    this.isSupported = 'Notification' in window;
+    this.isSupported = typeof window !== 'undefined' && 'Notification' in window;
     if (this.isSupported) {
       this.permission = Notification.permission;
     }
