@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { type ReactionType } from '@/lib/constants';
+import { DEFAULT_REACTION, type ReactionType } from '@/lib/constants';
 import type { ReactionCounts } from '@/types';
 import { useReactionContext } from '@/contexts/ReactionContext';
 import { useUser } from '@/contexts/UserContext';
@@ -133,7 +133,7 @@ export function useBatchReactions(): BatchReactionsReturn {
       // Update local state optimistically
       setUserReactions(prev => ({ ...prev, [imageId]: type }));
       setReactionCounts(prev => {
-        const current = prev[imageId] || { like: 0, heart: 0, wow: 0 };
+        const current = prev[imageId] || DEFAULT_REACTION;
         const newCounts = { ...current };
         
         // Remove old reaction count if switching
@@ -177,7 +177,7 @@ export function useBatchReactions(): BatchReactionsReturn {
       const oldReaction = userReactions[imageId];
       setUserReactions(prev => ({ ...prev, [imageId]: undefined }));
       setReactionCounts(prev => {
-        const current = prev[imageId] || { like: 0, heart: 0, wow: 0 };
+        const current = prev[imageId] || DEFAULT_REACTION;
         const newCounts = { ...current };
         newCounts[oldReaction!] = Math.max(0, newCounts[oldReaction!] - 1);
         return { ...prev, [imageId]: newCounts };

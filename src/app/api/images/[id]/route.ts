@@ -67,6 +67,7 @@ export async function GET(
       like: 0,
       heart: 0,
       wow: 0,
+      haha: 0,
     };
 
     reactionCounts.forEach(({ type, count }) => {

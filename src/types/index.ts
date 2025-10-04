@@ -33,6 +33,7 @@ export interface ReactionCounts {
   like: number;
   heart: number;
   wow: number;
+  haha: number;
 }
 
 export interface PlanWithImages extends Plan {

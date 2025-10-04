@@ -62,7 +62,7 @@ function UserProfileContent() {
 
         // Fetch user's images using the images API with userId filter
         const imagesResponse = await fetch(
-          `/api/images?userId=${userId}&limit=100`
+          `/api/images?userId=${userId}&limit=50`
         );
 
         if (!imagesResponse.ok) {
@@ -188,10 +188,10 @@ function UserProfileContent() {
               {/* User Info */}
               <div className="flex-1 min-w-0">
                 <h1 className="text-3xl font-bold text-white mb-2">
-                  {user.name || user.email}
+                  {user.name || "No name"}
                 </h1>
                 {user.name && (
-                  <p className="text-white/70 text-lg mb-4">{user.email}</p>
+                  <p className="text-white/70 text-lg mb-4">Member</p>
                 )}
 
                 {/* Stats */}

@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { 
   HandThumbUpIcon, 
   HeartIcon, 
-  FaceSmileIcon 
+  FaceSmileIcon,
+  FaceFrownIcon
 } from '@heroicons/react/24/outline';
 import { 
   HandThumbUpIcon as HandThumbUpIconSolid,
   HeartIcon as HeartIconSolid,
-  FaceSmileIcon as FaceSmileIconSolid 
+  FaceSmileIcon as FaceSmileIconSolid,
+  FaceFrownIcon as FaceFrownIconSolid
 } from '@heroicons/react/24/solid';
 import { REACTION_TYPES, type ReactionType } from '@/lib/constants';
 
@@ -47,6 +49,14 @@ const reactionConfig = {
     color: 'text-yellow-400',
     activeColor: 'text-yellow-500',
     bgColor: 'bg-yellow-500/20',
+  },
+  [REACTION_TYPES.HAHA]: {
+    icon: FaceFrownIcon,
+    iconSolid: FaceFrownIconSolid,
+    label: 'Haha',
+    color: 'text-purple-400',
+    activeColor: 'text-purple-500',
+    bgColor: 'bg-purple-500/20',
   },
 };
 

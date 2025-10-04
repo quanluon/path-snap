@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import ReactionButton from './ReactionButton';
-import { REACTION_TYPES, type ReactionType } from '@/lib/constants';
+import { DEFAULT_REACTION, REACTION_TYPES, type ReactionType } from '@/lib/constants';
 import type { ReactionCounts } from '@/types';
+import ReactionButton from './ReactionButton';
 
 interface ReactionBarProps {
   imageId: string;
-  reactionCounts: ReactionCounts;
+  reactionCounts?: ReactionCounts;
   userReaction?: ReactionType;
   onReactionChange: (type: ReactionType) => Promise<void>;
   disabled?: boolean;
@@ -15,7 +14,7 @@ interface ReactionBarProps {
 
 export default function ReactionBar({
   imageId,
-  reactionCounts,
+  reactionCounts = DEFAULT_REACTION,
   userReaction,
   onReactionChange,
   disabled = false
@@ -54,6 +53,15 @@ export default function ReactionBar({
         type={REACTION_TYPES.WOW}
         count={reactionCounts.wow}
         isActive={userReaction === REACTION_TYPES.WOW}
+        onClick={handleReactionClick}
+        disabled={disabled}
+        isUnauthenticated={disabled}
+      />
+      
+      <ReactionButton
+        type={REACTION_TYPES.HAHA}
+        count={reactionCounts.haha}
+        isActive={userReaction === REACTION_TYPES.HAHA}
         onClick={handleReactionClick}
         disabled={disabled}
         isUnauthenticated={disabled}

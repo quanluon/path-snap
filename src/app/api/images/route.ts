@@ -102,6 +102,7 @@ export async function GET(request: NextRequest) {
         like: 0,
         heart: 0,
         wow: 0,
+        haha: 0,
       },
       author: img.authorId ? {
         id: img.authorId,

@@ -181,7 +181,7 @@ export default function ImageCard({
                   <ReactionBar
                     imageId={image.id}
                     reactionCounts={
-                      reactionCounts || { like: 0, heart: 0, wow: 0 }
+                      reactionCounts
                     }
                     userReaction={userReaction}
                     onReactionChange={onReactionChange || (async () => {})}

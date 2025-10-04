@@ -17,6 +17,7 @@ import { useDeleteImage } from "@/hooks/useDeleteImage";
 import ConfirmModal from "@/components/ConfirmModal";
 import { useRouter } from "next/navigation";
 import type { ImageWithReactions } from "@/types";
+import { DEFAULT_REACTION, type ReactionType } from "@/lib/constants";
 import { formatImageDate } from "@/lib/utils/date";
 import { renderFormattedDescription } from "@/lib/utils/text";
 import { Address } from "./Address";
@@ -36,7 +37,6 @@ export default function ImageDetailModal({
   const { user, isLoading: userLoading } = useUser();
   const [showPreview, setShowPreview] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  console.log('user',user);
   
   const { deleteImage, isDeleting } = useDeleteImage({
     onSuccess: () => {
@@ -61,22 +61,31 @@ export default function ImageDetailModal({
     }
   }, [isOpen]);
 
-  const { reactionCounts, userReaction, addReaction, isAuthenticated } =
+  const { reactionCounts, userReaction, addReaction, removeReaction, isAuthenticated, refreshReactions } =
     useReactions({
       imageId: image?.id || "",
-      initialCounts: image?.reactionCounts || { like: 0, heart: 0, wow: 0 },
+      initialCounts: image?.reactionCounts || DEFAULT_REACTION,
       initialUserReaction: image?.userReaction,
+      canFetchOne: true,
     });
 
-  // Track view when modal is opened
+    // Track view when modal is opened
   useImageView({ imageId: image?.id || "", enabled: isOpen && !!image });
 
-  const handleReactionChange = async (type: string) => {
+  // Refresh reaction counts when modal opens to ensure we have the latest data
+  useEffect(() => {
+    if (isOpen && image?.id) {
+      refreshReactions();
+    }
+  }, [isOpen, image?.id, refreshReactions]);
+
+  const handleReactionChange = async (type: ReactionType) => {
     if (userReaction === type) {
       // If clicking the same reaction, remove it
-      return;
+      await removeReaction();
+    } else {
+      await addReaction(type);
     }
-    await addReaction(type as "like" | "heart" | "wow");
   };
 
   const handleAuthorClick = () => {

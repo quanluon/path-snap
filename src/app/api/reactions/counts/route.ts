@@ -42,15 +42,15 @@ export async function GET(request: NextRequest) {
       .groupBy(reactions.imageId, reactions.type);
 
     // Initialize counts object for all requested images
-    const reactionCounts: Record<string, { like: number; heart: number; wow: number }> = {};
+    const reactionCounts: Record<string, { like: number; heart: number; wow: number; haha: number }> = {};
     targetImageIds.forEach(id => {
-      reactionCounts[id] = { like: 0, heart: 0, wow: 0 };
+      reactionCounts[id] = { like: 0, heart: 0, wow: 0, haha: 0 };
     });
 
     // Populate counts from database results
     counts.forEach(({ imageId, type, count }) => {
       if (reactionCounts[imageId] && type in reactionCounts[imageId]) {
-        reactionCounts[imageId][type as keyof typeof reactionCounts[typeof imageId]] = count;
+        reactionCounts[imageId][type as keyof typeof reactionCounts[typeof imageId]] = Number(count || 0);
       }
     });
 

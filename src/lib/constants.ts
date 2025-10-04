@@ -32,8 +32,10 @@ export const REACTION_TYPES = {
   LIKE: 'like',
   HEART: 'heart',
   WOW: 'wow',
+  HAHA: 'haha',
 } as const;
 
 export type ReactionType = typeof REACTION_TYPES[keyof typeof REACTION_TYPES];
 
+export const DEFAULT_REACTION = { like: 0, heart: 0, wow: 0, haha: 0 }
 
