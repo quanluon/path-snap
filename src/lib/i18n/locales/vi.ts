@@ -131,6 +131,14 @@ export const vi = {
     invalidCoordinates: 'Tọa độ không hợp lệ',
     requiredField: 'Trường này là bắt buộc',
   },
+  upload: {
+    fileSize: 'Kích thước file',
+    maxSize: 'Kích thước tối đa',
+    selectImage: 'Chọn ảnh',
+    dragDrop: 'Kéo thả ảnh vào đây, hoặc nhấn để chọn',
+    supportedFormats: 'Định dạng hỗ trợ: JPEG, PNG, WebP',
+    maxSizeInfo: 'Kích thước file tối đa: 10MB',
+  },
   settings: {
     title: 'Cài đặt',
     subtitle: 'Quản lý tài khoản và cài đặt ứng dụng',

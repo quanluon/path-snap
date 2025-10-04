@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { CameraIcon, MapPinIcon, PencilIcon } from '@heroicons/react/24/solid';
-import { validateImageFile } from '@/lib/utils/client-image';
+import { validateImageFile, formatFileSize, getMaxFileSize } from '@/lib/utils/client-image';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePlan } from '@/contexts/PlanContext';
 import ImageEditor from './ImageEditor';
@@ -29,6 +29,7 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get user's current location
@@ -65,7 +66,16 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
     // Validate file
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      setMessage({ type: 'error', text: validation.error || 'Invalid file' });
+      // Use internationalized error messages with file size details
+      let errorMessage: string = t.validation.invalidFileType;
+      if (validation.error?.includes('File size exceeds')) {
+        const fileSize = formatFileSize(file.size);
+        const maxSize = getMaxFileSize();
+        errorMessage = `${t.validation.fileSizeExceeded} (${fileSize} > ${maxSize})`;
+      } else if (validation.error?.includes('File type')) {
+        errorMessage = t.validation.invalidFileType;
+      }
+      setMessage({ type: 'error', text: errorMessage });
       return;
     }
 
@@ -110,6 +120,62 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
     setShowEditor(false);
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      
+      // Validate file
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        // Use internationalized error messages with file size details
+        let errorMessage: string = t.validation.invalidFileType;
+        if (validation.error?.includes('File size exceeds')) {
+          const fileSize = formatFileSize(file.size);
+          const maxSize = getMaxFileSize();
+          errorMessage = `${t.validation.fileSizeExceeded} (${fileSize} > ${maxSize})`;
+        } else if (validation.error?.includes('File type')) {
+          errorMessage = t.validation.invalidFileType;
+        }
+        setMessage({ type: 'error', text: errorMessage });
+        return;
+      }
+
+      // Store selected file
+      setSelectedFile(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Get location
+      try {
+        const loc = await getCurrentLocation();
+        setLocation(loc);
+        setLocationError('');
+      } catch (error) {
+        setLocationError((error as Error).message);
+        setLocation(null);
+      }
+    }
+  };
+
   const handleEditorCancel = () => {
     setShowEditor(false);
   };
@@ -151,7 +217,14 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
       <div className="mb-6">
         <label
           htmlFor="image-upload"
-          className="flex items-center justify-center w-full h-48 border-2 border-dashed border-dark-primary rounded-lg cursor-pointer hover:border-dark-secondary transition-colors relative"
+          className={`flex items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer transition-colors relative ${
+            isDragOver 
+              ? 'border-blue-400 bg-blue-500/10' 
+              : 'border-dark-primary hover:border-dark-secondary'
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
         >
           {preview ? (
             <>
@@ -193,7 +266,11 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
           ) : (
             <div className="text-center">
               <CameraIcon className="w-12 h-12 mx-auto text-dark-muted mb-2" />
-              <p className="text-dark-secondary">{t.camera.selectImage}</p>
+              <p className="text-dark-secondary">
+                {isDragOver ? t.upload.dragDrop : t.camera.selectImage}
+              </p>
+              <p className="text-dark-muted text-xs mt-2">{t.upload.maxSizeInfo}</p>
+              <p className="text-dark-muted text-xs">{t.upload.supportedFormats}</p>
             </div>
           )}
         </label>
@@ -211,6 +288,20 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
       {message && (
         <div className="mb-4 p-4 rounded-lg bg-dark-secondary border border-dark-primary">
           <p className="text-sm font-medium text-dark-primary">{message.text}</p>
+        </div>
+      )}
+
+      {/* File Size Info */}
+      {selectedFile && (
+        <div className="mb-4 p-3 bg-dark-secondary border border-dark-primary rounded-lg">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-dark-primary">{t.upload.fileSize}:</span>
+            <span className="text-dark-secondary">{formatFileSize(selectedFile.size)}</span>
+          </div>
+          <div className="flex items-center justify-between text-sm mt-1">
+            <span className="text-dark-primary">{t.upload.maxSize}:</span>
+            <span className="text-dark-secondary">{getMaxFileSize()}</span>
+          </div>
         </div>
       )}
 

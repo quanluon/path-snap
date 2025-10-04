@@ -131,6 +131,14 @@ export const en = {
     invalidCoordinates: 'Invalid coordinates',
     requiredField: 'This field is required',
   },
+  upload: {
+    fileSize: 'File size',
+    maxSize: 'Max size',
+    selectImage: 'Select Image',
+    dragDrop: 'Drag and drop an image here, or click to select',
+    supportedFormats: 'Supported formats: JPEG, PNG, WebP',
+    maxSizeInfo: 'Maximum file size: 10MB',
+  },
   settings: {
     title: 'Settings',
     subtitle: 'Manage your account preferences and app settings',
