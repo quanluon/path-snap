@@ -5,10 +5,13 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { PlanProvider } from "@/contexts/PlanContext";
 import { UserProvider } from "@/contexts/UserContext";
 import { ReactionProvider } from "@/contexts/ReactionContext";
+import { ToastProvider } from "@/contexts/ToastContext";
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
 import GlobalPullToRefresh from "@/components/GlobalPullToRefresh";
 import NotificationListener from "@/components/NotificationListener";
+import NotificationPermissionPrompt from "@/components/NotificationPermissionPrompt";
+import ToastContainer from "@/components/ToastContainer";
 
 const openSans = Open_Sans({
   variable: "--font-open-sans",
@@ -77,15 +80,19 @@ export default function RootLayout({
           <UserProvider>
             <ReactionProvider>
               <PlanProvider>
-                <NotificationListener>
-                  <GlobalPullToRefresh>
-                    <Header />
-                    <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
-                      {children}
-                    </main>
-                    <Navigation />
-                  </GlobalPullToRefresh>
-                </NotificationListener>
+                <ToastProvider>
+                  <NotificationListener>
+                    <GlobalPullToRefresh>
+                      <Header />
+                      <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
+                        {children}
+                      </main>
+                      <Navigation />
+                    </GlobalPullToRefresh>
+                    <NotificationPermissionPrompt />
+                    <ToastContainer />
+                  </NotificationListener>
+                </ToastProvider>
               </PlanProvider>
             </ReactionProvider>
           </UserProvider>

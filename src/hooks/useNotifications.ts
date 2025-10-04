@@ -19,6 +19,7 @@ interface UseNotificationsReturn {
     commenterName: string;
     imageId: string;
     imageUrl?: string;
+    commentContent?: string;
     authorId: string;
   }) => Promise<void>;
   navigateToImageDetail: (imageId: string) => void;
@@ -70,6 +71,7 @@ export function useNotifications(): UseNotificationsReturn {
     commenterName: string;
     imageId: string;
     imageUrl?: string;
+    commentContent?: string;
     authorId: string;
   }): Promise<void> => {
     try {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useComments } from '@/hooks/useComments';
 import CommentList from './CommentList';
 import CommentForm from './CommentForm';
-import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { ArrowDownIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CommentsSectionProps {
@@ -53,7 +53,9 @@ export default function CommentsSection({ imageId, className = '' }: CommentsSec
           {error && (
             <span className="text-red-400 text-sm">{t.comments.errorLoading}</span>
           )}
-          <div className={`w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full transition-transform duration-200 ${showComments ? 'rotate-180' : ''}`}></div>
+          <div className={` transition-transform duration-200 ${showComments ? 'rotate-180' : ''}`}>
+            <ArrowDownIcon className="w-4 h-4" />
+          </div>
         </div>
       </div>
 

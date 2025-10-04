@@ -12,11 +12,15 @@ async function sendCommentNotification({
   imageId,
   commenterUserId,
   commenterName,
+  commentContent,
+  imageUrl,
   authorUserId,
 }: {
   imageId: string;
   commenterUserId: string;
   commenterName: string;
+  commentContent: string;
+  imageUrl?: string;
   authorUserId: string;
 }) {
   try {
@@ -30,6 +34,8 @@ async function sendCommentNotification({
         imageId,
         commenterUserId,
         commenterName,
+        commentContent,
+        imageUrl,
         type: 'comment',
         message: `${commenterName} commented on your image`,
         timestamp: new Date().toISOString(),
@@ -119,18 +125,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Guest name is required for anonymous comments' }, { status: 400 });
     }
 
-    // Get image author and commenter information
-    const [imageWithAuthor, commenterUser] = await Promise.all([
-      db
-        .select({
-          authorId: images.userId,
-          authorName: users.name,
-          authorEmail: users.email,
-        })
-        .from(images)
-        .leftJoin(users, eq(images.userId, users.id))
-        .where(eq(images.id, imageId))
-        .limit(1),
+        // Get image author and commenter information
+        const [imageWithAuthor, commenterUser] = await Promise.all([
+          db
+            .select({
+              authorId: images.userId,
+              authorName: users.name,
+              authorEmail: users.email,
+              imageUrl: images.url,
+            })
+            .from(images)
+            .leftJoin(users, eq(images.userId, users.id))
+            .where(eq(images.id, imageId))
+            .limit(1),
       // Only fetch commenter info if user is authenticated
       user ? db
         .select({
@@ -183,13 +190,26 @@ export async function POST(request: NextRequest) {
       .leftJoin(users, eq(comments.userId, users.id))
       .where(eq(comments.id, newComment.id));
 
-    // Send notification to image author (if not commenting on own image and user is authenticated)
-    if (user && imageData.authorId && imageData.authorId !== user.id) {
+    // Send notification to image author (if not commenting on own image)
+    const shouldNotify = imageData.authorId && (
+      (user && imageData.authorId !== user.id) || // Authenticated user commenting on someone else's image
+      (!user && guestName) // Guest commenting on any image
+    );
+
+    if (shouldNotify) {
+      const commenterName = user 
+        ? (commenterData.name || commenterData.email || 'Someone')
+        : guestName;
+      
+      const commenterUserId = user?.id || 'guest';
+
       await sendCommentNotification({
         imageId,
-        commenterUserId: user.id,
-        commenterName: commenterData.name || commenterData.email || 'Someone',
-        authorUserId: imageData.authorId,
+        commenterUserId,
+        commenterName: commenterName || 'Someone',
+        commentContent: content.trim(),
+        imageUrl: imageData.imageUrl,
+        authorUserId: imageData.authorId!,
       });
     }
 

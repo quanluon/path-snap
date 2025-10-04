@@ -177,6 +177,7 @@ export class NotificationService {
     const title = `${emoji} New Reaction!`;
     const body = `${reactorName} reacted ${reactionType} to your image`;
 
+    // Send browser notification
     await this.sendNotification({
       title,
       body,
@@ -191,6 +192,19 @@ export class NotificationService {
         url: `/image/${imageId}`,
       },
     });
+
+    // Also show toast notification
+    this.showToast({
+      type: 'reaction',
+      title,
+      content: body,
+      imageUrl,
+      duration: 5000,
+      action: {
+        label: 'View',
+        onClick: () => this.navigateToImageDetail(imageId),
+      },
+    });
   }
 
   /**
@@ -200,16 +214,21 @@ export class NotificationService {
     commenterName,
     imageId,
     imageUrl,
+    commentContent,
     authorId,
   }: {
     commenterName: string;
     imageId: string;
     imageUrl?: string;
+    commentContent?: string;
     authorId: string;
   }): Promise<void> {
     const title = `💬 New Comment!`;
-    const body = `${commenterName} commented on your image`;
+    const body = commentContent 
+      ? `${commenterName}: ${commentContent.length > 50 ? commentContent.substring(0, 50) + '...' : commentContent}`
+      : `${commenterName} commented on your image`;
 
+    // Send browser notification
     await this.sendNotification({
       title,
       body,
@@ -221,6 +240,19 @@ export class NotificationService {
         imageId,
         authorId,
         url: `/image/${imageId}`,
+      },
+    });
+
+    // Also show toast notification
+    this.showToast({
+      type: 'comment',
+      title,
+      content: body,
+      imageUrl,
+      duration: 7000, // Longer duration for comments
+      action: {
+        label: 'View',
+        onClick: () => this.navigateToImageDetail(imageId),
       },
     });
   }
@@ -243,6 +275,17 @@ export class NotificationService {
     // This is handled by the browser automatically when new notifications
     // with the same tag are created
     console.log('Notifications will be cleared automatically by browser');
+  }
+
+  /**
+   * Show a toast notification
+   */
+  public showToast(toast: Omit<import('@/contexts/ToastContext').ToastData, 'id'>): void {
+    // This will be implemented by the toast context
+    // For now, we'll dispatch a custom event that the toast context can listen to
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('show-toast', { detail: toast }));
+    }
   }
 }
 

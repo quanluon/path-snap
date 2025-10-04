@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import CommentItem from './CommentItem';
-import Skeleton from './Skeleton';
-import type { CommentWithUser } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { CommentWithUser } from '@/types';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import CommentItem from './CommentItem';
 
 interface CommentListProps {
   comments: CommentWithUser[];

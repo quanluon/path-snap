@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import NotificationSettings from '@/components/NotificationSettings';
 import AuthModal from '@/components/AuthModal';
 import { 
   UserIcon, 
   GlobeAltIcon, 
-  BellIcon, 
   ShieldCheckIcon,
   ArrowRightOnRectangleIcon,
   Cog6ToothIcon,
@@ -22,6 +22,35 @@ export default function SettingsPage() {
   const { t } = useLanguage();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [isTestingNotification, setIsTestingNotification] = useState(false);
+
+  const testNotification = async (type: 'reaction' | 'comment') => {
+    if (!user) return;
+    
+    setIsTestingNotification(true);
+    try {
+      const response = await fetch('/api/test-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type,
+          imageId: 'test-image-123',
+          reactorName: type === 'reaction' ? 'Test User' : undefined,
+          commenterName: type === 'comment' ? 'Test Commenter' : undefined,
+        }),
+      });
+
+      if (response.ok) {
+        console.log(`${type} notification test sent successfully`);
+      } else {
+        console.error('Failed to send test notification');
+      }
+    } catch (error) {
+      console.error('Error testing notification:', error);
+    } finally {
+      setIsTestingNotification(false);
+    }
+  };
 
   // Show login prompt if not authenticated
   if (!user) {
@@ -125,21 +154,15 @@ export default function SettingsPage() {
             <LanguageSwitcher />
           </div>
 
-          {/* Notifications Setting */}
-          <div className="flex items-center justify-between p-4 bg-dark-hover rounded-lg">
-            <div className="flex items-center gap-3">
-              <BellIcon className="w-5 h-5 text-dark-primary" />
-              <div>
-              <p className="text-dark-primary font-medium">{t.settings.notifications.title}</p>
-              <p className="text-dark-secondary text-sm">{t.settings.notifications.subtitle}</p>
-              </div>
-            </div>
-            <button className="px-4 py-2 text-dark-primary border border-dark-primary rounded-lg hover:bg-dark-primary hover:text-dark-secondary transition-colors">
-{t.settings.notifications.configure}
-            </button>
-          </div>
         </div>
       </div>
+
+      {/* Notifications Section */}
+      <NotificationSettings 
+        className="mb-6" 
+        onTestNotification={testNotification}
+        isTestingNotification={isTestingNotification}
+      />
 
       {/* About Section */}
       <div className="bg-dark-card rounded-lg shadow-dark-primary border border-dark-primary p-6 mb-6">

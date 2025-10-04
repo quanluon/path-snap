@@ -15,12 +15,15 @@ export default function NotificationListener({ children }: NotificationListenerP
   const { isSupported, permission, requestPermission, sendReactionNotification, sendCommentNotification } = useNotifications();
   const supabase = createClient();
   const router = useRouter();
-  const channelRef = useRef<any>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
-    // Request notification permission when user is logged in
+    // Request notification permission when user is logged in and permission is default
     if (user && isSupported && permission === 'default') {
-      requestPermission();
+      console.log('Requesting notification permission for user:', user.id);
+      requestPermission().then((newPermission) => {
+        console.log('Notification permission result:', newPermission);
+      });
     }
   }, [user, isSupported, permission, requestPermission]);
 
@@ -50,7 +53,7 @@ export default function NotificationListener({ children }: NotificationListenerP
       .on('broadcast', { event: 'reaction_notification' }, async (payload) => {
         console.log('Received reaction notification:', payload);
         
-        const { reactorName, reactionType, imageId, imageUrl } = payload;
+        const { reactorName, reactionType, imageId, imageUrl } = payload.payload;
         
         // Show browser notification
         await sendReactionNotification({
@@ -64,13 +67,14 @@ export default function NotificationListener({ children }: NotificationListenerP
       .on('broadcast', { event: 'comment_notification' }, async (payload) => {
         console.log('Received comment notification:', payload);
         
-        const { commenterName, imageId, imageUrl } = payload;
+        const { commenterName, imageId, imageUrl, commentContent } = payload.payload;
         
         // Show browser notification
         await sendCommentNotification({
           commenterName,
           imageId,
           imageUrl,
+          commentContent,
           authorId: user.id,
         });
       })
@@ -86,7 +90,7 @@ export default function NotificationListener({ children }: NotificationListenerP
         channelRef.current = null;
       }
     };
-  }, [user?.id, sendReactionNotification, supabase]);
+  }, [user?.id, sendReactionNotification, sendCommentNotification, supabase]);
 
   return <>{children}</>;
 }
