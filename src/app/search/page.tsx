@@ -97,7 +97,7 @@ export default function SearchPage() {
         <div className="mt-8">
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-dark-primary">
-              Kết quả tìm kiếm ({results.length} ảnh)
+              {t.search.resultsTitle} ({results.length} {t.search.resultsCount})
             </h2>
           </div>
           <ImageList

@@ -3,6 +3,7 @@
 import ImageItem from "@/components/ImageItem";
 import { CarouselSkeleton } from "@/components/Skeleton";
 import { useBatchReactions } from "@/hooks/useBatchReactions";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { ImageWithReactions } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useMemo, useRef } from "react";
@@ -23,6 +24,7 @@ const ImageList = ({
   hasMore = false,
   isLoadingMore = false,
 }: ImageListProps) => {
+  const { t } = useLanguage();
   const parentRef = useRef<HTMLDivElement>(null);
 
   // Use batch reactions hook for optimized API calls
@@ -69,7 +71,7 @@ const ImageList = ({
   if (images.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-dark-muted">No images found</p>
+        <p className="text-dark-muted">{t.grid.noImages}</p>
       </div>
     );
   }
@@ -144,10 +146,10 @@ const ImageList = ({
                       <div className="text-center">
                         <div className="text-white/60 text-6xl mb-4">✨</div>
                         <p className="text-white/80 text-lg font-secondary font-medium">
-                          You&apos;ve reached the end!
+                          {t.grid.endOfResults}
                         </p>
                         <p className="text-white/60 text-sm font-caption mt-2">
-                          No more images to show
+                          {t.grid.noMoreImages}
                         </p>
                       </div>
                     </div>

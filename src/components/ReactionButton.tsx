@@ -14,6 +14,7 @@ import {
   FaceFrownIcon as FaceFrownIconSolid
 } from '@heroicons/react/24/solid';
 import { REACTION_TYPES, type ReactionType } from '@/lib/constants';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ReactionButtonProps {
   type: ReactionType;
@@ -25,40 +26,6 @@ interface ReactionButtonProps {
   isUnauthenticated?: boolean;
 }
 
-const reactionConfig = {
-  [REACTION_TYPES.LIKE]: {
-    icon: HandThumbUpIcon,
-    iconSolid: HandThumbUpIconSolid,
-    label: 'Like',
-    color: 'text-blue-400',
-    activeColor: 'text-blue-500',
-    bgColor: 'bg-blue-500/20',
-  },
-  [REACTION_TYPES.HEART]: {
-    icon: HeartIcon,
-    iconSolid: HeartIconSolid,
-    label: 'Heart',
-    color: 'text-red-400',
-    activeColor: 'text-red-500',
-    bgColor: 'bg-red-500/20',
-  },
-  [REACTION_TYPES.WOW]: {
-    icon: FaceSmileIcon,
-    iconSolid: FaceSmileIconSolid,
-    label: 'Wow',
-    color: 'text-yellow-400',
-    activeColor: 'text-yellow-500',
-    bgColor: 'bg-yellow-500/20',
-  },
-  [REACTION_TYPES.HAHA]: {
-    icon: FaceFrownIcon,
-    iconSolid: FaceFrownIconSolid,
-    label: 'Haha',
-    color: 'text-purple-400',
-    activeColor: 'text-purple-500',
-    bgColor: 'bg-purple-500/20',
-  },
-};
 
 export default function ReactionButton({ 
   type, 
@@ -69,8 +36,45 @@ export default function ReactionButton({
   isProcessing = false,
   isUnauthenticated = false
 }: ReactionButtonProps) {
+  const { t } = useLanguage();
   const [isAnimating, setIsAnimating] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
+  
+  const reactionConfig = {
+    [REACTION_TYPES.LIKE]: {
+      icon: HandThumbUpIcon,
+      iconSolid: HandThumbUpIconSolid,
+      label: t.reactions.like,
+      color: 'text-blue-400',
+      activeColor: 'text-blue-500',
+      bgColor: 'bg-blue-500/20',
+    },
+    [REACTION_TYPES.HEART]: {
+      icon: HeartIcon,
+      iconSolid: HeartIconSolid,
+      label: t.reactions.heart,
+      color: 'text-red-400',
+      activeColor: 'text-red-500',
+      bgColor: 'bg-red-500/20',
+    },
+    [REACTION_TYPES.WOW]: {
+      icon: FaceSmileIcon,
+      iconSolid: FaceSmileIconSolid,
+      label: t.reactions.wow,
+      color: 'text-yellow-400',
+      activeColor: 'text-yellow-500',
+      bgColor: 'bg-yellow-500/20',
+    },
+    [REACTION_TYPES.HAHA]: {
+      icon: FaceFrownIcon,
+      iconSolid: FaceFrownIconSolid,
+      label: t.reactions.haha,
+      color: 'text-purple-400',
+      activeColor: 'text-purple-500',
+      bgColor: 'bg-purple-500/20',
+    },
+  };
+  
   const config = reactionConfig[type];
   const Icon = isActive ? config.iconSolid : config.icon;
   const colorClass = isActive ? config.activeColor : config.color;

@@ -64,6 +64,15 @@ export const en = {
     resultsFound: 'results found',
     noResults: 'No images found nearby',
     invalidLocation: 'Invalid location',
+    resultsTitle: 'Search Results',
+    resultsCount: 'images',
+    showRangeSettings: 'Show range settings',
+    hideRangeSettings: 'Hide range settings',
+    getLocation: 'Get Location',
+    search: 'Search',
+    locationObtained: 'Location obtained successfully. Click search to find images.',
+    getLocationFirst: 'Please get your location first.',
+    searchFailed: 'Search failed. Please try again.',
   },
   plan: {
     title: 'Travel Plan',
@@ -103,6 +112,11 @@ export const en = {
     days: 'days',
     hours: 'hours',
     minutes: 'minutes',
+    failedToFetchDetails: 'Failed to fetch plan details',
+    failedToEndPlan: 'Failed to end plan',
+    failedToStartPlan: 'Failed to start plan',
+    failedToFetchPlans: 'Failed to fetch plans',
+    planNotFound: 'Plan not found',
   },
   timeline: {
     title: 'Timeline',
@@ -226,6 +240,8 @@ export const en = {
     switchLanguage: 'Switch language',
     dontHaveAccount: "Don't have an account? Sign up",
     alreadyHaveAccount: 'Already have an account? Login',
+    noProfileData: 'No profile data available',
+    failedToLoadImages: 'Failed to load images',
   },
   api: {
     unauthorized: 'Unauthorized',
@@ -241,6 +257,26 @@ export const en = {
     failedToFetchUserReaction: 'Failed to fetch user reaction',
     failedToAddReaction: 'Failed to add reaction',
     failedToRemoveReaction: 'Failed to remove reaction',
+  },
+  grid: {
+    noImages: 'No images found',
+    endOfResults: "You've reached the end!",
+    noMoreImages: 'No more images to show',
+  },
+  editor: {
+    title: 'Edit',
+    rotate: 'Rotate',
+    flipHorizontal: 'Flip H',
+    flipVertical: 'Flip V',
+    reset: 'Reset',
+    changeImage: 'Change Image',
+    editImage: 'Edit Image',
+  },
+  reactions: {
+    like: 'Like',
+    heart: 'Heart',
+    wow: 'Wow',
+    haha: 'Haha',
   },
 } as const;
 

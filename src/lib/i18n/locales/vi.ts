@@ -64,6 +64,15 @@ export const vi = {
     resultsFound: 'kết quả',
     noResults: 'Không tìm thấy ảnh gần đây',
     invalidLocation: 'Vị trí không hợp lệ',
+    resultsTitle: 'Kết quả tìm kiếm',
+    resultsCount: 'ảnh',
+    showRangeSettings: 'Hiển thị cài đặt phạm vi',
+    hideRangeSettings: 'Ẩn cài đặt phạm vi',
+    getLocation: 'Lấy vị trí',
+    search: 'Tìm kiếm',
+    locationObtained: 'Đã lấy vị trí thành công. Nhấn tìm kiếm để tìm ảnh.',
+    getLocationFirst: 'Vui lòng lấy vị trí trước.',
+    searchFailed: 'Tìm kiếm thất bại. Vui lòng thử lại.',
   },
   plan: {
     title: 'Kế hoạch di chuyển',
@@ -103,6 +112,11 @@ export const vi = {
     days: 'ngày',
     hours: 'giờ',
     minutes: 'phút',
+    failedToFetchDetails: 'Tải chi tiết kế hoạch thất bại',
+    failedToEndPlan: 'Kết thúc kế hoạch thất bại',
+    failedToStartPlan: 'Bắt đầu kế hoạch thất bại',
+    failedToFetchPlans: 'Tải kế hoạch thất bại',
+    planNotFound: 'Không tìm thấy kế hoạch',
   },
   timeline: {
     title: 'Dòng thời gian',
@@ -226,6 +240,8 @@ export const vi = {
     switchLanguage: 'Chuyển ngôn ngữ',
     dontHaveAccount: 'Chưa có tài khoản? Đăng ký',
     alreadyHaveAccount: 'Đã có tài khoản? Đăng nhập',
+    noProfileData: 'Không có dữ liệu hồ sơ',
+    failedToLoadImages: 'Tải ảnh thất bại',
   },
   api: {
     unauthorized: 'Không được phép',
@@ -241,6 +257,26 @@ export const vi = {
     failedToFetchUserReaction: 'Tải phản ứng người dùng thất bại',
     failedToAddReaction: 'Thêm phản ứng thất bại',
     failedToRemoveReaction: 'Xóa phản ứng thất bại',
+  },
+  grid: {
+    noImages: 'Không tìm thấy ảnh',
+    endOfResults: 'Bạn đã đến cuối!',
+    noMoreImages: 'Không còn ảnh nào để hiển thị',
+  },
+  editor: {
+    title: 'Chỉnh sửa',
+    rotate: 'Xoay',
+    flipHorizontal: 'Lật ngang',
+    flipVertical: 'Lật dọc',
+    reset: 'Đặt lại',
+    changeImage: 'Thay đổi ảnh',
+    editImage: 'Chỉnh sửa ảnh',
+  },
+  reactions: {
+    like: 'Thích',
+    heart: 'Tim',
+    wow: 'Wow',
+    haha: 'Haha',
   },
 } as const;
 

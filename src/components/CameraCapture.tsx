@@ -170,7 +170,7 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
                   handleEditImage();
                 }}
                 className="absolute top-2 right-2 p-2 bg-dark-primary text-dark-secondary rounded-full hover:bg-dark-hover transition-colors shadow-lg"
-                title="Edit Image"
+                title={t.editor.editImage}
               >
                 <PencilIcon className="w-5 h-5" />
               </button>
@@ -183,7 +183,7 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
                   fileInputRef.current?.click();
                 }}
                 className="absolute top-2 left-2 p-2 bg-dark-secondary text-dark-primary rounded-full hover:bg-dark-hover transition-colors shadow-lg"
-                title="Change Image"
+                title={t.editor.changeImage}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
