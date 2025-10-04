@@ -230,7 +230,7 @@ export default function ImageDetailModal({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[90vh]">
             {/* Image Section */}
             <div
-              className="relative bg-cream flex items-center justify-center cursor-pointer hover:bg-cream-light transition-colors group aspect-[4/3]"
+              className="relative bg-green flex items-center justify-center cursor-pointer hover:bg-green-light transition-colors group aspect-[4/3]"
               onClick={handleImageClick}
             >
               <OptimizedImage
@@ -362,7 +362,7 @@ export default function ImageDetailModal({
 
       {/* Full-screen Image Preview */}
       {showPreview && (
-        <div className="fixed inset-0 z-[60] bg-cream">
+        <div className="fixed inset-0 z-[60] bg-green">
           {/* Close Button */}
           <button
             onClick={handlePreviewClose}

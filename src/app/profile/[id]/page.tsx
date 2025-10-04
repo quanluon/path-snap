@@ -1,7 +1,7 @@
 "use client";
 
-import ImageList from "@/components/ImageList";
 import ImageDetailModal from "@/components/ImageDetailModal";
+import ImageList from "@/components/ImageList";
 import OptimizedImage from "@/components/OptimizedImage";
 import { AvatarSkeleton, CarouselSkeleton } from "@/components/Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -240,7 +240,7 @@ function UserProfileContent() {
       </div>
 
       {/* Images Carousel */}
-      <div className="flex-1">
+      <div className="flex-1 pt-2">
         {images.length === 0 ? (
           <div className="text-center py-16">
             <MapPinIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />

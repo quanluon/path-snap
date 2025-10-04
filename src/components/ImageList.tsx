@@ -6,6 +6,7 @@ import { useBatchReactions } from "@/hooks/useBatchReactions";
 import type { ImageWithReactions } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useMemo, useRef } from "react";
+import VirtualGrid from "./VirtualGrid";
 
 interface ImageListProps {
   images: ImageWithReactions[];
@@ -32,7 +33,6 @@ const ImageList = ({
   const virtualizer = useVirtualizer({
     count: images.length,
     getScrollElement: () => parentRef.current,
-    // estimateSize: () => itemHeight,
     overscan: 3, // Render 3 extra items outside viewport
     gap: 5, // No gap between items
     estimateSize: () => 500,
@@ -75,7 +75,17 @@ const ImageList = ({
   }
 
   return (
-      <div className="relative w-full h-screen overflow-hidden bg-green">
+    <div>
+      <div className="hidden sm:block">
+        <VirtualGrid
+          images={images}
+          onImageClick={onImageClick}
+          onLoadMore={onLoadMore}
+          hasMore={hasMore}
+          isLoadingMore={isLoadingMore}
+        />
+      </div>
+      <div className="relative w-full h-screen overflow-hidden bg-green sm:hidden">
         <div
           ref={parentRef}
           className="h-full overflow-auto scrollbar-hide"
@@ -129,7 +139,7 @@ const ImageList = ({
                         margin: 0,
                         padding: 0,
                       }}
-                      className="w-full flex items-center justify-center bg-cream"
+                      className="w-full flex items-center justify-center bg-green"
                     >
                       <div className="text-center">
                         <div className="text-white/60 text-6xl mb-4">✨</div>
@@ -174,7 +184,8 @@ const ImageList = ({
           </div>
         </div>
       </div>
+    </div>
   );
-}
+};
 
 export default ImageList;

@@ -22,7 +22,6 @@ interface SearchImagesProps {
 
 export default function SearchImages({
   onSearch,
-  results,
   isLoading,
 }: SearchImagesProps) {
   const { t } = useLanguage();

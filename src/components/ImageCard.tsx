@@ -77,7 +77,7 @@ export default function ImageCard({
   return (
     <div style={style} className={containerClasses}>
       {/* 1. Profile with created date/time */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 sm:flex-col sm:items-start">
         <div className="flex items-center space-x-2">
           {/* Author */}
           {showAuthor && image.author && (
@@ -152,7 +152,8 @@ export default function ImageCard({
           image={image}
           addressIconSize={addressIconSize}
           addressIconMargin={addressIconMargin}
-          addressTextClassName="truncate w-3/4"
+          addressTextClassName="truncate"
+          addressClassName="w-3/4"
         />
       </div>
 

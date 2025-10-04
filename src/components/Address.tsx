@@ -14,7 +14,7 @@ export const Address = ({
   image,
   addressIconSize = "w-4 h-4",
   addressIconMargin = "mr-1.5",
-  addressClassName = "text-sm font-medium transition-colors my-2",
+  addressClassName = "",
   addressTextClassName = "",
 }: {
   image: Image;
@@ -29,7 +29,7 @@ export const Address = ({
       href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center text-white ${addressClassName}`}
+      className={`inline-flex items-center text-white text-sm font-medium transition-colors my-2 ${addressClassName}`}
     >
       <MapPinIcon
         className={`${addressIconSize} ${addressIconMargin} flex-shrink-0`}
