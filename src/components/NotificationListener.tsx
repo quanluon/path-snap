@@ -12,7 +12,7 @@ interface NotificationListenerProps {
 
 export default function NotificationListener({ children }: NotificationListenerProps) {
   const { user } = useUser();
-  const { isSupported, permission, requestPermission, sendReactionNotification } = useNotifications();
+  const { isSupported, permission, requestPermission, sendReactionNotification, sendCommentNotification } = useNotifications();
   const supabase = createClient();
   const router = useRouter();
   const channelRef = useRef<any>(null);
@@ -56,6 +56,19 @@ export default function NotificationListener({ children }: NotificationListenerP
         await sendReactionNotification({
           reactorName,
           reactionType,
+          imageId,
+          imageUrl,
+          authorId: user.id,
+        });
+      })
+      .on('broadcast', { event: 'comment_notification' }, async (payload) => {
+        console.log('Received comment notification:', payload);
+        
+        const { commenterName, imageId, imageUrl } = payload;
+        
+        // Show browser notification
+        await sendCommentNotification({
+          commenterName,
           imageId,
           imageUrl,
           authorId: user.id,

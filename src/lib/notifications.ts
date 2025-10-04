@@ -194,6 +194,38 @@ export class NotificationService {
   }
 
   /**
+   * Send a comment notification to the image author
+   */
+  public async sendCommentNotification({
+    commenterName,
+    imageId,
+    imageUrl,
+    authorId,
+  }: {
+    commenterName: string;
+    imageId: string;
+    imageUrl?: string;
+    authorId: string;
+  }): Promise<void> {
+    const title = `💬 New Comment!`;
+    const body = `${commenterName} commented on your image`;
+
+    await this.sendNotification({
+      title,
+      body,
+      icon: '/icon-192.png',
+      image: imageUrl,
+      tag: `comment-${imageId}`,
+      data: {
+        type: 'comment',
+        imageId,
+        authorId,
+        url: `/image/${imageId}`,
+      },
+    });
+  }
+
+  /**
    * Navigate to image detail page using imageId
    */
   public navigateToImageDetail(imageId: string): void {

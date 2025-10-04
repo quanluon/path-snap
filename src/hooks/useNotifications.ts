@@ -15,6 +15,12 @@ interface UseNotificationsReturn {
     imageUrl?: string;
     authorId: string;
   }) => Promise<void>;
+  sendCommentNotification: (params: {
+    commenterName: string;
+    imageId: string;
+    imageUrl?: string;
+    authorId: string;
+  }) => Promise<void>;
   navigateToImageDetail: (imageId: string) => void;
 }
 
@@ -60,6 +66,19 @@ export function useNotifications(): UseNotificationsReturn {
     }
   }, []);
 
+  const sendCommentNotification = useCallback(async (params: {
+    commenterName: string;
+    imageId: string;
+    imageUrl?: string;
+    authorId: string;
+  }): Promise<void> => {
+    try {
+      await notificationService.sendCommentNotification(params);
+    } catch (error) {
+      console.error('Error sending comment notification:', error);
+    }
+  }, []);
+
   const navigateToImageDetail = useCallback((imageId: string): void => {
     notificationService.navigateToImageDetail(imageId);
   }, []);
@@ -70,6 +89,7 @@ export function useNotifications(): UseNotificationsReturn {
     requestPermission,
     sendNotification,
     sendReactionNotification,
+    sendCommentNotification,
     navigateToImageDetail,
   };
 }

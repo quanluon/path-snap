@@ -1,17 +1,47 @@
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/db';
-import { comments, users } from '@/db/schema';
-import { and, desc, eq, count } from 'drizzle-orm';
+import { comments, users, images } from '@/db/schema';
+import { desc, eq, count } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import type { CommentCreateRequest } from '@/types';
 
 const COMMENTS_PER_PAGE = 20;
 
-export async function GET(request: NextRequest) {
+// Function to send comment notification
+async function sendCommentNotification({
+  imageId,
+  commenterUserId,
+  commenterName,
+  authorUserId,
+}: {
+  imageId: string;
+  commenterUserId: string;
+  commenterName: string;
+  authorUserId: string;
+}) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    
+    // Send real-time notification to the image author
+    await supabase.channel(`notifications:${authorUserId}`).send({
+      type: 'broadcast',
+      event: 'comment_notification',
+      payload: {
+        imageId,
+        commenterUserId,
+        commenterName,
+        type: 'comment',
+        message: `${commenterName} commented on your image`,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('Error sending comment notification:', error);
+  }
+}
 
+export async function GET(request: NextRequest) {
+  try {
     const { searchParams } = new URL(request.url);
     const imageId = searchParams.get('imageId');
     const page = parseInt(searchParams.get('page') || '1');
@@ -86,6 +116,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Comment too long (max 1000 characters)' }, { status: 400 });
     }
 
+    // Get image author and commenter information
+    const [imageWithAuthor, commenterUser] = await Promise.all([
+      db
+        .select({
+          authorId: images.userId,
+          authorName: users.name,
+          authorEmail: users.email,
+        })
+        .from(images)
+        .leftJoin(users, eq(images.userId, users.id))
+        .where(eq(images.id, imageId))
+        .limit(1),
+      db
+        .select({
+          name: users.name,
+          email: users.email,
+        })
+        .from(users)
+        .where(eq(users.id, user.id))
+        .limit(1),
+    ]);
+
+    if (!imageWithAuthor.length) {
+      return NextResponse.json({ error: 'Image not found' }, { status: 404 });
+    }
+
+    const imageData = imageWithAuthor[0];
+    const commenterData = commenterUser[0];
+
     // Create the comment
     const [newComment] = await db
       .insert(comments)
@@ -115,6 +174,16 @@ export async function POST(request: NextRequest) {
       .from(comments)
       .leftJoin(users, eq(comments.userId, users.id))
       .where(eq(comments.id, newComment.id));
+
+    // Send notification to image author (if not commenting on own image)
+    if (imageData.authorId && imageData.authorId !== user.id) {
+      await sendCommentNotification({
+        imageId,
+        commenterUserId: user.id,
+        commenterName: commenterData.name || commenterData.email || 'Someone',
+        authorUserId: imageData.authorId,
+      });
+    }
 
     return NextResponse.json({ comment: commentWithUser }, { status: 201 });
   } catch (error) {
