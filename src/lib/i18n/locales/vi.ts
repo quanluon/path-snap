@@ -18,6 +18,7 @@ export const vi = {
     search: 'Tìm kiếm',
     timeline: 'Dòng thời gian',
     plan: 'Kế hoạch',
+    settings: 'Cài đặt',
   },
   auth: {
     login: 'Đăng nhập',
@@ -115,6 +116,44 @@ export const vi = {
     invalidFileType: 'Loại file không hợp lệ',
     invalidCoordinates: 'Tọa độ không hợp lệ',
     requiredField: 'Trường này là bắt buộc',
+  },
+  settings: {
+    title: 'Cài đặt',
+    subtitle: 'Quản lý tài khoản và cài đặt ứng dụng',
+    profile: {
+      title: 'Hồ sơ',
+      subtitle: 'Quản lý thông tin hồ sơ của bạn',
+    },
+    privacy: {
+      title: 'Quyền riêng tư',
+      subtitle: 'Kiểm soát cài đặt quyền riêng tư',
+    },
+    language: {
+      title: 'Ngôn ngữ',
+      subtitle: 'Chọn ngôn ngữ ưa thích của bạn',
+    },
+    notifications: {
+      title: 'Thông báo',
+      subtitle: 'Quản lý tùy chọn thông báo',
+      configure: 'Cấu hình',
+    },
+    about: {
+      title: 'Giới thiệu',
+      version: 'Phiên bản',
+      support: 'Hỗ trợ',
+      subtitle: 'Nhận trợ giúp và hỗ trợ',
+      contact: 'Liên hệ',
+    },
+    account: {
+      title: 'Hành động tài khoản',
+      signOut: 'Đăng xuất',
+      signOutSubtitle: 'Đăng xuất khỏi tài khoản của bạn',
+    },
+    loginPrompt: {
+      title: 'Cài đặt',
+      subtitle: 'Vui lòng đăng nhập để truy cập cài đặt và tùy chọn.',
+      login: 'Đăng nhập',
+    },
   },
 } as const;
 

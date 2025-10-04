@@ -3,6 +3,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   CameraIcon,
+  Cog6ToothIcon,
   HomeIcon,
   MagnifyingGlassIcon,
   MapIcon
@@ -11,7 +12,8 @@ import {
   CameraIcon as CameraIconSolid,
   HomeIcon as HomeIconSolid,
   MagnifyingGlassIcon as MagnifyingGlassIconSolid,
-  MapIcon as MapIconSolid
+  MapIcon as MapIconSolid,
+  Cog6ToothIcon as Cog6ToothIconSolid
 } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -53,6 +55,12 @@ export default function Navigation() {
       href: '/plan',
       icon: MapIcon,
       iconActive: MapIconSolid,
+    },
+    {
+      name: t.nav.settings,
+      href: '/settings',
+      icon: Cog6ToothIcon,
+      iconActive: Cog6ToothIconSolid,
     },
   ];
 

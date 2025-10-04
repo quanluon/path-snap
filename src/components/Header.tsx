@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
-import LanguageSwitcher from './LanguageSwitcher';
 import { MapPinIcon, UserCircleIcon, ArrowRightOnRectangleIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 
 export default function Header() {
@@ -70,12 +69,13 @@ export default function Header() {
             <Link href="/plan" onClick={(e) => handleNavClick('/plan', e)} className="text-dark-secondary hover:text-dark-primary transition-colors px-3 py-2 rounded-lg hover:bg-dark-hover">
               {t.nav.plan}
             </Link>
+            <Link href="/settings" onClick={(e) => handleNavClick('/settings', e)} className="text-dark-secondary hover:text-dark-primary transition-colors px-3 py-2 rounded-lg hover:bg-dark-hover">
+              {t.nav.settings}
+            </Link>
           </nav>
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
-            {/* Language Switcher */}
-            <LanguageSwitcher />
             
             {/* Profile Dropdown */}
             {user ? (

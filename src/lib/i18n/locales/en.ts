@@ -18,6 +18,7 @@ export const en = {
     search: 'Search',
     timeline: 'Timeline',
     plan: 'Plan',
+    settings: 'Settings',
   },
   auth: {
     login: 'Login',
@@ -115,6 +116,44 @@ export const en = {
     invalidFileType: 'Invalid file type',
     invalidCoordinates: 'Invalid coordinates',
     requiredField: 'This field is required',
+  },
+  settings: {
+    title: 'Settings',
+    subtitle: 'Manage your account preferences and app settings',
+    profile: {
+      title: 'Profile',
+      subtitle: 'Manage your profile information',
+    },
+    privacy: {
+      title: 'Privacy',
+      subtitle: 'Control your privacy settings',
+    },
+    language: {
+      title: 'Language',
+      subtitle: 'Choose your preferred language',
+    },
+    notifications: {
+      title: 'Notifications',
+      subtitle: 'Manage notification preferences',
+      configure: 'Configure',
+    },
+    about: {
+      title: 'About',
+      version: 'Version',
+      support: 'Support',
+      subtitle: 'Get help and support',
+      contact: 'Contact',
+    },
+    account: {
+      title: 'Account Actions',
+      signOut: 'Sign Out',
+      signOutSubtitle: 'Sign out of your account',
+    },
+    loginPrompt: {
+      title: 'Settings',
+      subtitle: 'Please login to access your settings and preferences.',
+      login: 'Login',
+    },
   },
 } as const;
 
