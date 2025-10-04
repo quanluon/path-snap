@@ -22,6 +22,7 @@ import { DEFAULT_REACTION, type ReactionType } from "@/lib/constants";
 import { formatImageDate } from "@/lib/utils/date";
 import { renderFormattedDescription } from "@/lib/utils/text";
 import { Address } from "./Address";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ImageDetailModalProps {
   image: ImageWithReactions | null;
@@ -34,6 +35,7 @@ export default function ImageDetailModal({
   isOpen,
   onClose,
 }: ImageDetailModalProps) {
+  const { t } = useLanguage()
   const router = useRouter();
   const { user, isLoading: userLoading } = useUser();
   const [showPreview, setShowPreview] = useState(false);
@@ -117,12 +119,12 @@ export default function ImageDetailModal({
 
     // Generate the direct image URL
     const imageUrl = `${window.location.origin}/image/${image.id}`;
-    const shareText = image.description || "Check out this checkpoint image!";
+    const shareText = image.description || t.image.checkOutImage;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Checkpoint Image",
+          title: t.image.checkPointImage,
           text: shareText,
           url: imageUrl,
         });
@@ -207,7 +209,7 @@ export default function ImageDetailModal({
               <button
                 onClick={handleDeleteClick}
                 className="p-3 bg-red-600/80 backdrop-blur-sm rounded-full hover:bg-red-600 transition-colors"
-                title="Delete image"
+                      title={t.image.deleteImage}
               >
                 <TrashIcon className="w-6 h-6 text-white" />
               </button>
@@ -230,7 +232,7 @@ export default function ImageDetailModal({
             >
               <OptimizedImage
                 src={image.url}
-                alt={image.description || "Checkpoint image"}
+                alt={image.description || t.image.checkPointImage}
                 className="object-contain p-4"
                 objectFit="contain"
                 fallbackSrc="/placeholder-image.svg"
@@ -255,14 +257,14 @@ export default function ImageDetailModal({
                     <button
                       onClick={handleDownload}
                       className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
-                      title="Download image"
+                      title={t.image.downloadImage}
                     >
                       <ArrowDownTrayIcon className="w-5 h-5 text-white" />
                     </button>
                     <button
                       onClick={handleShare}
                       className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
-                      title="Share image"
+                      title={t.image.shareImage}
                     >
                       <ShareIcon className="w-5 h-5 text-white" />
                     </button>
@@ -278,7 +280,7 @@ export default function ImageDetailModal({
                     {image.author.avatarUrl ? (
                       <OptimizedImage
                         src={image.author.avatarUrl}
-                        alt={image.author.name || "Author"}
+                        alt={image.author.name || t.image.author}
                         className="w-12 h-12 rounded-full object-cover"
                         objectFit="cover"
                         fallbackSrc="/placeholder-image.svg"
@@ -292,10 +294,10 @@ export default function ImageDetailModal({
                     )}
                     <div className="text-left">
                       <p className="text-white font-medium">
-                        {image.author.name || "Anonymous"}
+                        {image.author.name || t.image.anonymous}
                       </p>
                       <p className="text-white/60 text-sm">
-                        Member
+{t.image.member}
                       </p>
                     </div>
                   </button>
@@ -370,7 +372,7 @@ export default function ImageDetailModal({
           <div className="flex items-center justify-center h-full p-4">
             <OptimizedImage
               src={image.url}
-              alt={image.description || "Checkpoint image"}
+              alt={image.description || t.image.checkPointImage}
               className="object-contain max-w-full max-h-full"
               objectFit="contain"
               fallbackSrc="/placeholder-image.svg"
@@ -381,11 +383,11 @@ export default function ImageDetailModal({
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6">
             <div className="text-center">
               <h3 className="text-white text-lg font-medium mb-2">
-                {image.description || "Checkpoint Image"}
+                {image.description || t.image.checkPointImage}
               </h3>
               {image.author && (
                 <p className="text-white/70 text-sm">
-                  by {image.author.name || "Member"}
+                  by {image.author.name || t.image.member}
                 </p>
               )}
             </div>
@@ -398,10 +400,10 @@ export default function ImageDetailModal({
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete Image"
-        message="Are you sure you want to delete this image? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t.image.deleteImage}
+        message={t.image.deleteConfirmMessage}
+        confirmText={t.image.deleteConfirm}
+        cancelText={t.image.cancel}
         type="danger"
         isLoading={isDeleting}
       />

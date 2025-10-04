@@ -103,8 +103,17 @@ export default function Header() {
                       className="flex items-center gap-2 px-4 py-2 text-sm text-dark-secondary hover:bg-dark-hover transition-colors"
                       onClick={() => setIsProfileOpen(false)}
                     >
+                      <UserCircleIcon className="w-4 h-4" />
+                      Profile
+                    </Link>
+
+                    <Link
+                      href="/settings"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-dark-secondary hover:bg-dark-hover transition-colors"
+                      onClick={() => setIsProfileOpen(false)}
+                    >
                       <Cog6ToothIcon className="w-4 h-4" />
-                      Profile Settings
+                      Settings
                     </Link>
                     
                     <button

@@ -3,6 +3,7 @@ import { useComments } from '@/hooks/useComments';
 import CommentList from './CommentList';
 import CommentForm from './CommentForm';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CommentsSectionProps {
   imageId: string;
@@ -10,6 +11,7 @@ interface CommentsSectionProps {
 }
 
 export default function CommentsSection({ imageId, className = '' }: CommentsSectionProps) {
+  const { t } = useLanguage();
   const {
     comments,
     isLoading,
@@ -42,7 +44,7 @@ export default function CommentsSection({ imageId, className = '' }: CommentsSec
       >
         <div className="flex items-center gap-2">
           <ChatBubbleLeftRightIcon className="w-5 h-5 text-blue-400" />
-          <span className="text-white font-medium">Comments</span>
+          <span className="text-white font-medium">{t.comments.title}</span>
           {totalCount > 0 && (
             <span className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs">
               {totalCount}
@@ -51,7 +53,7 @@ export default function CommentsSection({ imageId, className = '' }: CommentsSec
         </div>
         <div className="flex items-center gap-2">
           {error && (
-            <span className="text-red-400 text-sm">Error loading comments</span>
+            <span className="text-red-400 text-sm">{t.comments.errorLoading}</span>
           )}
           <div className={`w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full transition-transform duration-200 ${showComments ? 'rotate-180' : ''}`}></div>
         </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { useUser } from '@/contexts/UserContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CommentFormProps {
   onSubmit: (content: string) => Promise<void>;
@@ -8,9 +9,10 @@ interface CommentFormProps {
   placeholder?: string;
 }
 
-export default function CommentForm({ onSubmit, isLoading, placeholder = "Write a comment..." }: CommentFormProps) {
+export default function CommentForm({ onSubmit, isLoading, placeholder }: CommentFormProps) {
   const [content, setContent] = useState('');
   const { user } = useUser();
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +43,7 @@ export default function CommentForm({ onSubmit, isLoading, placeholder = "Write 
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          <p className="text-sm">Please sign in to comment</p>
+          <p className="text-sm">{t.comments.signInPrompt}</p>
         </div>
       </div>
     );
@@ -54,7 +56,7 @@ export default function CommentForm({ onSubmit, isLoading, placeholder = "Write 
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
+            placeholder={placeholder || t.comments.placeholder}
             disabled={isLoading}
             maxLength={1000}
             rows={2}
@@ -70,7 +72,7 @@ export default function CommentForm({ onSubmit, isLoading, placeholder = "Write 
           ) : (
             <PaperAirplaneIcon className="w-4 h-4" />
           )}
-          <span className="hidden sm:inline">Comment</span>
+          <span className="hidden sm:inline">{t.comments.comment}</span>
         </button>
       </form>
     </div>

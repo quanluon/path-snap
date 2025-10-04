@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import CommentItem from './CommentItem';
 import Skeleton from './Skeleton';
 import type { CommentWithUser } from '@/types';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CommentListProps {
   comments: CommentWithUser[];
@@ -15,6 +16,7 @@ const VISIBLE_ITEMS = 10; // Number of items visible at once
 const BUFFER_SIZE = 5; // Extra items to render outside viewport
 
 export default function CommentList({ comments, isLoading, hasMore, onLoadMore }: CommentListProps) {
+  const { t } = useLanguage();
   const [scrollTop, setScrollTop] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(400);
@@ -56,8 +58,8 @@ export default function CommentList({ comments, isLoading, hasMore, onLoadMore }
       <div className="flex items-center justify-center h-32 text-gray-400">
         <div className="text-center">
           <div className="text-4xl mb-2">💬</div>
-          <p>No comments yet</p>
-          <p className="text-sm">Be the first to comment!</p>
+          <p>{t.comments.noComments}</p>
+          <p className="text-sm">{t.comments.beFirst}</p>
         </div>
       </div>
     );
@@ -95,7 +97,7 @@ export default function CommentList({ comments, isLoading, hasMore, onLoadMore }
             <div className="flex items-center justify-center p-4">
               <div className="flex items-center gap-2 text-gray-400">
                 <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-sm">Loading comments...</span>
+                <span className="text-sm">{t.comments.loadingComments}</span>
               </div>
             </div>
           )}
@@ -107,7 +109,7 @@ export default function CommentList({ comments, isLoading, hasMore, onLoadMore }
                 onClick={onLoadMore}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
               >
-                Load more comments
+{t.comments.loadMore}
               </button>
             </div>
           )}

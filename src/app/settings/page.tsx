@@ -15,6 +15,7 @@ import {
   InformationCircleIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
+import OptimizedImage from '@/components/OptimizedImage';
 
 export default function SettingsPage() {
   const { user } = useUser();
@@ -30,16 +31,16 @@ export default function SettingsPage() {
           <div className="bg-dark-card rounded-lg shadow-dark-primary border border-dark-primary p-8">
             <Cog6ToothIcon className="w-16 h-16 text-dark-primary mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-dark-primary mb-4">
-              Settings
+              {t.settings.loginPrompt.title}
             </h1>
             <p className="text-dark-secondary mb-6">
-              Please login to access your settings and preferences.
+              {t.settings.loginPrompt.subtitle}
             </p>
             <button
               onClick={() => setAuthModalOpen(true)}
               className="px-6 py-3 bg-dark-primary text-dark-secondary font-medium rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
             >
-              Login
+              {t.settings.loginPrompt.login}
             </button>
           </div>
         </div>
@@ -58,8 +59,8 @@ export default function SettingsPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-dark-primary mb-2">Settings</h1>
-        <p className="text-dark-secondary">Manage your account preferences and app settings</p>
+        <h1 className="text-3xl font-bold text-dark-primary mb-2">{t.settings.title}</h1>
+        <p className="text-dark-secondary">{t.settings.subtitle}</p>
       </div>
 
       {/* User Profile Section */}
@@ -67,10 +68,12 @@ export default function SettingsPage() {
         <div className="flex items-center gap-4 mb-6">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
             {user.avatarUrl ? (
-              <img
+              <OptimizedImage
                 src={user.avatarUrl}
                 alt={user.name || 'User'}
-                className="w-16 h-16 rounded-full object-cover"
+                className="rounded-full object-cover"
+                width={16}
+                height={16}
               />
             ) : (
               <UserIcon className="w-8 h-8 text-white" />
@@ -88,15 +91,15 @@ export default function SettingsPage() {
           <div className="flex items-center gap-3 p-4 bg-dark-hover rounded-lg">
             <UserIcon className="w-5 h-5 text-dark-primary" />
             <div>
-              <p className="text-dark-primary font-medium">Profile</p>
-              <p className="text-dark-secondary text-sm">Manage your profile information</p>
+              <p className="text-dark-primary font-medium">{t.settings.profile.title}</p>
+              <p className="text-dark-secondary text-sm">{t.settings.profile.subtitle}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 p-4 bg-dark-hover rounded-lg">
             <ShieldCheckIcon className="w-5 h-5 text-dark-primary" />
             <div>
-              <p className="text-dark-primary font-medium">Privacy</p>
-              <p className="text-dark-secondary text-sm">Control your privacy settings</p>
+              <p className="text-dark-primary font-medium">{t.settings.privacy.title}</p>
+              <p className="text-dark-secondary text-sm">{t.settings.privacy.subtitle}</p>
             </div>
           </div>
         </div>
@@ -106,7 +109,7 @@ export default function SettingsPage() {
       <div className="bg-dark-card rounded-lg shadow-dark-primary border border-dark-primary p-6 mb-6">
         <h3 className="text-xl font-semibold text-dark-primary mb-6 flex items-center gap-2">
           <Cog6ToothIcon className="w-5 h-5" />
-          App Settings
+          {t.settings.title}
         </h3>
 
         <div className="space-y-4">
@@ -115,8 +118,8 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3">
               <GlobeAltIcon className="w-5 h-5 text-dark-primary" />
               <div>
-                <p className="text-dark-primary font-medium">Language</p>
-                <p className="text-dark-secondary text-sm">Choose your preferred language</p>
+              <p className="text-dark-primary font-medium">{t.settings.language.title}</p>
+              <p className="text-dark-secondary text-sm">{t.settings.language.subtitle}</p>
               </div>
             </div>
             <LanguageSwitcher />
@@ -127,12 +130,12 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3">
               <BellIcon className="w-5 h-5 text-dark-primary" />
               <div>
-                <p className="text-dark-primary font-medium">Notifications</p>
-                <p className="text-dark-secondary text-sm">Manage notification preferences</p>
+              <p className="text-dark-primary font-medium">{t.settings.notifications.title}</p>
+              <p className="text-dark-secondary text-sm">{t.settings.notifications.subtitle}</p>
               </div>
             </div>
             <button className="px-4 py-2 text-dark-primary border border-dark-primary rounded-lg hover:bg-dark-primary hover:text-dark-secondary transition-colors">
-              Configure
+{t.settings.notifications.configure}
             </button>
           </div>
         </div>
@@ -142,13 +145,13 @@ export default function SettingsPage() {
       <div className="bg-dark-card rounded-lg shadow-dark-primary border border-dark-primary p-6 mb-6">
         <h3 className="text-xl font-semibold text-dark-primary mb-6 flex items-center gap-2">
           <InformationCircleIcon className="w-5 h-5" />
-          About
+          {t.settings.about.title}
         </h3>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 bg-dark-hover rounded-lg">
             <div>
-              <p className="text-dark-primary font-medium">Version</p>
+              <p className="text-dark-primary font-medium">{t.settings.about.version}</p>
               <p className="text-dark-secondary text-sm">Checkpoint v1.0.0</p>
             </div>
           </div>
@@ -157,12 +160,12 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3">
               <HeartIcon className="w-5 h-5 text-red-500" />
               <div>
-                <p className="text-dark-primary font-medium">Support</p>
-                <p className="text-dark-secondary text-sm">Get help and support</p>
+              <p className="text-dark-primary font-medium">{t.settings.about.support}</p>
+              <p className="text-dark-secondary text-sm">{t.settings.about.subtitle}</p>
               </div>
             </div>
             <button className="px-4 py-2 text-dark-primary border border-dark-primary rounded-lg hover:bg-dark-primary hover:text-dark-secondary transition-colors">
-              Contact
+{t.settings.about.contact}
             </button>
           </div>
         </div>
@@ -172,17 +175,17 @@ export default function SettingsPage() {
       <div className="bg-dark-card rounded-lg shadow-dark-primary border border-red-500/20 p-6">
         <h3 className="text-xl font-semibold text-red-400 mb-6 flex items-center gap-2">
           <ArrowRightOnRectangleIcon className="w-5 h-5" />
-          Account Actions
+          {t.settings.account.title}
         </h3>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 bg-red-500/10 rounded-lg">
             <div>
-              <p className="text-red-400 font-medium">Sign Out</p>
-              <p className="text-dark-secondary text-sm">Sign out of your account</p>
+              <p className="text-red-400 font-medium">{t.settings.account.signOut}</p>
+              <p className="text-dark-secondary text-sm">{t.settings.account.signOutSubtitle}</p>
             </div>
             <button className="px-4 py-2 text-red-400 border border-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors">
-              Sign Out
+{t.settings.account.signOut}
             </button>
           </div>
         </div>

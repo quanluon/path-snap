@@ -155,6 +155,32 @@ export const vi = {
       login: 'Đăng nhập',
     },
   },
+  comments: {
+    title: 'Bình luận',
+    placeholder: 'Viết bình luận...',
+    comment: 'Bình luận',
+    signInPrompt: 'Vui lòng đăng nhập để bình luận',
+    noComments: 'Chưa có bình luận nào',
+    beFirst: 'Hãy là người đầu tiên bình luận!',
+    loadingComments: 'Đang tải bình luận...',
+    loadMore: 'Tải thêm bình luận',
+    errorLoading: 'Lỗi tải bình luận',
+    characters: 'ký tự',
+    pressEnter: 'Nhấn Enter để gửi, Shift+Enter để xuống dòng',
+  },
+  image: {
+    checkPointImage: 'Ảnh Checkpoint',
+    checkOutImage: 'Xem ảnh checkpoint này!',
+    downloadImage: 'Tải ảnh',
+    shareImage: 'Chia sẻ ảnh',
+    deleteImage: 'Xóa ảnh',
+    deleteConfirmMessage: 'Bạn có chắc chắn muốn xóa ảnh này? Hành động này không thể hoàn tác.',
+    deleteConfirm: 'Xóa',
+    cancel: 'Hủy',
+    anonymous: 'Ẩn danh',
+    author: 'Tác giả',
+    member: 'Thành viên',
+  },
 } as const;
 
 export type VietnameseTranslations = typeof vi;

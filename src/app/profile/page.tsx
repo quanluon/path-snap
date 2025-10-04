@@ -49,7 +49,7 @@ export default function ProfilePage() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-dark-primary mb-2">
-            Profile Settings
+            Profile
           </h1>
           <p className="text-dark-secondary">
             Manage your account information and preferences

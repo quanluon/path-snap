@@ -155,6 +155,32 @@ export const en = {
       login: 'Login',
     },
   },
+  comments: {
+    title: 'Comments',
+    placeholder: 'Write a comment...',
+    comment: 'Comment',
+    signInPrompt: 'Please sign in to comment',
+    noComments: 'No comments yet',
+    beFirst: 'Be the first to comment!',
+    loadingComments: 'Loading comments...',
+    loadMore: 'Load more comments',
+    errorLoading: 'Error loading comments',
+    characters: 'characters',
+    pressEnter: 'Press Enter to submit, Shift+Enter for new line',
+  },
+  image: {
+    checkPointImage: 'Checkpoint Image',
+    checkOutImage: 'Check out this checkpoint image!',
+    downloadImage: 'Download image',
+    shareImage: 'Share image',
+    deleteImage: 'Delete Image',
+    deleteConfirmMessage: 'Are you sure you want to delete this image? This action cannot be undone.',
+    deleteConfirm: 'Delete',
+    cancel: 'Cancel',
+    anonymous: 'Anonymous',
+    author: 'Author',
+    member: 'Member',
+  },
 } as const;
 
 export type Translations = typeof en;
