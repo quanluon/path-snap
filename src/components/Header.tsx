@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -10,8 +11,17 @@ import { MapPinIcon, UserCircleIcon, ArrowRightOnRectangleIcon, Cog6ToothIcon } 
 export default function Header() {
   const { t } = useLanguage();
   const { user, signOut } = useAuth();
+  const pathname = usePathname();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleNavClick = (href: string, e: React.MouseEvent) => {
+    // If clicking on the current page, scroll to top instead of navigating
+    if (pathname === href) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -41,23 +51,23 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 hover-dark-card p-2 rounded-lg">
+          <Link href="/" onClick={(e) => handleNavClick('/', e)} className="flex items-center gap-2 hover-dark-card p-2 rounded-lg">
             <MapPinIcon className="w-8 h-8 text-dark-primary" />
             <span className="text-xl font-bold text-dark-primary">Checkpoint</span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-dark-secondary hover:text-dark-primary transition-colors px-3 py-2 rounded-lg hover:bg-dark-hover">
+            <Link href="/" onClick={(e) => handleNavClick('/', e)} className="text-dark-secondary hover:text-dark-primary transition-colors px-3 py-2 rounded-lg hover:bg-dark-hover">
               {t.nav.home}
             </Link>
-            <Link href="/upload" className="text-dark-secondary hover:text-dark-primary transition-colors px-3 py-2 rounded-lg hover:bg-dark-hover">
+            <Link href="/upload" onClick={(e) => handleNavClick('/upload', e)} className="text-dark-secondary hover:text-dark-primary transition-colors px-3 py-2 rounded-lg hover:bg-dark-hover">
               {t.nav.upload}
             </Link>
-            <Link href="/search" className="text-dark-secondary hover:text-dark-primary transition-colors px-3 py-2 rounded-lg hover:bg-dark-hover">
+            <Link href="/search" onClick={(e) => handleNavClick('/search', e)} className="text-dark-secondary hover:text-dark-primary transition-colors px-3 py-2 rounded-lg hover:bg-dark-hover">
               {t.nav.search}
             </Link>
-            <Link href="/plan" className="text-dark-secondary hover:text-dark-primary transition-colors px-3 py-2 rounded-lg hover:bg-dark-hover">
+            <Link href="/plan" onClick={(e) => handleNavClick('/plan', e)} className="text-dark-secondary hover:text-dark-primary transition-colors px-3 py-2 rounded-lg hover:bg-dark-hover">
               {t.nav.plan}
             </Link>
           </nav>

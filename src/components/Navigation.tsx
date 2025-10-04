@@ -1,24 +1,33 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
-  HomeIcon,
   CameraIcon,
+  HomeIcon,
   MagnifyingGlassIcon,
-  MapIcon,
+  MapIcon
 } from '@heroicons/react/24/outline';
 import {
-  HomeIcon as HomeIconSolid,
   CameraIcon as CameraIconSolid,
+  HomeIcon as HomeIconSolid,
   MagnifyingGlassIcon as MagnifyingGlassIconSolid,
-  MapIcon as MapIconSolid,
+  MapIcon as MapIconSolid
 } from '@heroicons/react/24/solid';
-import { useLanguage } from '@/contexts/LanguageContext';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const router = useRouter();
   const { t } = useLanguage();
+
+  const handleNavClick = (href: string, e: React.MouseEvent) => {
+    // If clicking on the current page, scroll to top instead of navigating
+    if (pathname === href) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const navItems = [
     {
@@ -58,6 +67,7 @@ export default function Navigation() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={(e) => handleNavClick(item.href, e)}
               className={`flex flex-col items-center justify-center w-full h-full transition-all duration-200 hover:bg-dark-hover ${
                 isActive ? 'text-dark-primary' : 'text-dark-secondary hover:text-dark-primary'
               }`}
