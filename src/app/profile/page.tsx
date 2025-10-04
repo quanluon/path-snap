@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useProfile } from '@/hooks/useProfile';
 import { UserCircleIcon, EnvelopeIcon, UserIcon } from '@heroicons/react/24/outline';
 
 export default function ProfilePage() {
   const { user, isLoading } = useAuth();
   const { t } = useLanguage();
+  const { isUpdating, error, success, updateProfile, clearMessages } = useProfile();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -18,6 +20,24 @@ export default function ProfilePage() {
       setEmail(user.email || '');
     }
   }, [user]);
+
+  const handleSaveChanges = async () => {
+    if (!name.trim()) {
+      return;
+    }
+
+    const success = await updateProfile(name.trim(), email.trim());
+    if (success) {
+      setIsEditing(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setName(user?.user_metadata?.name || '');
+    setEmail(user?.email || '');
+    clearMessages();
+  };
 
   if (isLoading) {
     return (
@@ -80,8 +100,12 @@ export default function ProfilePage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={!isEditing}
+                placeholder={t.profile.fullName}
                 className="w-full px-4 py-2 border border-dark-primary rounded-lg focus:ring-2 focus:ring-dark-primary focus:border-transparent bg-dark-secondary text-dark-primary disabled:opacity-50"
               />
+              {isEditing && !name.trim() && (
+                <p className="text-red-400 text-sm mt-1">{t.profile.nameRequired}</p>
+              )}
             </div>
 
             <div>
@@ -93,9 +117,10 @@ export default function ProfilePage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={!isEditing}
-                className="w-full px-4 py-2 border border-dark-primary rounded-lg focus:ring-2 focus:ring-dark-primary focus:border-transparent bg-dark-secondary text-dark-primary disabled:opacity-50"
+                disabled={true} // Email cannot be changed
+                className="w-full px-4 py-2 border border-dark-primary rounded-lg bg-dark-secondary text-dark-muted disabled:opacity-50"
               />
+              <p className="text-gray-400 text-sm mt-1">{t.profile.emailUpdateError}</p>
             </div>
 
             <div>
@@ -110,6 +135,22 @@ export default function ProfilePage() {
               />
             </div>
 
+            {/* Error and Success Messages */}
+            {(error || success) && (
+              <div className="mt-4">
+                {error && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <p className="text-red-400 text-sm">{error}</p>
+                  </div>
+                )}
+                {success && (
+                  <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                    <p className="text-green-400 text-sm">{success}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="flex gap-4 pt-4">
               {!isEditing ? (
@@ -122,23 +163,18 @@ export default function ProfilePage() {
               ) : (
                 <>
                   <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      // TODO: Save changes
-                    }}
-                    className="px-6 py-2 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors font-medium"
+                    onClick={handleSaveChanges}
+                    disabled={isUpdating || !name.trim()}
+                    className="px-6 py-2 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-{t.profile.saveChanges}
+                    {isUpdating ? t.profile.saving : t.profile.saveChanges}
                   </button>
                   <button
-                    onClick={() => {
-                      setIsEditing(false);
-                      setName(user.user_metadata?.name || '');
-                      setEmail(user.email || '');
-                    }}
-                    className="px-6 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors font-medium border border-dark-primary"
+                    onClick={handleCancel}
+                    disabled={isUpdating}
+                    className="px-6 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors font-medium border border-dark-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-{t.profile.cancel}
+                    {t.profile.cancel}
                   </button>
                 </>
               )}
