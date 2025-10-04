@@ -110,7 +110,7 @@ reactions: id, user_id, image_id, type, created_at
 
 ### **Core Components**
 - `CameraCapture` - Photo upload with geolocation
-- `ImageCarousel` - Swipeable image gallery
+- `ImageList` - Swipeable image gallery
 - `ImageDetailModal` - Full-screen image viewer
 - `SearchImages` - Location-based search interface
 - `PlanManager` - Travel plan controls

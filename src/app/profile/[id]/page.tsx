@@ -1,6 +1,6 @@
 "use client";
 
-import ImageCarousel from "@/components/ImageCarousel";
+import ImageList from "@/components/ImageList";
 import ImageDetailModal from "@/components/ImageDetailModal";
 import OptimizedImage from "@/components/OptimizedImage";
 import { AvatarSkeleton, CarouselSkeleton } from "@/components/Skeleton";
@@ -252,7 +252,7 @@ function UserProfileContent() {
             </p>
           </div>
         ) : (
-          <ImageCarousel
+          <ImageList
             images={images}
             onImageClick={handleImageClick}
             onLoadMore={loadMoreImages}

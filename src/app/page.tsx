@@ -1,6 +1,6 @@
 "use client";
 
-import ImageCarousel from "@/components/ImageCarousel";
+import ImageList from "@/components/ImageList";
 import ImageDetailModal from "@/components/ImageDetailModal";
 import { CarouselSkeleton } from "@/components/Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -128,7 +128,7 @@ function HomePageContent() {
       {isLoading ? (
         <CarouselSkeleton />
       ) : (
-        <ImageCarousel
+        <ImageList
           images={images}
           onImageClick={handleImageClick}
           onLoadMore={loadMoreImages}

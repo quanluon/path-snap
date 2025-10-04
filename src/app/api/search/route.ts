@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { images } from '@/db/schema';
+import { images, users } from '@/db/schema';
 import { sql } from 'drizzle-orm';
 import { SEARCH_RADIUS } from '@/lib/constants';
 import { validateCoordinates } from '@/lib/utils/location';
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     let nearbyImages;
     
     try {
-      // Query using PostGIS for location-based search
+      // Query using PostGIS for location-based search with author information
       nearbyImages = await db
         .select({
           id: images.id,
@@ -60,8 +60,14 @@ export async function GET(request: NextRequest) {
               ST_SetSRID(ST_Point(${longitude}, ${latitude}), 4326)::geography
             )
           `.as('distance'),
+          author: {
+            id: users.id,
+            name: users.name,
+            avatarUrl: users.avatarUrl,
+          },
         })
         .from(images)
+        .leftJoin(users, sql`${images.userId} = ${users.id}`)
         .where(
           sql`
             ST_DWithin(
@@ -79,7 +85,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.log('PostGIS not available, using fallback distance calculation:', error);
       
-      // Fallback: Get all images and calculate distance manually
+      // Fallback: Get all images and calculate distance manually with author information
       const allImages = await db
         .select({
           id: images.id,
@@ -90,8 +96,14 @@ export async function GET(request: NextRequest) {
           latitude: images.latitude,
           longitude: images.longitude,
           createdAt: images.createdAt,
+          author: {
+            id: users.id,
+            name: users.name,
+            avatarUrl: users.avatarUrl,
+          },
         })
         .from(images)
+        .leftJoin(users, sql`${images.userId} = ${users.id}`)
         .limit(1000); // Limit to prevent memory issues
       
       // Calculate distance using Haversine formula

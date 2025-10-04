@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { ArrowLeftIcon, MapPinIcon, CalendarIcon, PhotoIcon, StopIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePlan } from '@/contexts/PlanContext';
-import ImageCarousel from '@/components/ImageCarousel';
+import ImageList from '@/components/ImageList';
 import CheckpointMap from '@/components/CheckpointMap';
 import ImageDetailModal from '@/components/ImageDetailModal';
 import type { images } from '@/db/schema';
@@ -273,7 +273,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
           
           {viewMode === 'timeline' ? (
             <>
-              <ImageCarousel 
+              <ImageList 
                 images={plan.images} 
                 onImageClick={handleImageClick}
               />
@@ -367,7 +367,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
               </button>
             </div>
             <div className="p-4">
-              <ImageCarousel
+              <ImageList
                 images={carouselImages}
                 onImageClick={handleImageClick}
               />

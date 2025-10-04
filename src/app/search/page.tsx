@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import SearchImages from "@/components/SearchImages";
-import ImageCarousel from "@/components/ImageCarousel";
+import ImageList from "@/components/ImageList";
 import ImageDetailModal from "@/components/ImageDetailModal";
 import { CarouselSkeleton } from "@/components/Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -63,7 +63,7 @@ export default function SearchPage() {
   };
 
   useEffect(() => {
-      fetchSearchResults();
+    fetchSearchResults();
   }, [searchParams]);
 
   const loadMoreResults = async () => {
@@ -77,16 +77,8 @@ export default function SearchPage() {
     setIsModalOpen(true);
   };
 
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-dark-primary mb-2">
-          {t.nav.search}
-        </h1>
-        <p className="text-dark-secondary">Tìm kiếm checkpoint gần vị trí của bạn</p>
-      </div>
-
       <SearchImages
         onSearch={handleSearch}
         results={results}
@@ -108,7 +100,7 @@ export default function SearchPage() {
               Kết quả tìm kiếm ({results.length} ảnh)
             </h2>
           </div>
-          <ImageCarousel
+          <ImageList
             images={results}
             onImageClick={handleImageClick}
             onLoadMore={loadMoreResults}

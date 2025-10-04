@@ -1,44 +1,91 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { MapPinIcon } from '@heroicons/react/24/solid';
-import { SEARCH_RADIUS } from '@/lib/constants';
-import { useLanguage } from '@/contexts/LanguageContext';
-import type { ImageWithReactions } from '@/types';
+import { useState } from "react";
+import {
+  MapPinIcon,
+  AdjustmentsHorizontalIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/solid";
+import { SEARCH_RADIUS } from "@/lib/constants";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { ImageWithReactions } from "@/types";
 
 interface SearchImagesProps {
-  onSearch: (latitude: number, longitude: number, radius: number) => Promise<void>;
+  onSearch: (
+    latitude: number,
+    longitude: number,
+    radius: number
+  ) => Promise<void>;
   results?: ImageWithReactions[];
   isLoading?: boolean;
 }
 
-export default function SearchImages({ onSearch, results, isLoading }: SearchImagesProps) {
+export default function SearchImages({
+  onSearch,
+  results,
+  isLoading,
+}: SearchImagesProps) {
   const { t } = useLanguage();
   const [radius, setRadius] = useState<number>(SEARCH_RADIUS.DEFAULT);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [showRangeBar, setShowRangeBar] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
-  const handleCurrentLocation = async () => {
-    setIsGettingLocation(true);
-    setMessage(null);
-    
+  const handleSearch = async () => {
+    if (!currentLocation) {
+      return;
+    }
+
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        });
-      });
-      
-      await onSearch(position.coords.latitude, position.coords.longitude, radius);
-      setMessage({ type: 'success', text: t.search.resultsFound });
+      await onSearch(
+        currentLocation.latitude,
+        currentLocation.longitude,
+        radius
+      );
+      // Hide range bar after successful search
+      setShowRangeBar(false);
     } catch (error) {
-      console.error('Error getting location:', error);
-      setMessage({ type: 'error', text: t.search.invalidLocation });
+      console.error("Search error:", error);
+    }
+  };
+
+  const handleGetLocationAndSearch = async () => {
+    setIsGettingLocation(true);
+
+    try {
+      const position = await new Promise<GeolocationPosition>(
+        (resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          });
+        }
+      );
+
+      const location = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+
+      setCurrentLocation(location);
+
+      // Automatically search after getting location
+      await onSearch(location.latitude, location.longitude, radius);
+      // Hide range bar after successful search
+      setShowRangeBar(false);
+    } catch (error) {
+      console.error("Error getting location:", error);
     } finally {
       setIsGettingLocation(false);
     }
+  };
+
+  const toggleRangeBar = () => {
+    setShowRangeBar(!showRangeBar);
   };
 
   // Remove manual lat/lng search - only use current location
@@ -46,52 +93,78 @@ export default function SearchImages({ onSearch, results, isLoading }: SearchIma
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="bg-dark-card rounded-lg shadow-dark-primary p-6 mb-6 border border-dark-primary">
-        <h2 className="text-2xl font-bold mb-6 text-dark-primary">{t.search.title}</h2>
-
+        <div className="mb-2">
+          <h1 className="text-3xl font-bold text-dark-primary mb-2">
+            {t.nav.search}
+          </h1>
+          <p className="text-dark-secondary">
+            Tìm kiếm checkpoint gần vị trí của bạn
+          </p>
+        </div>
         {/* Search Form */}
         <div className="space-y-4">
-          {/* Message Display */}
-          {message && (
-            <div className={`p-4 rounded-lg border ${
-              message.type === 'success' ? 'bg-dark-secondary border-dark-primary text-dark-primary' :
-              message.type === 'error' ? 'bg-dark-secondary border-dark-primary text-dark-primary' :
-              'bg-dark-secondary border-dark-primary text-dark-primary'
-            }`}>
-              <p className="text-sm font-medium">{message.text}</p>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-dark-secondary mb-2">
-              {t.search.radius} ({radius}m)
-            </label>
-            <input
-              type="range"
-              min={SEARCH_RADIUS.MIN}
-              max={SEARCH_RADIUS.MAX}
-              value={radius}
-              onChange={(e) => setRadius(parseInt(e.target.value))}
-              className="w-full accent-dark-primary"
-            />
-            <div className="flex justify-between text-xs text-dark-muted mt-1">
-              <span>{SEARCH_RADIUS.MIN}m</span>
-              <span>{SEARCH_RADIUS.MAX}m</span>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
+          {/* Main Action Button */}
+          <div className="flex items-center justify-between">
             <button
-              onClick={handleCurrentLocation}
+              onClick={handleGetLocationAndSearch}
               disabled={isGettingLocation || isLoading}
               className="flex items-center gap-2 px-6 py-3 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors disabled:opacity-50 font-medium border border-dark-primary"
             >
               <MapPinIcon className="w-5 h-5" />
-              {isGettingLocation || isLoading ? t.common.loading : t.search.currentLocation}
+              {isGettingLocation || isLoading
+                ? t.common.loading
+                : t.search.currentLocation}
             </button>
+
+            {/* Range Toggle Button - Only show when range bar is hidden */}
+
+            <div className="flex items-center justify-center">
+              <button
+                onClick={toggleRangeBar}
+                className="flex items-center gap-2 px-4 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
+                title="Show range settings"
+              >
+                <AdjustmentsHorizontalIcon className="w-8 h-8" />
+              </button>
+            </div>
           </div>
+
+          {/* Range Bar - Conditionally Shown */}
+          {showRangeBar && (
+            <div className="mt-4 p-4 bg-dark-secondary rounded-lg border border-dark-primary">
+              <div className="flex items-center justify-between mb-4">
+                <label className="block text-sm font-medium text-dark-secondary">
+                  {t.search.radius} ({radius}m)
+                </label>
+              </div>
+              <input
+                type="range"
+                min={SEARCH_RADIUS.MIN}
+                max={SEARCH_RADIUS.MAX}
+                value={radius}
+                onChange={(e) => setRadius(parseInt(e.target.value))}
+                className="w-full accent-dark-primary"
+              />
+              <div className="flex justify-between text-xs text-dark-muted mt-1">
+                <span>{SEARCH_RADIUS.MIN}m</span>
+                <span>{SEARCH_RADIUS.MAX}m</span>
+              </div>
+
+              {/* Search Button Below Range */}
+              <div className="mt-4 flex justify-center">
+                <button
+                  onClick={handleSearch}
+                  disabled={!currentLocation || isLoading}
+                  className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  <MagnifyingGlassIcon className="w-5 h-5" />
+                  {isLoading ? t.common.loading : "Search"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-

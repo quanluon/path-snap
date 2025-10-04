@@ -1,28 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  XMarkIcon,
-  EyeIcon,
-  UserIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/solid";
-import { CalendarIcon, ShareIcon, ArrowDownTrayIcon, TrashIcon } from "@heroicons/react/24/outline";
+import CommentsSection from "@/components/CommentsSection";
+import ConfirmModal from "@/components/ConfirmModal";
 import OptimizedImage from "@/components/OptimizedImage";
 import ReactionBar from "@/components/ReactionBar";
-import CommentsSection from "@/components/CommentsSection";
-import { useReactions } from "@/hooks/useReactions";
-import { useImageView } from "@/hooks/useImageView";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useUser } from "@/contexts/UserContext";
 import { useDeleteImage } from "@/hooks/useDeleteImage";
-import ConfirmModal from "@/components/ConfirmModal";
-import { useRouter } from "next/navigation";
-import type { ImageWithReactions } from "@/types";
+import { useImageView } from "@/hooks/useImageView";
+import { useReactions } from "@/hooks/useReactions";
 import { DEFAULT_REACTION, type ReactionType } from "@/lib/constants";
 import { formatImageDate } from "@/lib/utils/date";
 import { renderFormattedDescription } from "@/lib/utils/text";
+import type { ImageWithReactions } from "@/types";
+import {
+  ArrowDownTrayIcon,
+  CalendarIcon,
+  ShareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
+import {
+  EyeIcon,
+  MagnifyingGlassIcon,
+  UserIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { Address } from "./Address";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ImageDetailModalProps {
   image: ImageWithReactions | null;
@@ -35,89 +40,91 @@ export default function ImageDetailModal({
   isOpen,
   onClose,
 }: ImageDetailModalProps) {
-  const { t } = useLanguage()
+  const { t } = useLanguage();
   const router = useRouter();
   const { user, isLoading: userLoading } = useUser();
   const [showPreview, setShowPreview] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
+
+  // Check if current user owns this image
+  const isOwner = !userLoading && user && image?.author?.id === user.id;
+
   const { deleteImage, isDeleting } = useDeleteImage({
     onSuccess: () => {
       setShowDeleteModal(false);
-      // The window.location.reload() in the hook will handle the refresh
-      // No need to close modal manually as the page will reload
+      onClose();
     },
     onError: (error) => {
-      console.error('Delete error:', error);
-      // You could show a toast notification here
+      console.error("Delete error:", error);
     },
   });
 
-  // Check if current user owns this image
-  // Also check if we're still loading user data
-  const isOwner = !userLoading && user && image?.author?.id === user.id;
+  const {
+    reactionCounts,
+    userReaction,
+    addReaction,
+    removeReaction,
+    isAuthenticated,
+    refreshReactions,
+  } = useReactions({
+    imageId: image?.id || "",
+    initialCounts: image?.reactionCounts || DEFAULT_REACTION,
+    initialUserReaction: image?.userReaction,
+    canFetchOne: true,
+  });
 
-  // Reset preview state when modal closes
+  // Track view when modal is opened
+  useImageView({ imageId: image?.id || "", enabled: isOpen && !!image });
+
+  // Reset states when modal closes
   useEffect(() => {
     if (!isOpen) {
       setShowPreview(false);
+      setShowDeleteModal(false);
     }
   }, [isOpen]);
 
-  const { reactionCounts, userReaction, addReaction, removeReaction, isAuthenticated, refreshReactions } =
-    useReactions({
-      imageId: image?.id || "",
-      initialCounts: image?.reactionCounts || DEFAULT_REACTION,
-      initialUserReaction: image?.userReaction,
-      canFetchOne: true,
-    });
-
-    // Track view when modal is opened
-  useImageView({ imageId: image?.id || "", enabled: isOpen && !!image });
-
-  // Refresh reaction counts when modal opens to ensure we have the latest data
+  // Refresh reaction counts when modal opens
   useEffect(() => {
     if (isOpen && image?.id) {
       refreshReactions();
     }
   }, [isOpen, image?.id, refreshReactions]);
 
-  const handleReactionChange = async (type: ReactionType) => {
-    if (userReaction === type) {
-      // If clicking the same reaction, remove it
-      await removeReaction();
-    } else {
-      await addReaction(type);
-    }
-  };
+  const handleReactionChange = useCallback(
+    async (type: ReactionType) => {
+      if (userReaction === type) {
+        await removeReaction();
+      } else {
+        await addReaction(type);
+      }
+    },
+    [userReaction, addReaction, removeReaction]
+  );
 
-  const handleAuthorClick = () => {
+  const handleAuthorClick = useCallback(() => {
     if (image?.author?.id) {
       router.push(`/profile/${image.author.id}`);
       onClose();
     }
-  };
+  }, [image?.author?.id, router, onClose]);
 
-  const handleDeleteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    setShowDeleteModal(true);
-  };
+  const handleDeleteClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      setShowDeleteModal(true);
+    },
+    []
+  );
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!image) return;
-    try {
-      await deleteImage(image.id);
-    } catch {
-      // Error is handled in the hook
-    }finally {
-      window?.location?.reload();
-    }
-  };
+    await deleteImage(image.id);
+  }, [image, deleteImage]);
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     if (!image) return;
 
-    // Generate the direct image URL
     const imageUrl = `${window.location.origin}/image/${image.id}`;
     const shareText = image.description || t.image.checkOutImage;
 
@@ -130,64 +137,60 @@ export default function ImageDetailModal({
         });
       } catch (error) {
         console.log("Error sharing:", error);
-        // Fallback to clipboard if share fails
         try {
           await navigator.clipboard.writeText(imageUrl);
-          // You could show a toast notification here
         } catch (clipboardError) {
           console.log("Clipboard error:", clipboardError);
         }
       }
     } else {
-      // Fallback to clipboard
       try {
         await navigator.clipboard.writeText(imageUrl);
-        // You could show a toast notification here
       } catch (error) {
         console.log("Clipboard error:", error);
       }
     }
-  };
+  }, [image, t]);
 
-  const handleDownload = async () => {
+  const handleDownload = useCallback(async () => {
     if (!image) return;
 
     try {
-      // Fetch the image as a blob
       const response = await fetch(image.url);
       const blob = await response.blob();
-      
-      // Create a download link
+
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      
-      // Generate filename with timestamp and description
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-      const description = image.description ? image.description.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 30) : 'checkpoint';
+
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/:/g, "-");
+      const description = image.description
+        ? image.description.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 30)
+        : "checkpoint";
       const filename = `checkpoint_${description}_${timestamp}.jpg`;
-      
+
       link.download = filename;
       document.body.appendChild(link);
       link.click();
-      
-      // Cleanup
+
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading image:', error);
-      // Fallback: open image in new tab
-      window.open(image.url, '_blank');
+      console.error("Error downloading image:", error);
+      window.open(image.url, "_blank");
     }
-  };
+  }, [image]);
 
-  const handleImageClick = () => {
+  const handleImageClick = useCallback(() => {
     setShowPreview(true);
-  };
+  }, []);
 
-  const handlePreviewClose = () => {
+  const handlePreviewClose = useCallback(() => {
     setShowPreview(false);
-  };
+  }, []);
 
   if (!isOpen || !image) return null;
 
@@ -209,12 +212,12 @@ export default function ImageDetailModal({
               <button
                 onClick={handleDeleteClick}
                 className="p-3 bg-red-600/80 backdrop-blur-sm rounded-full hover:bg-red-600 transition-colors"
-                      title={t.image.deleteImage}
+                title={t.image.deleteImage}
               >
                 <TrashIcon className="w-6 h-6 text-white" />
               </button>
             )}
-            
+
             {/* Close Button */}
             <button
               onClick={onClose}
@@ -225,7 +228,7 @@ export default function ImageDetailModal({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[90vh]">
-            {/* Image */}
+            {/* Image Section */}
             <div
               className="relative bg-cream flex items-center justify-center cursor-pointer hover:bg-cream-light transition-colors group aspect-[4/3]"
               onClick={handleImageClick}
@@ -245,69 +248,69 @@ export default function ImageDetailModal({
               </div>
             </div>
 
-            {/* Details */}
-            <div className="p-8 overflow-y-auto max-h-[80vh] bg-gradient-to-b from-black to-gray-900">
-              {/* Header */}
-              <div className="">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-display text-white text-2xl font-bold">
-                    Checkpoint Details
-                  </h2>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={handleDownload}
-                      className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
-                      title={t.image.downloadImage}
-                    >
-                      <ArrowDownTrayIcon className="w-5 h-5 text-white" />
-                    </button>
-                    <button
-                      onClick={handleShare}
-                      className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
-                      title={t.image.shareImage}
-                    >
-                      <ShareIcon className="w-5 h-5 text-white" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Author */}
+            {/* Details Section */}
+            <div className="p-6 lg:p-8 overflow-y-auto max-h-[90vh] bg-gradient-to-b from-black to-gray-900">
+              {/* Header with Actions */}
+              <div className="flex items-center justify-between mb-6">
+                {/* Author Section */}
                 {image.author && (
                   <button
                     onClick={handleAuthorClick}
-                    className="flex items-center space-x-3 hover:bg-white/10 mb-3 rounded-xl transition-colors"
+                    className="flex items-center space-x-3 hover:bg-white/10 rounded-xl transition-colors w-full text-left"
                   >
                     {image.author.avatarUrl ? (
                       <OptimizedImage
                         src={image.author.avatarUrl}
                         alt={image.author.name || t.image.author}
-                        className="w-12 h-12 rounded-full object-cover"
+                        className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                         objectFit="cover"
                         fallbackSrc="/placeholder-image.svg"
                         width={48}
                         height={48}
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                         <UserIcon className="w-6 h-6 text-white" />
                       </div>
                     )}
-                    <div className="text-left">
-                      <p className="text-white font-medium">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white font-medium truncate">
                         {image.author.name || t.image.anonymous}
                       </p>
-                      <p className="text-white/60 text-sm">
-{t.image.member}
-                      </p>
+                      <p className="text-white/60 text-sm">{t.image.member}</p>
                     </div>
                   </button>
                 )}
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={handleDownload}
+                    className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                    title={t.image.downloadImage}
+                  >
+                    <ArrowDownTrayIcon className="w-5 h-5 text-white" />
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                    title={t.image.shareImage}
+                  >
+                    <ShareIcon className="w-5 h-5 text-white" />
+                  </button>
+                </div>
               </div>
 
-              {/* Address */}
-              <Address image={image} addressIconSize="w-4 h-4 mr-2 flex-shrink-0" addressIconMargin="mr-2" />
+              {/* Location Section */}
+              <div className="mb-6">
+                <div className="flex items-start space-x-2">
+                  <Address
+                    image={image}
+                    addressIconSize="w-4 h-4"
+                    addressIconMargin="mr-2"
+                  />
+                </div>
+              </div>
 
-              {/* Description */}
+              {/* Description Section */}
               {image.description && (
                 <div className="mb-6">
                   <p className="text-story text-white leading-relaxed whitespace-pre-line">
@@ -316,8 +319,8 @@ export default function ImageDetailModal({
                 </div>
               )}
 
-              {/* Stats */}
-              <div className="flex items-center space-x-6 mb-6">
+              {/* Stats Section */}
+              <div className="flex flex-wrap items-center gap-4 mb-6">
                 {/* View Count */}
                 {image.viewCount !== undefined && (
                   <div className="flex items-center text-white/70">
@@ -337,7 +340,7 @@ export default function ImageDetailModal({
                 </div>
               </div>
 
-              {/* Reactions */}
+              {/* Reactions Section */}
               <div className="mb-6">
                 <ReactionBar
                   imageId={image.id}
@@ -348,7 +351,7 @@ export default function ImageDetailModal({
                 />
               </div>
 
-              {/* Comments */}
+              {/* Comments Section */}
               <div className="mb-6">
                 <CommentsSection imageId={image.id} />
               </div>
