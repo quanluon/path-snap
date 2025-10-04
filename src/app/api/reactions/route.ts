@@ -1,9 +1,74 @@
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/db';
-import { reactions } from '@/db/schema';
-import { and, eq, sql } from 'drizzle-orm';
+import { reactions, images, users } from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 import { REACTION_TYPES } from '@/lib/constants';
 import { NextRequest, NextResponse } from 'next/server';
+
+/**
+ * Send notification to image author about new reaction
+ */
+async function sendReactionNotification({
+  imageId,
+  reactorUserId,
+  reactorName,
+  reactionType,
+  authorUserId,
+}: {
+  imageId: string;
+  reactorUserId: string;
+  reactorName: string;
+  reactionType: string;
+  authorUserId: string;
+}) {
+  try {
+    // Don't send notification if user is reacting to their own image
+    if (reactorUserId === authorUserId) {
+      return;
+    }
+
+    // Get image details for notification
+    const imageDetails = await db
+      .select({
+        url: images.url,
+        description: images.description,
+      })
+      .from(images)
+      .where(eq(images.id, imageId))
+      .limit(1);
+
+    if (imageDetails.length === 0) {
+      console.warn('Image not found for notification:', imageId);
+      return;
+    }
+
+    const image = imageDetails[0];
+
+    // Send notification to all connected clients of the author
+    // This would typically be done via WebSocket or Server-Sent Events
+    // For now, we'll use Supabase real-time to broadcast the notification
+    
+    const supabase = await createClient();
+    const channel = supabase.channel(`notifications:${authorUserId}`);
+    
+    await channel.send({
+      type: 'broadcast',
+      event: 'reaction_notification',
+      payload: {
+        type: 'reaction',
+        imageId,
+        reactorName,
+        reactionType,
+        imageUrl: image.url,
+        timestamp: new Date().toISOString(),
+      },
+    });
+
+    console.log('Reaction notification sent to author:', authorUserId);
+  } catch (error) {
+    console.error('Error sending reaction notification:', error);
+  }
+}
 
 /**
  * POST /api/reactions
@@ -48,6 +113,38 @@ export async function POST(request: NextRequest) {
         and(eq(reactions.userId, user.id), eq(reactions.imageId, imageId))
       );
 
+    // Get image author and reactor user details for notifications
+    const [imageWithAuthor, reactorUser] = await Promise.all([
+      db
+        .select({
+          authorId: images.userId,
+          authorName: users.name,
+          authorEmail: users.email,
+        })
+        .from(images)
+        .leftJoin(users, eq(images.userId, users.id))
+        .where(eq(images.id, imageId))
+        .limit(1),
+      db
+        .select({
+          name: users.name,
+          email: users.email,
+        })
+        .from(users)
+        .where(eq(users.id, user.id))
+        .limit(1),
+    ]);
+
+    if (imageWithAuthor.length === 0) {
+      return NextResponse.json(
+        { error: 'Image not found' },
+        { status: 404 }
+      );
+    }
+
+    const imageData = imageWithAuthor[0];
+    const reactorData = reactorUser[0];
+
     if (existingReaction.length > 0) {
       // Update existing reaction
       const [updated] = await db
@@ -55,6 +152,17 @@ export async function POST(request: NextRequest) {
         .set({ type })
         .where(eq(reactions.id, existingReaction[0].id))
         .returning();
+
+      // Send notification for reaction update (only if author exists and is different from reactor)
+      if (imageData.authorId && imageData.authorId !== user.id) {
+        await sendReactionNotification({
+          imageId,
+          reactorUserId: user.id,
+          reactorName: reactorData.name || reactorData.email || 'Someone',
+          reactionType: type,
+          authorUserId: imageData.authorId,
+        });
+      }
 
       return NextResponse.json({
         reaction: updated,
@@ -70,6 +178,17 @@ export async function POST(request: NextRequest) {
           type,
         })
         .returning();
+
+      // Send notification for new reaction (only if author exists and is different from reactor)
+      if (imageData.authorId && imageData.authorId !== user.id) {
+        await sendReactionNotification({
+          imageId,
+          reactorUserId: user.id,
+          reactorName: reactorData.name || reactorData.email || 'Someone',
+          reactionType: type,
+          authorUserId: imageData.authorId,
+        });
+      }
 
       return NextResponse.json(
         {
