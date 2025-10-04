@@ -84,7 +84,7 @@ export default function RootLayout({
                   <NotificationListener>
                     <GlobalPullToRefresh>
                       <Header />
-                      <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-3 pt-2">
+                      <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-4 pt-10">
                         {children}
                       </main>
                       <Navigation />

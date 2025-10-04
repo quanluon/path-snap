@@ -14,10 +14,14 @@ export const Address = ({
   image,
   addressIconSize = "w-4 h-4",
   addressIconMargin = "mr-1.5",
+  addressClassName = "text-sm font-medium transition-colors my-2",
+  addressTextClassName = "",
 }: {
   image: Image;
   addressIconSize?: string;
   addressIconMargin?: string;
+  addressClassName?: string;
+  addressTextClassName?: string;
 }) => {
   if (!image.latitude || !image.longitude) return null;
   return (
@@ -25,12 +29,12 @@ export const Address = ({
       href={`https://www.google.com/maps?q=${image.latitude},${image.longitude}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors my-2"
+      className={`inline-flex items-center text-white ${addressClassName}`}
     >
       <MapPinIcon
         className={`${addressIconSize} ${addressIconMargin} flex-shrink-0`}
       />
-      <span className="text-blue-400">{formatAddress(image?.address)}</span>
+      <span className={`text-white ${addressTextClassName}`}>{formatAddress(image?.address)}</span>
     </Link>
   );
 };

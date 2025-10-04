@@ -1,15 +1,15 @@
 "use client";
 
-import ImageCard from "@/components/ImageCard";
+import ImageCarousel from "@/components/ImageCarousel";
+import ImageDetailModal from "@/components/ImageDetailModal";
 import OptimizedImage from "@/components/OptimizedImage";
-import { AvatarSkeleton, CardSkeleton } from "@/components/Skeleton";
+import { AvatarSkeleton, CarouselSkeleton } from "@/components/Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { ImageWithReactions, User } from "@/types";
 import { MapPinIcon, UserIcon } from "@heroicons/react/24/outline";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 interface UserProfileData {
   user: User;
@@ -26,69 +26,39 @@ function UserProfileContent() {
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [itemsPerRow, setItemsPerRow] = useState(3); // Default for SSR
-  const parentRef = useRef<HTMLDivElement>(null);
+  const [selectedImage, setSelectedImage] = useState<ImageWithReactions | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const itemsPerPage = 50;
 
-  // Calculate items per row based on screen size - client side only
-  useEffect(() => {
-    const calculateItemsPerRow = () => {
-      if (typeof window !== "undefined") {
-        const width = window.innerWidth;
-        if (width < 768) return 1; // Mobile
-        if (width < 1024) return 2; // Tablet
-        return 3; // Desktop
-      }
-      return 3; // Default
-    };
-
-    setItemsPerRow(calculateItemsPerRow());
-
-    const handleResize = () => {
-      setItemsPerRow(calculateItemsPerRow());
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Group images into rows for virtual scrolling
-  const imageRows = useMemo(() => {
-    if (!profileData?.images) return [];
-    const rows = [];
-    for (let i = 0; i < profileData.images.length; i += itemsPerRow) {
-      rows.push(profileData.images.slice(i, i + itemsPerRow));
-    }
-    return rows;
-  }, [profileData?.images, itemsPerRow]);
-
-  // Virtual scrolling setup for rows
-  const virtualizer = useVirtualizer({
-    count: imageRows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 400, // Estimated height of each row
-    overscan: 5,
-  });
-
-  useEffect(() => {
-    async function fetchUserProfile() {
-      if (!userId) return;
-
-      try {
+  const fetchImages = useCallback(async (isInitial = false) => {
+    if (!userId) return;
+    
+    try {
+      if (isInitial) {
         setIsLoading(true);
-        setError(null);
+        setProfileData(prev => prev ? { ...prev, images: [] } : null);
+        setHasMore(true);
+      } else {
+        setIsLoadingMore(true);
+      }
 
-        // Fetch user's images using the images API with userId filter
-        const imagesResponse = await fetch(
-          `/api/images?userId=${userId}&limit=50`
-        );
+      const currentImages = profileData?.images || [];
+      const response = await fetch(
+        `/api/images?userId=${userId}&limit=${itemsPerPage}&offset=${currentImages.length}`
+      );
 
-        if (!imagesResponse.ok) {
-          throw new Error("Failed to fetch user images");
-        }
+      if (!response.ok) {
+        throw new Error("Failed to fetch user images");
+      }
 
-        const imagesData = await imagesResponse.json();
+      const imagesData = await response.json();
+      const newImages = imagesData.images || [];
 
-        // User has no images, fetch user info separately
+      // Fetch user info if not already loaded
+      let user = profileData?.user;
+      if (!user) {
         const userResponse = await fetch(`/api/users/${userId}/info`);
         if (!userResponse.ok) {
           if (userResponse.status === 404) {
@@ -96,23 +66,60 @@ function UserProfileContent() {
           }
           throw new Error("Failed to fetch user info");
         }
-        const { user } = await userResponse.json();
-
-        setProfileData({
-          user,
-          images: imagesData.images || [],
-          totalImages: imagesData.images ? imagesData.images.length : 0,
-        });
-      } catch (err) {
-        console.error("Error fetching user profile:", err);
-        setError(err instanceof Error ? err.message : "Failed to load profile");
-      } finally {
-        setIsLoading(false);
+        const userData = await userResponse.json();
+        user = userData.user;
       }
-    }
 
-    fetchUserProfile();
+      if (isInitial) {
+        setProfileData({
+          user: user!,
+          images: newImages,
+          totalImages: newImages.length,
+        });
+      } else {
+        // Filter out duplicates based on image ID
+        const uniqueNewImages = newImages.filter(
+          (newImage: ImageWithReactions) =>
+            !currentImages.some((existingImage) => existingImage.id === newImage.id)
+        );
+        setProfileData(prev => prev ? {
+          ...prev,
+          images: [...prev.images, ...uniqueNewImages],
+          totalImages: prev.totalImages + uniqueNewImages.length,
+        } : null);
+      }
+
+      // If no new images returned, no more to load
+      setHasMore(newImages.length > 0);
+    } catch (err) {
+      console.error("Error fetching user images:", err);
+      setError(err instanceof Error ? err.message : "Failed to load images");
+      setHasMore(false);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
   }, [userId]);
+
+  const loadMoreImages = async () => {
+    if (hasMore && !isLoadingMore) {
+      await fetchImages(false);
+    }
+  };
+
+  const handleImageClick = (image: ImageWithReactions) => {
+    setSelectedImage(image);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedImage(null);
+  };
+
+  useEffect(() => {
+    fetchImages(true);
+  }, [fetchImages]);
 
   if (isLoading) {
     return (
@@ -134,14 +141,9 @@ function UserProfileContent() {
           </div>
         </div>
 
-        {/* Images Grid Skeleton */}
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="h-8 bg-white/10 rounded mb-6 w-32"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <CardSkeleton key={index} />
-            ))}
-          </div>
+        {/* Images Carousel Skeleton */}
+        <div className="flex-1">
+          <CarouselSkeleton />
         </div>
       </div>
     );
@@ -180,139 +182,91 @@ function UserProfileContent() {
   const { user, images, totalImages } = profileData;
 
   return (
-    <div className="min-h-screen bg-dark-gradient">
-        {/* Header */}
-        <div className="bg-black/50 backdrop-blur-sm border-b border-white/10">
-          <div className="max-w-4xl mx-auto px-4 py-8">
-            <div className="flex items-center space-x-6">
-              {/* Avatar */}
-              <div className="flex-shrink-0">
-                {user.avatarUrl ? (
-                  <OptimizedImage
-                    src={user.avatarUrl}
-                    alt={user.name || user.email}
-                    width={120}
-                    height={120}
-                    className="w-30 h-30 rounded-full object-cover border-4 border-white/20"
-                  />
-                ) : (
-                  <div className="w-30 h-30 rounded-full bg-white/10 border-4 border-white/20 flex items-center justify-center">
-                    <UserIcon className="w-16 h-16 text-white/70" />
-                  </div>
-                )}
-              </div>
+    <div className="min-h-screen bg-dark-gradient flex flex-col">
+      {/* Header */}
+      <div className="bg-black/50 backdrop-blur-sm border-b border-white/10 flex-shrink-0">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="flex items-center space-x-6">
+            {/* Avatar */}
+            <div className="flex-shrink-0">
+              {user.avatarUrl ? (
+                <OptimizedImage
+                  src={user.avatarUrl}
+                  alt={user.name || user.email}
+                  width={120}
+                  height={120}
+                  className="w-30 h-30 rounded-full object-cover border-4 border-white/20"
+                />
+              ) : (
+                <div className="w-30 h-30 rounded-full bg-white/10 border-4 border-white/20 flex items-center justify-center">
+                  <UserIcon className="w-16 h-16 text-white/70" />
+                </div>
+              )}
+            </div>
 
-              {/* User Info */}
-              <div className="flex-1 min-w-0">
-                <h1 className="text-3xl font-bold text-white mb-2">
-                  {user.name || t.profile.noName}
-                </h1>
-                {user.name && (
-                  <p className="text-white/70 text-lg mb-4">{t.profile.member}</p>
-                )}
+            {/* User Info */}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-3xl font-bold text-white mb-2">
+                {user.name || t.profile.noName}
+              </h1>
+              {user.name && (
+                <p className="text-white/70 text-lg mb-4">{t.profile.member}</p>
+              )}
 
-                {/* Stats */}
-                <div className="flex items-center space-x-6 text-white/70">
-                  <div className="flex items-center space-x-2">
-                    <MapPinIcon className="w-5 h-5" />
-                    <span className="text-lg font-semibold">{totalImages}</span>
-                    <span className="text-sm">images</span>
-                  </div>
-                  <div className="text-sm">
-                    {user.createdAt ? (
-                      <>
-                        Joined{" "}
-                        {new Date(user.createdAt).toLocaleDateString("en-US", {
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </>
-                    ) : (
-                      <span>Member</span>
-                    )}
-                  </div>
+              {/* Stats */}
+              <div className="flex items-center space-x-6 text-white/70">
+                <div className="flex items-center space-x-2">
+                  <MapPinIcon className="w-5 h-5" />
+                  <span className="text-lg font-semibold">{totalImages}</span>
+                  <span className="text-sm">images</span>
+                </div>
+                <div className="text-sm">
+                  {user.createdAt ? (
+                    <>
+                      Joined{" "}
+                      {new Date(user.createdAt).toLocaleDateString("en-US", {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </>
+                  ) : (
+                    <span>Member</span>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Images Grid */}
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          {images.length === 0 ? (
-            <div className="text-center py-16">
-              <MapPinIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
-              <h2 className="text-white text-xl font-semibold mb-2">
-                No Images Yet
-              </h2>
-              <p className="text-white/70">
-                This user hasn&apos;t shared any images yet.
-              </p>
-            </div>
-          ) : (
-            <>
-              <h2 className="text-white text-2xl font-semibold mb-6">
-                Images ({images.length})
-              </h2>
-              {/* Virtual Scrolling Container */}
-              <div
-                ref={parentRef}
-                className="h-[600px] overflow-auto"
-                style={{
-                  contain: "strict",
-                }}
-              >
-                <div
-                  style={{
-                    height: `${virtualizer.getTotalSize()}px`,
-                    width: "100%",
-                    position: "relative",
-                  }}
-                >
-                  {virtualizer.getVirtualItems().map((virtualItem) => {
-                    const imageRow = imageRows[virtualItem.index];
-                    if (!imageRow) return null;
+      {/* Images Carousel */}
+      <div className="flex-1">
+        {images.length === 0 ? (
+          <div className="text-center py-16">
+            <MapPinIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
+            <h2 className="text-white text-xl font-semibold mb-2">
+              No Images Yet
+            </h2>
+            <p className="text-white/70">
+              This user hasn&apos;t shared any images yet.
+            </p>
+          </div>
+        ) : (
+          <ImageCarousel
+            images={images}
+            onImageClick={handleImageClick}
+            onLoadMore={loadMoreImages}
+            hasMore={hasMore}
+            isLoadingMore={isLoadingMore}
+          />
+        )}
+      </div>
 
-                    return (
-                      <div
-                        key={virtualItem.key}
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: `${virtualItem.size}px`,
-                          transform: `translateY(${virtualItem.start}px)`,
-                        }}
-                      >
-                         <div
-                           className={`grid gap-12 ${
-                             itemsPerRow === 1
-                               ? "grid-cols-1"
-                               : itemsPerRow === 2
-                                 ? "grid-cols-2"
-                                 : "grid-cols-3"
-                           }`}
-                         >
-                          {imageRow.map((image) => (
-                            <ImageCard
-                              key={image.id}
-                              image={image}
-                              variant="grid"
-                              showAuthor={false}
-                              showReactions={false}
-                              showViewCount={false}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+      <ImageDetailModal
+        image={selectedImage}
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+      />
     </div>
   );
 }
@@ -339,14 +293,9 @@ export default function UserProfilePage() {
             </div>
           </div>
 
-          {/* Images Grid Skeleton */}
-          <div className="max-w-6xl mx-auto px-4 py-8">
-            <div className="h-8 bg-white/10 rounded mb-6 w-32"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <CardSkeleton key={index} />
-              ))}
-            </div>
+          {/* Images Carousel Skeleton */}
+          <div className="flex-1">
+            <CarouselSkeleton />
           </div>
         </div>
       }

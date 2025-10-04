@@ -232,9 +232,6 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
             <MapPinIcon className="w-5 h-5 mr-2" />
             <span className="font-medium">{t.camera.locationCaptured}</span>
           </div>
-          <p className="text-sm text-dark-secondary mt-1">
-            Lat: {location.latitude.toFixed(6)}, Lng: {location.longitude.toFixed(6)}
-          </p>
         </div>
       ) : (
         <div className="mb-4 p-4 bg-dark-secondary border border-dark-primary rounded-lg">
@@ -271,16 +268,6 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        {/* Change Image Button */}
-        {preview && (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full py-2 px-6 bg-dark-secondary text-dark-primary font-medium rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
-          >
-            Change Image
-          </button>
-        )}
-        
         {/* Upload Button */}
         <button
           onClick={handleUpload}

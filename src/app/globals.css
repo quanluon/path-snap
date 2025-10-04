@@ -19,6 +19,9 @@
   --border-secondary: #3f3f46;
   --accent-primary: #ffffff;
   --accent-secondary: #e4e4e7;
+  --bg-cream: #faf8f3;
+  --bg-cream-light: #fefcf7;
+  --bg-cream-dark: #f5f2e8;
   --gradient-primary: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
   --gradient-secondary: linear-gradient(135deg, #111111 0%, #2a2a2a 100%);
   --gradient-accent: linear-gradient(135deg, #ffffff 0%, #e4e4e7 100%);
@@ -77,6 +80,18 @@
   
   .bg-dark-card {
     background: var(--bg-card);
+  }
+  
+  .bg-cream {
+    background: var(--bg-cream);
+  }
+  
+  .bg-cream-light {
+    background: var(--bg-cream-light);
+  }
+  
+  .bg-cream-dark {
+    background: var(--bg-cream-dark);
   }
   
   .bg-dark-gradient {
@@ -170,7 +185,7 @@ html {
 
 /* Image loading animation */
 .image-loading {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--bg-cream) 25%, var(--bg-cream-dark) 50%, var(--bg-cream) 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
 }

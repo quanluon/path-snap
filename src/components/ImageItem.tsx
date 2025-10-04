@@ -65,10 +65,6 @@ export default function ImageItem({
       userReaction={userReaction}
       onReactionChange={handleReactionChange}
       isAuthenticated={finalIsAuthenticated}
-      variant="carousel"
-      showAuthor={true}
-      showReactions={true}
-      showViewCount={true}
     />
   );
 }

@@ -15,9 +15,6 @@ interface ImageCarouselProps {
   isLoadingMore?: boolean;
 }
 
-// Virtual scrolling configuration - use a default height for SSR
-const DEFAULT_ITEM_HEIGHT = 800;
-
 export default function ImageCarousel({ 
   images, 
   onImageClick, 
@@ -30,25 +27,14 @@ export default function ImageCarousel({
   // Use batch reactions hook for optimized API calls
   const { reactionCounts, userReactions, fetchBatchReactions, addReaction } = useBatchReactions();
 
-  // Get dynamic item height on client side
-  const itemHeight = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerHeight;
-    }
-    return DEFAULT_ITEM_HEIGHT;
-  }, []);
-
-  // Calculate total item count (including loading state)
-  const itemCount = useMemo(() => {
-    return hasMore ? images.length + 1 : images.length;
-  }, [images.length, hasMore]);
-
   // Create virtualizer
   const virtualizer = useVirtualizer({
-    count: itemCount,
+    count: images.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => itemHeight,
+    // estimateSize: () => itemHeight,
     overscan: 3, // Render 3 extra items outside viewport
+    gap: 5, // No gap between items
+    estimateSize: () => 500,
   });
 
   // Load more when scrolling near the end
@@ -88,7 +74,7 @@ export default function ImageCarousel({
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
+    <div className="relative w-full h-screen overflow-hidden bg-green">
       <div
         ref={parentRef}
         className="h-full overflow-auto scrollbar-hide"
@@ -99,6 +85,8 @@ export default function ImageCarousel({
             height: `${virtualizer.getTotalSize()}px`,
             width: '100%',
             position: 'relative',
+            margin: 0,
+            padding: 0,
           }}
         >
           {virtualizer.getVirtualItems().map((virtualItem) => {
@@ -110,6 +98,7 @@ export default function ImageCarousel({
                 return (
                   <div
                     key={virtualItem.key}
+                    ref={virtualizer.measureElement}
                     style={{
                       position: 'absolute',
                       top: 0,
@@ -117,6 +106,8 @@ export default function ImageCarousel({
                       width: '100%',
                       height: `${virtualItem.size}px`,
                       transform: `translateY(${virtualItem.start}px)`,
+                      margin: 0,
+                      padding: 0,
                     }}
                   >
                     <CarouselSkeleton />
@@ -126,6 +117,7 @@ export default function ImageCarousel({
                 return (
                   <div
                     key={virtualItem.key}
+                    ref={virtualizer.measureElement}
                     style={{
                       position: 'absolute',
                       top: 0,
@@ -133,8 +125,10 @@ export default function ImageCarousel({
                       width: '100%',
                       height: `${virtualItem.size}px`,
                       transform: `translateY(${virtualItem.start}px)`,
+                      margin: 0,
+                      padding: 0,
                     }}
-                    className="w-full flex items-center justify-center bg-black"
+                    className="w-full flex items-center justify-center bg-cream"
                   >
                     <div className="text-center">
                       <div className="text-white/60 text-6xl mb-4">✨</div>
@@ -150,13 +144,9 @@ export default function ImageCarousel({
             if (!image) return null;
 
             return (
-              <ImageItem
+              <div
                 key={virtualItem.key}
-                image={image}
-                onImageClick={onImageClick}
-                reactionCounts={reactionCounts[image.id]}
-                userReaction={userReactions[image.id]}
-                onReactionChange={(type) => addReaction(image.id, type)}
+                ref={virtualizer.measureElement}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -165,7 +155,15 @@ export default function ImageCarousel({
                   height: `${virtualItem.size}px`,
                   transform: `translateY(${virtualItem.start}px)`,
                 }}
-              />
+              >
+                <ImageItem
+                  image={image}
+                  onImageClick={onImageClick}
+                  reactionCounts={reactionCounts[image.id]}
+                  userReaction={userReactions[image.id]}
+                  onReactionChange={(type) => addReaction(image.id, type)}
+                />
+              </div>
             );
           })}
         </div>

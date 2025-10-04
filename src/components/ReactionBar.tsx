@@ -8,7 +8,7 @@ interface ReactionBarProps {
   imageId: string;
   reactionCounts?: ReactionCounts;
   userReaction?: ReactionType;
-  onReactionChange: (type: ReactionType) => Promise<void>;
+  onReactionChange?: (type: ReactionType) => Promise<void>;
   disabled?: boolean;
 }
 
@@ -23,7 +23,7 @@ export default function ReactionBar({
     if (disabled) return;
 
     try {
-      await onReactionChange(type);
+      await onReactionChange?.(type);
     } catch (error) {
       console.error('Error updating reaction:', error);
     }

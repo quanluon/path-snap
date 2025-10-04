@@ -227,13 +227,13 @@ export default function ImageDetailModal({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[90vh]">
             {/* Image */}
             <div
-              className="relative bg-black flex items-center justify-center cursor-pointer hover:bg-gray-900 transition-colors group"
+              className="relative bg-cream flex items-center justify-center cursor-pointer hover:bg-cream-light transition-colors group aspect-[4/3]"
               onClick={handleImageClick}
             >
               <OptimizedImage
                 src={image.url}
                 alt={image.description || t.image.checkPointImage}
-                className="object-contain p-4"
+                className="w-full h-full object-contain"
                 objectFit="contain"
                 fallbackSrc="/placeholder-image.svg"
               />
@@ -359,7 +359,7 @@ export default function ImageDetailModal({
 
       {/* Full-screen Image Preview */}
       {showPreview && (
-        <div className="fixed inset-0 z-[60] bg-black">
+        <div className="fixed inset-0 z-[60] bg-cream">
           {/* Close Button */}
           <button
             onClick={handlePreviewClose}
