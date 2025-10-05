@@ -84,9 +84,9 @@ export default function SettingsPage() {
 
   const handleContactSupport = () => {
     // Open email client with support email
-    const subject = encodeURIComponent('Checkpoint App Support Request');
+    const subject = encodeURIComponent(t.settings.supportSubject);
     const body = encodeURIComponent(`Hello Checkpoint Support Team,\n\nI need help with:\n\n[Please describe your issue here]\n\nUser ID: ${user?.id}\nEmail: ${user?.email}\n\nThank you!`);
-    window.open(`mailto:support@checkpoint.app?subject=${subject}&body=${body}`);
+    window.open(`mailto:${t.settings.supportEmail}?subject=${subject}&body=${body}`);
   };
 
   const handleDeleteAccount = async () => {
@@ -216,8 +216,8 @@ export default function SettingsPage() {
           >
             <UserIcon className="w-5 h-5 text-gray-300" />
             <div>
-              <p className="text-white font-medium">Edit Profile</p>
-              <p className="text-gray-400 text-sm">Update your name and avatar</p>
+              <p className="text-white font-medium">{t.settings.editProfile}</p>
+              <p className="text-gray-400 text-sm">{t.settings.avatarUploadDesc}</p>
             </div>
           </button>
           <button 
@@ -226,8 +226,8 @@ export default function SettingsPage() {
           >
             <ShieldCheckIcon className="w-5 h-5 text-gray-300" />
             <div>
-              <p className="text-white font-medium">View Profile</p>
-              <p className="text-gray-400 text-sm">See your public profile</p>
+              <p className="text-white font-medium">{t.settings.viewProfile}</p>
+              <p className="text-gray-400 text-sm">{t.settings.profile.subtitle}</p>
             </div>
           </button>
         </div>
@@ -258,15 +258,15 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3">
               <ArrowDownTrayIcon className="w-5 h-5 text-gray-300" />
               <div>
-                <p className="text-white font-medium">Export Data</p>
-                <p className="text-gray-400 text-sm">Download your data as JSON</p>
+                <p className="text-white font-medium">{t.settings.exportData}</p>
+                <p className="text-gray-400 text-sm">{t.settings.exportDataDesc}</p>
               </div>
             </div>
             <button
               onClick={handleExportData}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors"
             >
-              Export
+              {t.settings.exportData}
             </button>
           </div>
         </div>
@@ -276,14 +276,14 @@ export default function SettingsPage() {
       <div className="bg-gray-900 rounded-lg shadow-2xl border border-gray-700 p-6 mb-6">
         <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
           <ShieldCheckIcon className="w-5 h-5" />
-          Privacy Settings
+          {t.settings.privacySettings}
         </h3>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
             <div>
-              <p className="text-white font-medium">Profile Visibility</p>
-              <p className="text-gray-400 text-sm">Make your profile public or private</p>
+              <p className="text-white font-medium">{t.settings.profileVisibility}</p>
+              <p className="text-gray-400 text-sm">{t.settings.profileVisibilityDesc}</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" className="sr-only peer" defaultChecked />
@@ -293,8 +293,8 @@ export default function SettingsPage() {
 
           <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
             <div>
-              <p className="text-white font-medium">Location Sharing</p>
-              <p className="text-gray-400 text-sm">Allow location data in your images</p>
+              <p className="text-white font-medium">{t.settings.locationSharing}</p>
+              <p className="text-gray-400 text-sm">{t.settings.locationSharingDesc}</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" className="sr-only peer" defaultChecked />
@@ -304,8 +304,8 @@ export default function SettingsPage() {
 
           <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
             <div>
-              <p className="text-white font-medium">Analytics</p>
-              <p className="text-gray-400 text-sm">Help improve the app with usage data</p>
+              <p className="text-white font-medium">{t.settings.analytics}</p>
+              <p className="text-gray-400 text-sm">{t.settings.analyticsDesc}</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" className="sr-only peer" defaultChecked />
@@ -373,7 +373,7 @@ export default function SettingsPage() {
               disabled={isLoggingOut}
               className="px-4 py-2 text-red-400 border border-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50"
             >
-              {isLoggingOut ? 'Signing out...' : t.settings.account.signOut}
+              {isLoggingOut ? t.settings.signingOut : t.settings.account.signOut}
             </button>
           </div>
 
@@ -381,15 +381,15 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3">
               <TrashIcon className="w-5 h-5 text-red-400" />
               <div>
-                <p className="text-red-400 font-medium">Delete Account</p>
-                <p className="text-gray-400 text-sm">Permanently delete your account and all data</p>
+                <p className="text-red-400 font-medium">{t.settings.deleteAccount}</p>
+                <p className="text-gray-400 text-sm">{t.settings.deleteAccountDesc}</p>
               </div>
             </div>
             <button 
               onClick={() => setShowDeleteModal(true)}
               className="px-4 py-2 text-red-400 border border-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors"
             >
-              Delete
+              {t.common.delete}
             </button>
           </div>
         </div>
@@ -404,24 +404,24 @@ export default function SettingsPage() {
               <div className="p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <TrashIcon className="w-6 h-6 text-red-400" />
-                  <h3 className="text-lg font-semibold text-white">Delete Account</h3>
+                  <h3 className="text-lg font-semibold text-white">{t.settings.deleteAccount}</h3>
                 </div>
                 <p className="text-gray-300 mb-6">
-                  Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your data including images, plans, and comments.
+                  {t.settings.deleteAccountConfirm}
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowDeleteModal(false)}
                     className="flex-1 px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-800 transition-colors"
                   >
-                    Cancel
+                    {t.common.cancel}
                   </button>
                   <button
                     onClick={handleDeleteAccount}
                     disabled={isDeletingAccount}
                     className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors disabled:opacity-50"
                   >
-                    {isDeletingAccount ? 'Deleting...' : 'Delete Account'}
+                    {isDeletingAccount ? t.settings.deletingAccount : t.settings.deleteAccountButton}
                   </button>
                 </div>
               </div>

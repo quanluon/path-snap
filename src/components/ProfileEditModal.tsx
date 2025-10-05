@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { XMarkIcon, UserIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useUser } from '@/contexts/UserContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import OptimizedImage from '@/components/OptimizedImage';
 
 interface ProfileEditModalProps {
@@ -13,6 +14,7 @@ interface ProfileEditModalProps {
 
 export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileEditModalProps) {
   const { user } = useUser();
+  const { t } = useLanguage();
   const [name, setName] = useState(user?.name || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [isLoading, setIsLoading] = useState(false);
@@ -52,13 +54,13 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      setError('Please select an image file');
+      setError(t.settings.avatarFileTypeError);
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setError('File size must be less than 5MB');
+      setError(t.settings.avatarFileSizeError);
       return;
     }
 
@@ -79,7 +81,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to upload avatar');
+        throw new Error(data.error || t.settings.avatarUploadError);
       }
 
       // Update local state with the new avatar URL
@@ -104,7 +106,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Failed to delete avatar');
+        throw new Error(data.error || t.settings.avatarDeleteError);
       }
 
       // Update local state to remove avatar
@@ -132,7 +134,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-700">
             <h3 className="text-lg font-semibold text-white">
-              Edit Profile
+              {t.settings.editProfile}
             </h3>
             <button
               onClick={onClose}
@@ -173,7 +175,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
                     onClick={handleDeleteAvatar}
                     disabled={isLoading}
                     className="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-500 transition-colors disabled:opacity-50"
-                    title="Delete avatar"
+                    title={t.settings.avatarDelete}
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>
@@ -181,7 +183,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
               </div>
               <div className="w-full">
                 <label className="block text-sm font-semibold text-gray-200 mb-2">
-                  Profile Picture
+                  {t.settings.avatarUpload}
                 </label>
                 <input
                   type="file"
@@ -196,14 +198,14 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
             {/* Name Field */}
             <div>
               <label className="block text-sm font-semibold text-gray-200 mb-2">
-                Display Name
+                {t.auth.name}
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white bg-gray-800 placeholder-gray-400"
-                placeholder="Enter your name"
+                placeholder={t.auth.name}
               />
             </div>
 
@@ -212,7 +214,7 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
               disabled={isLoading}
               className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
             >
-              {isLoading ? 'Updating...' : 'Update Profile'}
+              {isLoading ? t.common.loading : t.settings.editProfile}
             </button>
           </form>
         </div>
