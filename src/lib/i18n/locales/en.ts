@@ -243,6 +243,8 @@ export const en = {
     cropAvatarDesc: 'Adjust the crop area to select the part of the image you want to use as your avatar.',
     cropAndUse: 'Crop & Use',
     cropping: 'Cropping...',
+    croppedAvatarReady: 'Cropped avatar ready to upload',
+    clearCroppedAvatar: 'Clear cropped avatar',
   },
   comments: {
     title: 'Comments',

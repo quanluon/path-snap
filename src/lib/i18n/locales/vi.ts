@@ -243,6 +243,8 @@ export const vi = {
     cropAvatarDesc: 'Điều chỉnh vùng cắt để chọn phần ảnh bạn muốn sử dụng làm ảnh đại diện.',
     cropAndUse: 'Cắt & Sử dụng',
     cropping: 'Đang cắt...',
+    croppedAvatarReady: 'Ảnh đại diện đã cắt sẵn sàng tải lên',
+    clearCroppedAvatar: 'Xóa ảnh đại diện đã cắt',
   },
   comments: {
     title: 'Bình luận',

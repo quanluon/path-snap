@@ -1,6 +1,7 @@
 import { formatDistanceToNow } from 'date-fns';
 import type { CommentWithUser } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import OptimizedImage from './OptimizedImage';
 
 interface CommentItemProps {
   comment: CommentWithUser;
@@ -22,10 +23,13 @@ export default function CommentItem({ comment }: CommentItemProps) {
       {/* Avatar */}
       <div className="flex-shrink-0">
         {user?.avatarUrl ? (
-          <img
+          <OptimizedImage
             src={user.avatarUrl}
             alt={userName}
             className="w-8 h-8 rounded-full object-cover"
+            width={32}
+            height={32}
+            objectFit="cover"
           />
         ) : (
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
