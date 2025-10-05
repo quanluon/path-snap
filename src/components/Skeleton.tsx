@@ -102,9 +102,9 @@ export function CarouselSkeleton({ className = '' }: { className?: string }) {
   return (
     <div className={`w-full bg-black ${className}`}>
       <div className="relative w-full h-screen flex flex-col">
-        {/* Image skeleton */}
-        <div className="flex-1 relative overflow-hidden">
-          <Skeleton variant="rectangular" className="w-full h-full" />
+        {/* Image skeleton with 4:3 aspect ratio */}
+        <div className="flex-1 relative overflow-hidden bg-green flex items-center justify-center">
+          <Skeleton variant="rectangular" className="w-full aspect-[4/3] max-w-full max-h-full" />
         </div>
         
         {/* Content skeleton */}
@@ -120,6 +120,55 @@ export function CarouselSkeleton({ className = '' }: { className?: string }) {
             <Skeleton variant="text" width="20%" />
             <Skeleton variant="text" width="20%" />
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function GridSkeleton({ className = '' }: { className?: string }) {
+  return (
+    <div className={`w-full bg-black/50 rounded-xl overflow-hidden ${className}`}>
+      <div className="flex flex-col aspect-[4/3] mb-8">
+        {/* Profile section skeleton */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <AvatarSkeleton size={24} />
+            <Skeleton variant="text" width="60px" />
+          </div>
+          <Skeleton variant="text" width="80px" />
+        </div>
+        
+        {/* Image skeleton with 4:3 aspect ratio */}
+        <div className="relative w-full mb-3">
+          <Skeleton variant="rectangular" className="w-full aspect-[4/3]" />
+        </div>
+        
+        {/* Reactions and views skeleton */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex space-x-4">
+            <Skeleton variant="text" width="40px" />
+            <Skeleton variant="text" width="40px" />
+            <Skeleton variant="text" width="40px" />
+          </div>
+          <div className="flex items-center space-x-1">
+            <Skeleton variant="circular" width={16} height={16} />
+            <Skeleton variant="text" width="20px" />
+          </div>
+        </div>
+        
+        {/* Address skeleton */}
+        <div className="mb-3">
+          <div className="flex items-center space-x-2">
+            <Skeleton variant="circular" width={16} height={16} />
+            <Skeleton variant="text" width="120px" />
+          </div>
+        </div>
+        
+        {/* Description skeleton */}
+        <div className="space-y-2">
+          <Skeleton variant="text" width="100%" />
+          <Skeleton variant="text" width="75%" />
         </div>
       </div>
     </div>

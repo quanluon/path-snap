@@ -379,7 +379,7 @@ export default function ImageDetailModal({
           {/* Close Button */}
           <button
             onClick={handlePreviewClose}
-            className="absolute top-4 right-4 z-10 p-3 bg-black/80 backdrop-blur-sm rounded-full hover:bg-white/10 transition-colors"
+            className="absolute top-4 right-4 z-20 p-3 bg-black/80 backdrop-blur-sm rounded-full hover:bg-white/10 transition-colors"
           >
             <XMarkIcon className="w-6 h-6 text-white" />
           </button>

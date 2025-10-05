@@ -1,7 +1,7 @@
 "use client";
 
 import ImageItem from "@/components/ImageItem";
-import { CarouselSkeleton } from "@/components/Skeleton";
+import { GridSkeleton } from "@/components/Skeleton";
 import { useBatchReactions } from "@/hooks/useBatchReactions";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { ImageWithReactions } from "@/types";
@@ -222,7 +222,7 @@ const VirtualGrid = ({
                 height: "200px",
               }}
             >
-              <CarouselSkeleton />
+              <GridSkeleton />
             </div>
           )}
           
