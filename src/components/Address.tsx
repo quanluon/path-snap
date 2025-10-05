@@ -1,13 +1,14 @@
 import type { Image } from "@/types";
 import Link from "next/link";
 import { MapPinIcon } from "@heroicons/react/24/solid";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const formatAddress = (address?: string | null) => {
+const formatAddress = (address?: string | null, fallbackText?: string) => {
   if (address) {
     const [_, ...lines] = address.split(",");
     return lines.join(",");
   }
-  return "Open in Google Maps →";
+  return fallbackText || "Open in Google Maps →";
 };
 
 export const Address = ({
@@ -23,6 +24,8 @@ export const Address = ({
   addressClassName?: string;
   addressTextClassName?: string;
 }) => {
+  const { t } = useLanguage();
+  
   if (!image.latitude || !image.longitude) return null;
   return (
     <Link
@@ -34,7 +37,7 @@ export const Address = ({
       <MapPinIcon
         className={`${addressIconSize} ${addressIconMargin} flex-shrink-0`}
       />
-      <span className={`text-white ${addressTextClassName}`}>{formatAddress(image?.address)}</span>
+      <span className={`text-white ${addressTextClassName}`}>{formatAddress(image?.address, t.common.openInMaps)}</span>
     </Link>
   );
 };

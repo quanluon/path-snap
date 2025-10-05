@@ -135,7 +135,8 @@ export default function SearchPage() {
                 images={results}
                 onImageClick={handleImageClick}
                 className="h-full"
-                hasLine={false}
+                showLine={false}
+                showOrder={false}
               />
             </div>
           )}

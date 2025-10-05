@@ -54,7 +54,7 @@ export async function uploadToS3(
 
     // Generate public URL
     const baseUrl = `https://${BUCKET_NAME}.s3.${
-      process.env.AWS_REGION || "us-east-1"
+      process.env.AWS_REGION || "ap-southeast-1"
     }.amazonaws.com`;
     const url = `${baseUrl}/${key}`;
 
@@ -88,6 +88,66 @@ export async function deleteFromS3(
   } catch (error) {
     console.error("S3 delete error:", error);
     throw new Error("Failed to delete image from S3");
+  }
+}
+
+export async function uploadAvatarToS3(
+  file: File,
+  userId: string
+): Promise<S3UploadResult> {
+  try {
+    // Generate unique key for avatar
+    const timestamp = Date.now();
+    const fileExtension = file.name.split(".").pop() || "jpg";
+    const key = `avatars/${userId}/${timestamp}.${fileExtension}`;
+
+    // Process image using common function
+    const { buffer: processedImage } = await processImage(file);
+
+    // Upload avatar
+    const uploadCommand = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: processedImage,
+      ContentType: "image/jpeg",
+      Metadata: {
+        userId,
+        type: "avatar",
+        originalName: file.name,
+        uploadedAt: new Date().toISOString(),
+      },
+    });
+
+    // Execute upload
+    await s3Client.send(uploadCommand);
+
+    // Generate public URL
+    const baseUrl = `https://${BUCKET_NAME}.s3.${
+      process.env.AWS_REGION || "ap-southeast-1"
+    }.amazonaws.com`;
+    const url = `${baseUrl}/${key}`;
+
+    return {
+      url,
+      key,
+    };
+  } catch (error) {
+    console.error("S3 avatar upload error:", error);
+    throw new Error("Failed to upload avatar to S3");
+  }
+}
+
+export async function deleteAvatarFromS3(key: string): Promise<void> {
+  try {
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    });
+
+    await s3Client.send(deleteCommand);
+  } catch (error) {
+    console.error("S3 avatar delete error:", error);
+    throw new Error("Failed to delete avatar from S3");
   }
 }
 

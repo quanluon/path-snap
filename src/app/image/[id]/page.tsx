@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageDetailModal from '@/components/ImageDetailModal';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { ImageWithReactions } from '@/types';
 
 export default function ImagePage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [image, setImage] = useState<ImageWithReactions | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,9 +37,9 @@ export default function ImagePage({ params }: { params: Promise<{ id: string }> 
         
         if (!response.ok) {
           if (response.status === 404) {
-            setError('Image not found');
+            setError(t.common.imageNotFound);
           } else {
-            setError('Failed to load image');
+            setError(t.common.failedToLoad);
           }
           return;
         }
@@ -46,7 +48,7 @@ export default function ImagePage({ params }: { params: Promise<{ id: string }> 
         setImage(data.image);
       } catch (err) {
         console.error('Error fetching image:', err);
-        setError('Failed to load image');
+        setError(t.common.failedToLoad);
       } finally {
         setIsLoading(false);
       }
@@ -65,7 +67,7 @@ export default function ImagePage({ params }: { params: Promise<{ id: string }> 
       <div className="h-screen flex justify-center items-center bg-black">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-white/80 text-lg font-secondary font-medium">Loading image...</p>
+          <p className="text-white/80 text-lg font-secondary font-medium">{t.common.loadingImage}</p>
         </div>
       </div>
     );
@@ -76,13 +78,13 @@ export default function ImagePage({ params }: { params: Promise<{ id: string }> 
       <div className="h-screen flex justify-center items-center bg-black">
         <div className="text-center">
           <div className="text-white/60 text-6xl mb-4">😞</div>
-          <h1 className="text-white text-2xl font-bold mb-2">Oops!</h1>
+          <h1 className="text-white text-2xl font-bold mb-2">{t.common.oops}</h1>
           <p className="text-white/70 text-lg mb-6">{error}</p>
           <button
             onClick={() => router.push('/')}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
-            Go Home
+            {t.common.goHome}
           </button>
         </div>
       </div>
@@ -94,13 +96,13 @@ export default function ImagePage({ params }: { params: Promise<{ id: string }> 
       <div className="h-screen flex justify-center items-center bg-black">
         <div className="text-center">
           <div className="text-white/60 text-6xl mb-4">🤔</div>
-          <h1 className="text-white text-2xl font-bold mb-2">Something went wrong</h1>
-          <p className="text-white/70 text-lg mb-6">Unable to load image</p>
+          <h1 className="text-white text-2xl font-bold mb-2">{t.common.somethingWrong}</h1>
+          <p className="text-white/70 text-lg mb-6">{t.common.unableToLoad}</p>
           <button
             onClick={() => router.push('/')}
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
-            Go Home
+            {t.common.goHome}
           </button>
         </div>
       </div>

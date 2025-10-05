@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import PullToRefresh from "react-simple-pull-to-refresh";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface GlobalPullToRefreshProps {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ interface GlobalPullToRefreshProps {
 
 export default function GlobalPullToRefresh({ children }: GlobalPullToRefreshProps) {
   const router = useRouter();
+  const { t } = useLanguage();
 
   const handleRefresh = async () => {
     router.refresh();
@@ -21,13 +23,13 @@ export default function GlobalPullToRefresh({ children }: GlobalPullToRefreshPro
       pullingContent={
         <div className="flex items-center justify-center py-4 bg-black/80">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-          <span className="text-white ml-3 font-medium">Pull to refresh...</span>
+          <span className="text-white ml-3 font-medium">{t.common.pullToRefresh}</span>
         </div>
       }
       refreshingContent={
         <div className="flex items-center justify-center py-4 bg-black/80">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-          <span className="text-white ml-3 font-medium">Refreshing...</span>
+          <span className="text-white ml-3 font-medium">{t.common.refreshing}</span>
         </div>
       }
       canFetchMore={false}

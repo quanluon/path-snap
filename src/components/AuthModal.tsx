@@ -74,31 +74,31 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
         />
 
         {/* Modal */}
-        <div className="relative inline-block w-full max-w-md overflow-hidden text-left align-middle transition-all transform bg-dark-card rounded-lg shadow-dark-secondary border border-dark-primary">
+        <div className="relative inline-block w-full max-w-md overflow-hidden text-left align-middle transition-all transform bg-gray-900 rounded-lg shadow-2xl border border-gray-700">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-dark-primary">
-            <h3 className="text-lg font-semibold text-dark-primary">
+          <div className="flex items-center justify-between p-6 border-b border-gray-700">
+            <h3 className="text-lg font-semibold text-white">
               {mode === 'login' ? t.auth.login : t.auth.signup}
             </h3>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-dark-hover rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
             >
-              <XMarkIcon className="w-5 h-5 text-dark-primary" />
+              <XMarkIcon className="w-5 h-5 text-gray-400" />
             </button>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800">{error}</p>
+              <div className="p-3 bg-red-900/50 border border-red-700 rounded-lg">
+                <p className="text-sm text-red-300 font-medium">{error}</p>
               </div>
             )}
 
             {mode === 'signup' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-200 mb-2">
                   {t.auth.name}
                 </label>
                 <input
@@ -106,13 +106,14 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white bg-gray-800 placeholder-gray-400"
+                  placeholder={t.auth.name}
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-200 mb-2">
                 {t.auth.email}
               </label>
               <input
@@ -120,12 +121,13 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white bg-gray-800 placeholder-gray-400"
+                placeholder={t.auth.email}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-200 mb-2">
                 {t.auth.password}
               </label>
               <div className="relative">
@@ -134,12 +136,13 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 pr-12 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white bg-gray-800 placeholder-gray-400"
+                  placeholder={t.auth.password}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
                 >
                   {showPassword ? (
                     <EyeSlashIcon className="w-5 h-5" />
@@ -153,16 +156,16 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
             >
               {isLoading ? t.common.loading : (mode === 'login' ? t.auth.login : t.auth.signup)}
             </button>
 
-            <div className="text-center">
+            <div className="text-center pt-2">
               <button
                 type="button"
                 onClick={() => onModeChange(mode === 'login' ? 'signup' : 'login')}
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors"
               >
                 {mode === 'login' 
                   ? t.profile.dontHaveAccount

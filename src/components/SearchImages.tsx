@@ -117,15 +117,13 @@ export default function SearchImages({
 
             {/* Range Toggle Button - Only show when range bar is hidden */}
 
-            <div className="flex items-center justify-center">
-              <button
-                onClick={toggleRangeBar}
-                className="flex items-center gap-2 px-4 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
-                title={t.search.showRangeSettings}
-              >
-                <AdjustmentsHorizontalIcon className="w-8 h-8" />
-              </button>
-            </div>
+            <button
+              onClick={toggleRangeBar}
+              className="flex items-center gap-2 px-4 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
+              title={t.search.showRangeSettings}
+            >
+              <AdjustmentsHorizontalIcon className="h-full w-6" />
+            </button>
           </div>
 
           {/* Range Bar - Conditionally Shown */}
@@ -150,7 +148,7 @@ export default function SearchImages({
               </div>
 
               {/* Search Button Below Range */}
-              <div className="mt-4 flex justify-center">
+              <div className="mt-4 flex justify-end">
                 <button
                   onClick={handleSearch}
                   disabled={!currentLocation || isLoading}

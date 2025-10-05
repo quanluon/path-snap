@@ -1,6 +1,7 @@
 "use client";
 
 import { ExclamationTriangleIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export default function ConfirmModal({
   type = "danger",
   isLoading = false,
 }: ConfirmModalProps) {
+  const { t } = useLanguage();
+  
   if (!isOpen) return null;
 
   const getIconColor = () => {
@@ -120,7 +123,7 @@ export default function ConfirmModal({
                 {isLoading ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Deleting...
+                    {t.common.deleting}
                   </div>
                 ) : (
                   confirmText

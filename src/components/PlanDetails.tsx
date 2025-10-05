@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { ArrowLeftIcon, MapPinIcon, CalendarIcon, PhotoIcon, StopIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, MapPinIcon, CalendarIcon, PhotoIcon, StopIcon, XMarkIcon, MapIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePlan } from '@/contexts/PlanContext';
 import ImageList from '@/components/ImageList';
@@ -243,23 +243,25 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
         <div className="flex space-x-2 mb-6">
           <button
             onClick={() => setViewMode('timeline')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`p-3 rounded-lg transition-colors ${
               viewMode === 'timeline'
                 ? 'bg-dark-primary text-dark-secondary'
                 : 'bg-dark-card text-dark-secondary hover:bg-dark-hover border border-dark-primary'
             }`}
+            title={t.plan.timeline}
           >
-            {t.plan.timeline}
+            <PhotoIcon className="w-5 h-5" />
           </button>
           <button
             onClick={() => setViewMode('map')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`p-3 rounded-lg transition-colors ${
               viewMode === 'map'
                 ? 'bg-dark-primary text-dark-secondary'
                 : 'bg-dark-card text-dark-secondary hover:bg-dark-hover border border-dark-primary'
             }`}
+            title={t.plan.map}
           >
-            {t.plan.map}
+            <MapIcon className="w-5 h-5" />
           </button>
         </div>
       )}
