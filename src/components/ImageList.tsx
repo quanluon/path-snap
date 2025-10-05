@@ -4,11 +4,11 @@ import ImageItem from "@/components/ImageItem";
 import { CarouselSkeleton } from "@/components/Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBatchReactions } from "@/hooks/useBatchReactions";
+import { FETCH_MORE_THRESHOLD } from "@/lib/constants";
 import type { ImageWithReactions } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import VirtualGrid from "./VirtualGrid";
-import { FETCH_MORE_THRESHOLD } from "@/lib/constants";
 
 interface ImageListProps {
   images: ImageWithReactions[];
@@ -34,7 +34,7 @@ const ImageList = ({
 
   // Create virtualizer
   const virtualizer = useVirtualizer({
-    count:  images.length + 1,
+    count: images.length + 1,
     getScrollElement: () => parentRef.current,
     overscan: 3, // Render 3 extra items outside viewport
     gap: 5, // No gap between items
@@ -141,7 +141,7 @@ const ImageList = ({
                         top: 0,
                         left: 0,
                         width: "100%",
-                        height: `${virtualItem.size}px`,
+                        height: `250px`,
                         transform: `translateY(${virtualItem.start}px)`,
                         margin: 0,
                         padding: 0,
