@@ -38,83 +38,81 @@ function UserProfileContent() {
   const [hasMore, setHasMore] = useState(true);
   const itemsPerPage = 50;
 
-  const fetchImages = useCallback(
-    async (isInitial = false) => {
-      if (!userId) return;
+  const fetchImages = async (isInitial = false) => {
+    if (!userId) return;
 
-      try {
-        if (isInitial) {
-          setIsLoading(true);
-          setProfileData((prev) => (prev ? { ...prev, images: [] } : null));
-          setHasMore(true);
-        } else {
-          setIsLoadingMore(true);
-        }
-
-        const currentImages = profileData?.images || [];
-        const response = await fetch(
-          `/api/images?userId=${userId}&limit=${itemsPerPage}&offset=${currentImages.length}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch user images");
-        }
-
-        const imagesData = await response.json();
-        const newImages = imagesData.images || [];
-
-        // Fetch user info if not already loaded
-        let user = profileData?.user;
-        if (!user) {
-          const userResponse = await fetch(`/api/users/${userId}/info`);
-          if (!userResponse.ok) {
-            if (userResponse.status === 404) {
-              throw new Error("User not found");
-            }
-            throw new Error("Failed to fetch user info");
-          }
-          const userData = await userResponse.json();
-          user = userData.user;
-        }
-
-        if (isInitial) {
-          setProfileData({
-            user: user!,
-            images: newImages,
-            totalImages: newImages.length,
-          });
-        } else {
-          // Filter out duplicates based on image ID
-          const uniqueNewImages = newImages.filter(
-            (newImage: ImageWithReactions) =>
-              !currentImages.some(
-                (existingImage) => existingImage.id === newImage.id
-              )
-          );
-          setProfileData((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  images: [...prev.images, ...uniqueNewImages],
-                  totalImages: prev.totalImages + uniqueNewImages.length,
-                }
-              : null
-          );
-        }
-
-        // If no new images returned, no more to load
-        setHasMore(newImages.length > 0);
-      } catch (err) {
-        console.error("Error fetching user images:", err);
-        setError(err instanceof Error ? err.message : "Failed to load images");
-        setHasMore(false);
-      } finally {
-        setIsLoading(false);
-        setIsLoadingMore(false);
+    try {
+      if (isInitial) {
+        setIsLoading(true);
+        setProfileData((prev) => (prev ? { ...prev, images: [] } : null));
+        setHasMore(true);
+      } else {
+        setIsLoadingMore(true);
       }
-    },
-    [userId]
-  );
+
+      const currentImages = profileData?.images || [];
+
+      const response = await fetch(
+        `/api/images?userId=${userId}&limit=${itemsPerPage}&offset=${currentImages.length}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user images");
+      }
+
+      const imagesData = await response.json();
+      const newImages = imagesData.images || [];
+
+      // Fetch user info if not already loaded
+      let user = profileData?.user;
+      if (!user) {
+        const userResponse = await fetch(`/api/users/${userId}/info`);
+        if (!userResponse.ok) {
+          if (userResponse.status === 404) {
+            throw new Error("User not found");
+          }
+          throw new Error("Failed to fetch user info");
+        }
+        const userData = await userResponse.json();
+        user = userData.user;
+      }
+
+      if (isInitial) {
+        setProfileData({
+          user: user!,
+          images: newImages,
+          totalImages: newImages.length,
+        });
+      } else {
+        // Filter out duplicates based on image ID
+        const uniqueNewImages = newImages.filter(
+          (newImage: ImageWithReactions) =>
+            !currentImages.some(
+              (existingImage) => existingImage.id === newImage.id
+            )
+        );
+        setProfileData((prev) =>
+          prev
+            ? {
+                ...prev,
+                images: [...prev.images, ...uniqueNewImages],
+                totalImages: prev.totalImages + uniqueNewImages.length,
+              }
+            : null
+        );
+      }
+
+      // If no new images returned, no more to load
+      setHasMore(!!newImages.length);
+    } catch (err) {
+      console.error("Error fetching user images:", err);
+      setError(err instanceof Error ? err.message : "Failed to load images");
+      setHasMore(false);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
 
   const loadMoreImages = async () => {
     if (hasMore && !isLoadingMore) {
@@ -134,7 +132,7 @@ function UserProfileContent() {
 
   useEffect(() => {
     fetchImages(true);
-  }, [fetchImages]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -177,7 +175,7 @@ function UserProfileContent() {
             href="/"
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
           >
-{t.common.goHome}
+            {t.common.goHome}
           </Link>
         </div>
       </div>
@@ -261,9 +259,7 @@ function UserProfileContent() {
             <h2 className="text-white text-xl font-semibold mb-2">
               {t.profile.noImagesYet}
             </h2>
-            <p className="text-white/70">
-              {t.profile.noImagesDescription}
-            </p>
+            <p className="text-white/70">{t.profile.noImagesDescription}</p>
           </div>
         ) : (
           <ImageList
