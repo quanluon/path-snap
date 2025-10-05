@@ -362,7 +362,20 @@ export default function ImageDetailModal({
 
       {/* Full-screen Image Preview */}
       {showPreview && (
-        <div className="fixed inset-0 z-[60] bg-green">
+        <div className="fixed inset-0 z-[60] overflow-hidden">
+          {/* Blurred Background Image */}
+          <div className="absolute inset-0">
+            <OptimizedImage
+              src={image.url}
+              alt={image.description || t.image.checkPointImage}
+              className="w-full h-full object-cover"
+              objectFit="cover"
+              fallbackSrc="/placeholder-image.svg"
+            />
+            {/* Blur Overlay */}
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
+          </div>
+
           {/* Close Button */}
           <button
             onClick={handlePreviewClose}
@@ -372,18 +385,18 @@ export default function ImageDetailModal({
           </button>
 
           {/* Full-screen Image */}
-          <div className="flex items-center justify-center h-full p-4">
+          <div className="relative z-10 flex items-center justify-center h-full p-4">
             <OptimizedImage
               src={image.url}
               alt={image.description || t.image.checkPointImage}
-              className="object-contain max-w-full max-h-full"
+              className="object-contain max-w-full max-h-full shadow-2xl"
               objectFit="contain"
               fallbackSrc="/placeholder-image.svg"
             />
           </div>
 
           {/* Image Info Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6">
+          <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-6">
             <div className="text-center">
               <h3 className="text-white text-lg font-medium mb-2">
                 {image.description || t.image.checkPointImage}
