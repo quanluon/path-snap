@@ -139,7 +139,7 @@ function UserProfileContent() {
       <div className="min-h-screen bg-dark-gradient">
         {/* Header Skeleton */}
         <div className="bg-black/50 backdrop-blur-sm border-b border-white/10">
-          <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="mx-auto px-4 py-4">
             <div className="flex items-center space-x-6">
               <AvatarSkeleton size={120} />
               <div className="flex-1 min-w-0">
@@ -198,7 +198,7 @@ function UserProfileContent() {
     <div className="min-h-screen bg-dark-gradient flex flex-col">
       {/* Header */}
       <div className="bg-black/50 backdrop-blur-sm border-b border-white/10 flex-shrink-0">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mx-auto px-4 py-4">
           <div className="flex items-center space-x-6">
             {/* Avatar */}
             <div className="flex-shrink-0">
@@ -288,7 +288,7 @@ export default function UserProfilePage() {
         <div className="min-h-screen bg-dark-gradient">
           {/* Header Skeleton */}
           <div className="bg-black/50 backdrop-blur-sm border-b border-white/10">
-            <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="mx-auto px-4 py-4">
               <div className="flex items-center space-x-6">
                 <AvatarSkeleton size={120} />
                 <div className="flex-1 min-w-0">
