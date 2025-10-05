@@ -106,6 +106,7 @@ export const vi = {
     checkpoints: 'checkpoint',
     clusterInfo: 'Điểm đỏ = nhiều checkpoint tại cùng vị trí',
     images: 'ảnh',
+    orderByDate: 'Số thứ tự theo ngày tạo',
     ongoing: 'Đang hoạt động',
     ending: 'Đang kết thúc...',
     endPlanButton: 'Kết thúc kế hoạch',

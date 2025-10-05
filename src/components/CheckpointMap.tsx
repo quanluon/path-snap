@@ -25,6 +25,7 @@ const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapCo
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+const Polyline = dynamic(() => import('react-leaflet').then(mod => mod.Polyline), { ssr: false });
 
 // Import Leaflet for custom icons
 let L: typeof import('leaflet') | null = null;
@@ -47,6 +48,11 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Sort images by creation date to establish order
+  const sortedImages = [...images].sort((a, b) => 
+    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
 
   // Group nearby images (within 10 meters)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -142,6 +148,17 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           
+          {/* Polyline connecting checkpoints in order */}
+          {sortedImages.length > 1 && (
+            <Polyline
+              positions={sortedImages.map(img => [img.latitude, img.longitude])}
+              color="#3B82F6"
+              weight={3}
+              opacity={0.8}
+              dashArray="5, 10"
+            />
+          )}
+          
         {groupNearbyImages(images).map((group) => 
           group.map((image, imageIndex) => {
             const [offsetLat, offsetLng] = getOffsetPosition(
@@ -151,12 +168,15 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
               group.length
             );
 
-            // Create custom dot icon with count for clusters
+            // Create custom dot icon with order number
             const createDotIcon = () => {
               if (!L) return undefined;
               const isCluster = group.length > 1;
-              const size = isCluster ? 24 : 16;
+              const size = isCluster ? 28 : 24;
               const bgColor = isCluster ? '#EF4444' : '#3B82F6';
+              
+              // Find the order number for this image in the sorted list
+              const orderNumber = sortedImages.findIndex(img => img.id === image.id) + 1;
               
               return L.divIcon({
                 className: 'custom-dot-marker',
@@ -172,9 +192,9 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
                   align-items: center;
                   justify-content: center;
                   color: white;
-                  font-size: ${isCluster ? '10px' : '0px'};
+                  font-size: ${isCluster ? '10px' : '12px'};
                   font-weight: bold;
-                ">${isCluster ? group.length : ''}</div>`,
+                ">${isCluster ? group.length : orderNumber}</div>`,
                 iconSize: [size, size],
                 iconAnchor: [size/2, size/2]
               });
@@ -263,6 +283,9 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
           <div className="font-medium">{images.length} {t.plan.checkpoints}</div>
           <div className="text-xs text-gray-500 mt-1">
             {t.plan.clickMarker}
+          </div>
+          <div className="text-xs text-blue-600 mt-1">
+            🔵 {t.plan.orderByDate}
           </div>
           {groupNearbyImages(images).some(group => group.length > 1) && (
             <div className="text-xs text-orange-600 mt-1">

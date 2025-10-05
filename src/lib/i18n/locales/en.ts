@@ -106,6 +106,7 @@ export const en = {
     checkpoints: 'checkpoints',
     clusterInfo: 'Red dots = multiple checkpoints at same location',
     images: 'images',
+    orderByDate: 'Numbers show order by date',
     ongoing: 'Ongoing',
     ending: 'Ending...',
     endPlanButton: 'End Plan',
