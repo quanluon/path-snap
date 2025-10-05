@@ -39,9 +39,10 @@ interface CheckpointMapProps {
   onImageClick?: (image: typeof images.$inferSelect) => void;
   onShowCarousel?: (imageList: typeof images.$inferSelect[], startIndex: number) => void;
   className?: string;
+  hasLine?: boolean;
 }
 
-export default function CheckpointMap({ images, onImageClick, onShowCarousel, className = '' }: CheckpointMapProps) {
+export default function CheckpointMap({ images, onImageClick, onShowCarousel, className = '', hasLine = true }: CheckpointMapProps) {
   const { t } = useLanguage();
   const [isClient, setIsClient] = useState(false);
 
@@ -149,7 +150,7 @@ export default function CheckpointMap({ images, onImageClick, onShowCarousel, cl
           />
           
           {/* Polyline connecting checkpoints in order */}
-          {sortedImages.length > 1 && (
+          {hasLine && sortedImages.length > 1 && (
             <Polyline
               positions={sortedImages.map(img => [img.latitude, img.longitude])}
               color="#3B82F6"

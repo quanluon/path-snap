@@ -73,6 +73,8 @@ export const vi = {
     locationObtained: 'Đã lấy vị trí thành công. Nhấn tìm kiếm để tìm ảnh.',
     getLocationFirst: 'Vui lòng lấy vị trí trước.',
     searchFailed: 'Tìm kiếm thất bại. Vui lòng thử lại.',
+    gridView: 'Lưới',
+    mapView: 'Bản đồ',
   },
   plan: {
     title: 'Kế hoạch di chuyển',

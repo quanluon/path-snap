@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import SearchImages from "@/components/SearchImages";
 import ImageList from "@/components/ImageList";
 import ImageDetailModal from "@/components/ImageDetailModal";
+import CheckpointMap from "@/components/CheckpointMap";
+import ViewToggle from "@/components/ViewToggle";
 import { CarouselSkeleton } from "@/components/Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { ImageWithReactions } from "@/types";
@@ -18,6 +20,7 @@ export default function SearchPage() {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [currentView, setCurrentView] = useState<"grid" | "map">("grid");
   const [searchParams, setSearchParams] = useState<{
     latitude: number;
     longitude: number;
@@ -25,23 +28,30 @@ export default function SearchPage() {
   } | null>(null);
   const itemsPerPage = 50;
 
-  const fetchSearchResults = async () => {
+  const fetchSearchResults = useCallback(async (offset: number = 0) => {
     if (!searchParams) return;
 
     try {
       const response = await fetch(
-        `/api/search?latitude=${searchParams.latitude}&longitude=${searchParams.longitude}&radius=${searchParams.radius}&limit=${itemsPerPage}&offset=${results.length}`
+        `/api/search?latitude=${searchParams.latitude}&longitude=${searchParams.longitude}&radius=${searchParams.radius}&limit=${itemsPerPage}&offset=${offset}`
       );
       const data = await response.json();
 
       const newImages = data.images || [];
 
-      // Filter out duplicates based on image ID
-      const uniqueNewImages = newImages.filter(
-        (newImage: ImageWithReactions) =>
-          !results.some((existingImage) => existingImage.id === newImage.id)
-      );
-      setResults((prev) => [...prev, ...uniqueNewImages]);
+      if (offset === 0) {
+        // Initial search - replace results
+        setResults(newImages);
+      } else {
+        // Load more - append results and filter duplicates
+        setResults((prev) => {
+          const uniqueNewImages = newImages.filter(
+            (newImage: ImageWithReactions) =>
+              !prev.some((existingImage) => existingImage.id === newImage.id)
+          );
+          return [...prev, ...uniqueNewImages];
+        });
+      }
 
       // If no new images returned, no more to load
       setHasMore(newImages.length > 0);
@@ -52,7 +62,7 @@ export default function SearchPage() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  };
+  }, [searchParams, itemsPerPage]);
 
   const handleSearch = async (
     latitude: number,
@@ -63,18 +73,24 @@ export default function SearchPage() {
   };
 
   useEffect(() => {
-    fetchSearchResults();
-  }, [searchParams]);
+    if (searchParams) {
+      fetchSearchResults(0);
+    }
+  }, [searchParams, fetchSearchResults]);
 
   const loadMoreResults = async () => {
     if (hasMore && !isLoadingMore) {
-      await fetchSearchResults();
+      await fetchSearchResults(results.length);
     }
   };
 
   const handleImageClick = (image: ImageWithReactions) => {
     setSelectedImage(image);
     setIsModalOpen(true);
+  };
+
+  const handleViewChange = (view: "grid" | "map") => {
+    setCurrentView(view);
   };
 
   return (
@@ -95,18 +111,34 @@ export default function SearchPage() {
         </div>
       ) : results.length > 0 ? (
         <div className="mt-8">
-          <div className="mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold text-dark-primary">
               {t.search.resultsTitle} ({results.length} {t.search.resultsCount})
             </h2>
+            <ViewToggle
+              currentView={currentView}
+              onViewChange={handleViewChange}
+            />
           </div>
-          <ImageList
-            images={results}
-            onImageClick={handleImageClick}
-            onLoadMore={loadMoreResults}
-            hasMore={hasMore}
-            isLoadingMore={isLoadingMore}
-          />
+          
+          {currentView === "grid" ? (
+            <ImageList
+              images={results}
+              onImageClick={handleImageClick}
+              onLoadMore={loadMoreResults}
+              hasMore={hasMore}
+              isLoadingMore={isLoadingMore}
+            />
+          ) : (
+            <div className="h-[70vh] rounded-xl overflow-hidden border border-white/10">
+              <CheckpointMap
+                images={results}
+                onImageClick={handleImageClick}
+                className="h-full"
+                hasLine={false}
+              />
+            </div>
+          )}
         </div>
       ) : null}
 

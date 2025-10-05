@@ -73,6 +73,8 @@ export const en = {
     locationObtained: 'Location obtained successfully. Click search to find images.',
     getLocationFirst: 'Please get your location first.',
     searchFailed: 'Search failed. Please try again.',
+    gridView: 'Grid',
+    mapView: 'Map',
   },
   plan: {
     title: 'Travel Plan',
