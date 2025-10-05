@@ -239,6 +239,10 @@ export const en = {
     accountDeleteError: 'Failed to delete account',
     supportEmail: 'support@checkpoint.app',
     supportSubject: 'Checkpoint App Support Request',
+    cropAvatar: 'Crop Avatar',
+    cropAvatarDesc: 'Adjust the crop area to select the part of the image you want to use as your avatar.',
+    cropAndUse: 'Crop & Use',
+    cropping: 'Cropping...',
   },
   comments: {
     title: 'Comments',

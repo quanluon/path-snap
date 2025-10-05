@@ -239,6 +239,10 @@ export const vi = {
     accountDeleteError: 'Xóa tài khoản thất bại',
     supportEmail: 'support@checkpoint.app',
     supportSubject: 'Yêu cầu hỗ trợ ứng dụng Checkpoint',
+    cropAvatar: 'Cắt ảnh đại diện',
+    cropAvatarDesc: 'Điều chỉnh vùng cắt để chọn phần ảnh bạn muốn sử dụng làm ảnh đại diện.',
+    cropAndUse: 'Cắt & Sử dụng',
+    cropping: 'Đang cắt...',
   },
   comments: {
     title: 'Bình luận',

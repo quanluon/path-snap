@@ -130,7 +130,7 @@ export default function SearchPage() {
               isLoadingMore={isLoadingMore}
             />
           ) : (
-            <div className="h-[70vh] rounded-xl overflow-hidden border border-white/10">
+            <div className="rounded-xl overflow-hidden border border-white/10">
               <CheckpointMap
                 images={results}
                 onImageClick={handleImageClick}

@@ -5,6 +5,7 @@ import { XMarkIcon, UserIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useUser } from '@/contexts/UserContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import OptimizedImage from '@/components/OptimizedImage';
+import ImageCropModal from '@/components/ImageCropModal';
 
 interface ProfileEditModalProps {
   isOpen: boolean;
@@ -19,6 +20,9 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isCropping, setIsCropping] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,15 +68,24 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
       return;
     }
 
-    setIsLoading(true);
+    // Show crop modal instead of uploading directly
+    setSelectedFile(file);
+    setShowCropModal(true);
+    
+    // Clear the input
+    e.target.value = '';
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    setIsCropping(true);
     setError('');
 
     try {
       // Create FormData for file upload
       const formData = new FormData();
-      formData.append('avatar', file);
+      formData.append('avatar', croppedBlob, 'avatar.jpg');
 
-      // Upload avatar to S3
+      // Upload cropped avatar to S3
       const response = await fetch('/api/profile/avatar', {
         method: 'POST',
         body: formData,
@@ -86,11 +99,18 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
 
       // Update local state with the new avatar URL
       setAvatarUrl(data.avatarUrl);
+      setShowCropModal(false);
+      setSelectedFile(null);
     } catch (error) {
       setError((error as Error).message);
     } finally {
-      setIsLoading(false);
+      setIsCropping(false);
     }
+  };
+
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setSelectedFile(null);
   };
 
   const handleDeleteAvatar = async () => {
@@ -219,6 +239,15 @@ export default function ProfileEditModal({ isOpen, onClose, onUpdate }: ProfileE
           </form>
         </div>
       </div>
+
+      {/* Image Crop Modal */}
+      <ImageCropModal
+        isOpen={showCropModal}
+        onClose={handleCropCancel}
+        onCrop={handleCropComplete}
+        imageFile={selectedFile}
+        isLoading={isCropping}
+      />
     </div>
   );
 }
