@@ -46,7 +46,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
         <div className="flex justify-center items-center py-20">
           <div className="text-dark-muted">{t.common.loading}</div>
         </div>
@@ -56,7 +56,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-2xl font-bold text-dark-primary mb-4">
             {t.profile.accessDenied}
@@ -68,7 +68,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div>
       <div className="max-w-2xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-dark-primary mb-2">

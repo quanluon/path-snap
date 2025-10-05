@@ -6,7 +6,11 @@ import OptimizedImage from "@/components/OptimizedImage";
 import { AvatarSkeleton, CarouselSkeleton } from "@/components/Skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { ImageWithReactions, User } from "@/types";
-import { MapPinIcon, UserIcon } from "@heroicons/react/24/outline";
+import {
+  CalendarIcon,
+  MapPinIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
@@ -26,80 +30,91 @@ function UserProfileContent() {
   const [profileData, setProfileData] = useState<UserProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedImage, setSelectedImage] = useState<ImageWithReactions | null>(null);
+  const [selectedImage, setSelectedImage] = useState<ImageWithReactions | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const itemsPerPage = 50;
 
-  const fetchImages = useCallback(async (isInitial = false) => {
-    if (!userId) return;
-    
-    try {
-      if (isInitial) {
-        setIsLoading(true);
-        setProfileData(prev => prev ? { ...prev, images: [] } : null);
-        setHasMore(true);
-      } else {
-        setIsLoadingMore(true);
-      }
+  const fetchImages = useCallback(
+    async (isInitial = false) => {
+      if (!userId) return;
 
-      const currentImages = profileData?.images || [];
-      const response = await fetch(
-        `/api/images?userId=${userId}&limit=${itemsPerPage}&offset=${currentImages.length}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch user images");
-      }
-
-      const imagesData = await response.json();
-      const newImages = imagesData.images || [];
-
-      // Fetch user info if not already loaded
-      let user = profileData?.user;
-      if (!user) {
-        const userResponse = await fetch(`/api/users/${userId}/info`);
-        if (!userResponse.ok) {
-          if (userResponse.status === 404) {
-            throw new Error("User not found");
-          }
-          throw new Error("Failed to fetch user info");
+      try {
+        if (isInitial) {
+          setIsLoading(true);
+          setProfileData((prev) => (prev ? { ...prev, images: [] } : null));
+          setHasMore(true);
+        } else {
+          setIsLoadingMore(true);
         }
-        const userData = await userResponse.json();
-        user = userData.user;
-      }
 
-      if (isInitial) {
-        setProfileData({
-          user: user!,
-          images: newImages,
-          totalImages: newImages.length,
-        });
-      } else {
-        // Filter out duplicates based on image ID
-        const uniqueNewImages = newImages.filter(
-          (newImage: ImageWithReactions) =>
-            !currentImages.some((existingImage) => existingImage.id === newImage.id)
+        const currentImages = profileData?.images || [];
+        const response = await fetch(
+          `/api/images?userId=${userId}&limit=${itemsPerPage}&offset=${currentImages.length}`
         );
-        setProfileData(prev => prev ? {
-          ...prev,
-          images: [...prev.images, ...uniqueNewImages],
-          totalImages: prev.totalImages + uniqueNewImages.length,
-        } : null);
-      }
 
-      // If no new images returned, no more to load
-      setHasMore(newImages.length > 0);
-    } catch (err) {
-      console.error("Error fetching user images:", err);
-      setError(err instanceof Error ? err.message : "Failed to load images");
-      setHasMore(false);
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-    }
-  }, [userId]);
+        if (!response.ok) {
+          throw new Error("Failed to fetch user images");
+        }
+
+        const imagesData = await response.json();
+        const newImages = imagesData.images || [];
+
+        // Fetch user info if not already loaded
+        let user = profileData?.user;
+        if (!user) {
+          const userResponse = await fetch(`/api/users/${userId}/info`);
+          if (!userResponse.ok) {
+            if (userResponse.status === 404) {
+              throw new Error("User not found");
+            }
+            throw new Error("Failed to fetch user info");
+          }
+          const userData = await userResponse.json();
+          user = userData.user;
+        }
+
+        if (isInitial) {
+          setProfileData({
+            user: user!,
+            images: newImages,
+            totalImages: newImages.length,
+          });
+        } else {
+          // Filter out duplicates based on image ID
+          const uniqueNewImages = newImages.filter(
+            (newImage: ImageWithReactions) =>
+              !currentImages.some(
+                (existingImage) => existingImage.id === newImage.id
+              )
+          );
+          setProfileData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  images: [...prev.images, ...uniqueNewImages],
+                  totalImages: prev.totalImages + uniqueNewImages.length,
+                }
+              : null
+          );
+        }
+
+        // If no new images returned, no more to load
+        setHasMore(newImages.length > 0);
+      } catch (err) {
+        console.error("Error fetching user images:", err);
+        setError(err instanceof Error ? err.message : "Failed to load images");
+        setHasMore(false);
+      } finally {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
+    },
+    [userId]
+  );
 
   const loadMoreImages = async () => {
     if (hasMore && !isLoadingMore) {
@@ -155,14 +170,14 @@ function UserProfileContent() {
         <div className="text-center">
           <div className="text-red-400 text-6xl mb-4">⚠️</div>
           <h1 className="text-white text-2xl font-semibold mb-2">
-            Profile Not Found
+            {t.profile.profileNotFound}
           </h1>
           <p className="text-white/70 mb-6">{error}</p>
           <Link
             href="/"
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
           >
-            Go Home
+{t.common.goHome}
           </Link>
         </div>
       </div>
@@ -173,7 +188,7 @@ function UserProfileContent() {
     return (
       <div className="min-h-screen bg-dark-gradient flex items-center justify-center">
         <div className="text-center">
-          <p className="text-white/70">No profile data available</p>
+          <p className="text-white/70">{t.profile.noProfileData}</p>
         </div>
       </div>
     );
@@ -215,24 +230,22 @@ function UserProfileContent() {
               )}
 
               {/* Stats */}
-              <div className="flex items-center space-x-6 text-white/70">
+              <div className="text-white/70">
                 <div className="flex items-center space-x-2">
                   <MapPinIcon className="w-5 h-5" />
-                  <span className="text-lg font-semibold">{totalImages}</span>
-                  <span className="text-sm">images</span>
+                  <span className="text-lg font-semibold">
+                    {totalImages} {t.profile.images}
+                  </span>
                 </div>
-                <div className="text-sm">
-                  {user.createdAt ? (
-                    <>
-                      Joined{" "}
-                      {new Date(user.createdAt).toLocaleDateString("en-US", {
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </>
-                  ) : (
-                    <span>Member</span>
-                  )}
+                <div className="flex items-center space-x-2 text-sm">
+                  <CalendarIcon className="w-5 h-5" />
+                  <span>
+                    {t.profile.joined}{" "}
+                    {new Date(user.createdAt).toLocaleDateString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
                 </div>
               </div>
             </div>
@@ -246,10 +259,10 @@ function UserProfileContent() {
           <div className="text-center py-16">
             <MapPinIcon className="w-16 h-16 text-white/30 mx-auto mb-4" />
             <h2 className="text-white text-xl font-semibold mb-2">
-              No Images Yet
+              {t.profile.noImagesYet}
             </h2>
             <p className="text-white/70">
-              This user hasn&apos;t shared any images yet.
+              {t.profile.noImagesDescription}
             </p>
           </div>
         ) : (

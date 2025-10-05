@@ -50,7 +50,7 @@ export default function PlanPage() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
         <div className="flex justify-center items-center py-20">
           <div className="text-dark-muted">{t.common.loading}</div>
         </div>
@@ -61,7 +61,7 @@ export default function PlanPage() {
   // Show login prompt if not authenticated
   if (!user) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
         <div className="max-w-2xl mx-auto text-center">
           <div className="bg-dark-card rounded-lg shadow-dark-primary border border-dark-primary p-8">
             <h1 className="text-2xl font-bold text-dark-primary mb-4">
@@ -90,7 +90,7 @@ export default function PlanPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div>
       {/* Navigation */}
       <div className="mb-6">
         <div className="flex items-center space-x-4">

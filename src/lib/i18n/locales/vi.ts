@@ -86,6 +86,7 @@ export const vi = {
     searchFailed: 'Tìm kiếm thất bại. Vui lòng thử lại.',
     gridView: 'Lưới',
     mapView: 'Bản đồ',
+    subtitle: 'Tìm kiếm checkpoint gần vị trí của bạn',
   },
   plan: {
     title: 'Kế hoạch di chuyển',
@@ -306,6 +307,12 @@ export const vi = {
     alreadyHaveAccount: 'Đã có tài khoản? Đăng nhập',
     noProfileData: 'Không có dữ liệu hồ sơ',
     failedToLoadImages: 'Tải ảnh thất bại',
+    // Profile page specific translations
+    profileNotFound: 'Không tìm thấy hồ sơ',
+    noImagesYet: 'Chưa có ảnh nào',
+    noImagesDescription: 'Người dùng này chưa chia sẻ ảnh nào.',
+    joined: 'Tham gia',
+    images: 'ảnh',
   },
   api: {
     unauthorized: 'Không được phép',

@@ -2,8 +2,9 @@
 
 import ImageItem from "@/components/ImageItem";
 import { GridSkeleton } from "@/components/Skeleton";
-import { useBatchReactions } from "@/hooks/useBatchReactions";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBatchReactions } from "@/hooks/useBatchReactions";
+import { FETCH_MORE_THRESHOLD } from "@/lib/constants";
 import type { ImageWithReactions } from "@/types";
 import { useVirtualizer, VirtualItem } from "@tanstack/react-virtual";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -19,7 +20,7 @@ interface VirtualGridProps {
   itemHeight?: number;
 }
 
-const offsetWidth = 40
+const offsetWidth = 40;
 
 const VirtualGrid = ({
   images,
@@ -52,7 +53,7 @@ const VirtualGrid = ({
   // Calculate item width based on columns and gap
   const itemWidth = useMemo(() => {
     if (containerWidth === 0) return 0;
-    return (containerWidth - (gap * (responsiveColumns - 1))) / responsiveColumns;
+    return (containerWidth - gap * (responsiveColumns - 1)) / responsiveColumns;
   }, [containerWidth, responsiveColumns, gap]);
 
   // Calculate total rows needed
@@ -80,7 +81,7 @@ const VirtualGrid = ({
 
     // Use ResizeObserver if available, fallback to window resize
     let resizeObserver: ResizeObserver | null = null;
-    
+
     if (parentRef.current && window.ResizeObserver) {
       resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
@@ -89,34 +90,35 @@ const VirtualGrid = ({
       });
       resizeObserver.observe(parentRef.current);
     } else {
-      window.addEventListener('resize', updateWidth);
+      window.addEventListener("resize", updateWidth);
     }
 
     return () => {
       if (resizeObserver) {
         resizeObserver.disconnect();
       } else {
-        window.removeEventListener('resize', updateWidth);
+        window.removeEventListener("resize", updateWidth);
       }
     };
   }, []);
 
-  // Load more when scrolling near the end
-  useEffect(() => {
-    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
-
-    if (!lastItem) return;
-
-    if (
-      lastItem.index >= totalRows - 1 &&
-      onLoadMore &&
-      hasMore &&
-      !isLoadingMore
-    ) {
-      onLoadMore();
-    }
-  }, [virtualizer, totalRows, onLoadMore, hasMore, isLoadingMore]);
-
+  const fetchMoreOnBottom = useCallback(
+    (containerRefElement?: HTMLDivElement | null) => {
+      if (containerRefElement) {
+        const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
+        //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
+        if (
+          scrollHeight - scrollTop - clientHeight < FETCH_MORE_THRESHOLD &&
+          !isLoadingMore &&
+          hasMore &&
+          onLoadMore
+        ) {
+          onLoadMore();
+        }
+      }
+    },
+    [isLoadingMore, hasMore, onLoadMore]
+  );
   // Memoize image IDs to prevent unnecessary API calls
   const imageIds = useMemo(() => {
     return images.map((img) => img.id).filter((id) => id && id.trim() !== "");
@@ -130,62 +132,77 @@ const VirtualGrid = ({
   }, [imageIds, fetchBatchReactions]);
 
   // Memoized row renderer for better performance
-  const renderRow = useCallback((virtualRow: VirtualItem) => {
-    const rowIndex = virtualRow.index;
-    const startIndex = rowIndex * responsiveColumns;
-    const endIndex = Math.min(startIndex + responsiveColumns, images.length);
-    const rowImages = images.slice(startIndex, endIndex);
+  const renderRow = useCallback(
+    (virtualRow: VirtualItem) => {
+      const rowIndex = virtualRow.index;
+      const startIndex = rowIndex * responsiveColumns;
+      const endIndex = Math.min(startIndex + responsiveColumns, images.length);
+      const rowImages = images.slice(startIndex, endIndex);
 
-    return (
-      <div
-        key={virtualRow.key}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: `${virtualRow.size}px`,
-          transform: `translateY(${virtualRow.start}px)`,
-          display: "flex",
-          gap: `${gap}px`,
-          padding: `0 ${gap / 2}px`,
-        }}
-      >
-        {rowImages.map((image) => {
-          return (
-            <div
-              key={image.id}
-              style={{
-                width: `${itemWidth}px`,
-                height: `${itemHeight}px`,
-                flexShrink: 0,
-              }}
-            >
-              <ImageItem
-                image={image}
-                onImageClick={onImageClick}
-                reactionCounts={reactionCounts[image.id]}
-                userReaction={userReactions[image.id]}
-                onReactionChange={(type) => addReaction(image.id, type)}
+      return (
+        <div
+          key={virtualRow.key}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: `${virtualRow.size}px`,
+            transform: `translateY(${virtualRow.start}px)`,
+            display: "flex",
+            gap: `${gap}px`,
+            padding: `0 ${gap / 2}px`,
+          }}
+        >
+          {rowImages.map((image) => {
+            return (
+              <div
+                key={image.id}
+                style={{
+                  width: `${itemWidth}px`,
+                  height: `${itemHeight}px`,
+                  flexShrink: 0,
+                }}
+              >
+                <ImageItem
+                  image={image}
+                  onImageClick={onImageClick}
+                  reactionCounts={reactionCounts[image.id]}
+                  userReaction={userReactions[image.id]}
+                  onReactionChange={(type) => addReaction(image.id, type)}
+                />
+              </div>
+            );
+          })}
+
+          {/* Fill empty spaces in the last row */}
+          {Array.from({ length: responsiveColumns - rowImages.length }).map(
+            (_, emptyIndex) => (
+              <div
+                key={`empty-${emptyIndex}`}
+                style={{
+                  width: `${itemWidth}px`,
+                  height: `${itemHeight}px`,
+                  flexShrink: 0,
+                }}
               />
-            </div>
-          );
-        })}
-        
-        {/* Fill empty spaces in the last row */}
-        {Array.from({ length: responsiveColumns - rowImages.length }).map((_, emptyIndex) => (
-          <div
-            key={`empty-${emptyIndex}`}
-            style={{
-              width: `${itemWidth}px`,
-              height: `${itemHeight}px`,
-              flexShrink: 0,
-            }}
-          />
-        ))}
-      </div>
-    );
-  }, [images, responsiveColumns, gap, itemWidth, itemHeight, onImageClick, reactionCounts, userReactions, addReaction]);
+            )
+          )}
+        </div>
+      );
+    },
+    [
+      images,
+      responsiveColumns,
+      gap,
+      itemWidth,
+      itemHeight,
+      onImageClick,
+      reactionCounts,
+      userReactions,
+      addReaction,
+    ]
+  );
 
   if (images.length === 0) {
     return (
@@ -201,6 +218,7 @@ const VirtualGrid = ({
         ref={parentRef}
         className="h-full overflow-auto scrollbar-hide"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        onScroll={(e) => fetchMoreOnBottom(e.currentTarget)}
       >
         <div
           style={{
@@ -210,7 +228,7 @@ const VirtualGrid = ({
           }}
         >
           {virtualizer.getVirtualItems().map(renderRow)}
-          
+
           {/* Loading indicator */}
           {isLoadingMore && (
             <div
@@ -225,7 +243,7 @@ const VirtualGrid = ({
               <GridSkeleton />
             </div>
           )}
-          
+
           {/* End of results indicator */}
           {!hasMore && images.length > 0 && (
             <div

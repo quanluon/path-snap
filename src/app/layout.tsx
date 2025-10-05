@@ -74,7 +74,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body
-        className={`${openSans.variable} ${roboto.variable} ${poppins.variable} ${jetbrainsMono.variable} antialiased bg-dark-gradient min-h-screen`}
+        className={`${openSans.variable} ${roboto.variable} ${poppins.variable} ${jetbrainsMono.variable} antialiased bg-dark-gradient h-screen overflow-hidden`}
       >
         <LanguageProvider>
           <UserProvider>
@@ -83,11 +83,20 @@ export default function RootLayout({
                 <ToastProvider>
                   <NotificationListener>
                     <GlobalPullToRefresh>
-                      <Header />
-                      <main className="min-h-screen pb-20 md:pb-8 bg-dark-gradient px-4 pt-10">
-                        {children}
-                      </main>
-                      <Navigation />
+                      <div className="flex flex-col h-screen">
+                        {/* Fixed Header */}
+                        <Header />
+                        
+                        {/* Scrollable Content Area */}
+                        <main className="flex-1 overflow-y-scroll bg-dark-gradient px-4 py-4">
+                          <div className="max-w-7xl mx-auto">
+                            {children}
+                          </div>
+                        </main>
+                        
+                        {/* Fixed Navigation */}
+                        <Navigation />
+                      </div>
                     </GlobalPullToRefresh>
                     <NotificationPermissionPrompt />
                     <ToastContainer />

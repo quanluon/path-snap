@@ -148,7 +148,7 @@ export default function SettingsPage() {
   // Show login prompt if not authenticated
   if (!user) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
         <div className="max-w-2xl mx-auto text-center">
           <div className="bg-gray-900 rounded-lg shadow-2xl border border-gray-700 p-8">
             <Cog6ToothIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -178,10 +178,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">{t.settings.title}</h1>
+        <h1 className="text-3xl font-bold text-white mb-0">{t.settings.title}</h1>
         <p className="text-gray-400">{t.settings.subtitle}</p>
       </div>
 
@@ -202,7 +202,7 @@ export default function SettingsPage() {
             )}
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-xl font-semibold text-white mb-0">
               {user.name || user.email?.split('@')[0] || 'User'}
             </h2>
             <p className="text-gray-400">{user.email}</p>

@@ -2,12 +2,13 @@
 
 import ImageItem from "@/components/ImageItem";
 import { CarouselSkeleton } from "@/components/Skeleton";
-import { useBatchReactions } from "@/hooks/useBatchReactions";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBatchReactions } from "@/hooks/useBatchReactions";
 import type { ImageWithReactions } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import VirtualGrid from "./VirtualGrid";
+import { FETCH_MORE_THRESHOLD } from "@/lib/constants";
 
 interface ImageListProps {
   images: ImageWithReactions[];
@@ -33,28 +34,30 @@ const ImageList = ({
 
   // Create virtualizer
   const virtualizer = useVirtualizer({
-    count: images.length,
+    count: hasMore ? images.length + 1 : images.length,
     getScrollElement: () => parentRef.current,
     overscan: 3, // Render 3 extra items outside viewport
     gap: 5, // No gap between items
     estimateSize: () => 500,
   });
 
-  // Load more when scrolling near the end
-  useEffect(() => {
-    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
-
-    if (!lastItem) return;
-
-    if (
-      lastItem.index >= images.length - 1 &&
-      onLoadMore &&
-      hasMore &&
-      !isLoadingMore
-    ) {
-      onLoadMore();
-    }
-  }, [virtualizer, images.length, onLoadMore, hasMore, isLoadingMore]);
+  const fetchMoreOnBottom = useCallback(
+    (containerRefElement?: HTMLDivElement | null) => {
+      if (containerRefElement) {
+        const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
+        //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
+        if (
+          scrollHeight - scrollTop - clientHeight < FETCH_MORE_THRESHOLD &&
+          !isLoadingMore &&
+          hasMore &&
+          onLoadMore
+        ) {
+          onLoadMore();
+        }
+      }
+    },
+    [isLoadingMore, hasMore, onLoadMore]
+  );
 
   // Memoize image IDs to prevent unnecessary API calls
   const imageIds = useMemo(() => {
@@ -92,6 +95,7 @@ const ImageList = ({
           ref={parentRef}
           className="h-full overflow-auto scrollbar-hide"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          onScroll={(e) => fetchMoreOnBottom(e.currentTarget)}
         >
           <div
             style={{

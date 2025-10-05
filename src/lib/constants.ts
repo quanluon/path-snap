@@ -39,3 +39,4 @@ export type ReactionType = typeof REACTION_TYPES[keyof typeof REACTION_TYPES];
 
 export const DEFAULT_REACTION = { like: 0, heart: 0, wow: 0, haha: 0 }
 
+export const FETCH_MORE_THRESHOLD = 500;

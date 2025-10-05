@@ -94,7 +94,7 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div>
       <SearchImages
         onSearch={handleSearch}
         results={results}
@@ -102,7 +102,7 @@ export default function SearchPage() {
       />
 
       {isLoading && results.length === 0 ? (
-        <div className="mt-8">
+        <div>
           <div className="mb-4">
             <div className="h-6 bg-white/10 rounded w-48 mb-2"></div>
             <div className="h-4 bg-white/10 rounded w-32"></div>

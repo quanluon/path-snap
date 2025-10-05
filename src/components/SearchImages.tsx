@@ -91,13 +91,13 @@ export default function SearchImages({
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <div className="bg-dark-card rounded-lg shadow-dark-primary p-6 mb-6 border border-dark-primary">
+      <div className="bg-dark-card rounded-lg shadow-dark-primary p-6 border border-dark-primary">
         <div className="mb-2">
           <h1 className="text-3xl font-bold text-dark-primary mb-2">
             {t.nav.search}
           </h1>
           <p className="text-dark-secondary">
-            Tìm kiếm checkpoint gần vị trí của bạn
+            {t.search.subtitle}
           </p>
         </div>
         {/* Search Form */}
@@ -107,7 +107,7 @@ export default function SearchImages({
             <button
               onClick={handleGetLocationAndSearch}
               disabled={isGettingLocation || isLoading}
-              className="flex items-center gap-2 px-6 py-3 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors disabled:opacity-50 font-medium border border-dark-primary"
+              className="flex items-center gap-2 px-4 py-3 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover transition-colors disabled:opacity-50 font-medium border border-dark-primary"
             >
               <MapPinIcon className="w-5 h-5" />
               {isGettingLocation || isLoading
@@ -119,10 +119,10 @@ export default function SearchImages({
 
             <button
               onClick={toggleRangeBar}
-              className="flex items-center gap-2 px-4 py-2 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
+              className="flex items-center gap-2 px-4 py-3 bg-dark-secondary text-dark-primary rounded-lg hover:bg-dark-hover transition-colors border border-dark-primary"
               title={t.search.showRangeSettings}
             >
-              <AdjustmentsHorizontalIcon className="h-full w-6" />
+              <AdjustmentsHorizontalIcon className="h-6 w-6" />
             </button>
           </div>
 

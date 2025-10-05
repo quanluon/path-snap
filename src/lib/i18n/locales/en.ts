@@ -86,6 +86,7 @@ export const en = {
     searchFailed: 'Search failed. Please try again.',
     gridView: 'Grid',
     mapView: 'Map',
+    subtitle: 'Search for checkpoints near your location',
   },
   plan: {
     title: 'Travel Plan',
@@ -306,6 +307,12 @@ export const en = {
     alreadyHaveAccount: 'Already have an account? Login',
     noProfileData: 'No profile data available',
     failedToLoadImages: 'Failed to load images',
+    // Profile page specific translations
+    profileNotFound: 'Profile Not Found',
+    noImagesYet: 'No Images Yet',
+    noImagesDescription: "This user hasn't shared any images yet.",
+    joined: 'Joined',
+    images: 'images',
   },
   api: {
     unauthorized: 'Unauthorized',
