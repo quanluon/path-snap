@@ -195,10 +195,11 @@ function UserProfileContent() {
                   alt={user.name || user.email}
                   width={120}
                   height={120}
-                  className="w-30 h-30 rounded-full object-cover border-4 border-white/20"
+                  className="w-[120px] h-[120px] rounded-full object-cover border-4 border-white/20"
+                  objectFit="cover"
                 />
               ) : (
-                <div className="w-30 h-30 rounded-full bg-white/10 border-4 border-white/20 flex items-center justify-center">
+                <div className="w-[120px] h-[120px] rounded-full bg-white/10 border-4 border-white/20 flex items-center justify-center">
                   <UserIcon className="w-16 h-16 text-white/70" />
                 </div>
               )}
