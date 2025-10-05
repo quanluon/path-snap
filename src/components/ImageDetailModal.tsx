@@ -18,6 +18,10 @@ import {
   CalendarIcon,
   ShareIcon,
   TrashIcon,
+  ArrowPathIcon,
+  ArrowsPointingOutIcon,
+  ArrowsPointingInIcon,
+  ArrowUturnLeftIcon,
 } from "@heroicons/react/24/outline";
 import {
   EyeIcon,
@@ -45,6 +49,10 @@ export default function ImageDetailModal({
   const { user, isLoading: userLoading } = useUser();
   const [showPreview, setShowPreview] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [flipHorizontal, setFlipHorizontal] = useState(false);
+  const [flipVertical, setFlipVertical] = useState(false);
 
   // Check if current user owns this image
   const isOwner = !userLoading && user && image?.author?.id === user.id;
@@ -81,6 +89,11 @@ export default function ImageDetailModal({
     if (!isOpen) {
       setShowPreview(false);
       setShowDeleteModal(false);
+      // Reset all transformations when modal closes
+      setZoom(1);
+      setRotation(0);
+      setFlipHorizontal(false);
+      setFlipVertical(false);
     }
   }, [isOpen]);
 
@@ -190,12 +203,89 @@ export default function ImageDetailModal({
 
   const handlePreviewClose = useCallback(() => {
     setShowPreview(false);
+    // Reset all transformations when closing
+    setZoom(1);
+    setRotation(0);
+    setFlipHorizontal(false);
+    setFlipVertical(false);
   }, []);
+
+  const handleZoomIn = useCallback(() => {
+    setZoom(prev => Math.min(prev + 0.5, 3));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoom(prev => Math.max(prev - 0.5, 0.5));
+  }, []);
+
+  const handleRotate = useCallback(() => {
+    setRotation(prev => (prev + 90) % 360);
+  }, []);
+
+  const handleFlipHorizontal = useCallback(() => {
+    setFlipHorizontal(prev => !prev);
+  }, []);
+
+  const handleFlipVertical = useCallback(() => {
+    setFlipVertical(prev => !prev);
+  }, []);
+
+  const handleResetTransform = useCallback(() => {
+    setZoom(1);
+    setRotation(0);
+    setFlipHorizontal(false);
+    setFlipVertical(false);
+  }, []);
+
+  // Keyboard shortcuts for preview
+  useEffect(() => {
+    if (!showPreview) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case '+':
+        case '=':
+          e.preventDefault();
+          handleZoomIn();
+          break;
+        case '-':
+          e.preventDefault();
+          handleZoomOut();
+          break;
+        case 'r':
+        case 'R':
+          e.preventDefault();
+          handleRotate();
+          break;
+        case 'h':
+        case 'H':
+          e.preventDefault();
+          handleFlipHorizontal();
+          break;
+        case 'v':
+        case 'V':
+          e.preventDefault();
+          handleFlipVertical();
+          break;
+        case '0':
+          e.preventDefault();
+          handleResetTransform();
+          break;
+        case 'Escape':
+          e.preventDefault();
+          handlePreviewClose();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showPreview, handleZoomIn, handleZoomOut, handleRotate, handleFlipHorizontal, handleFlipVertical, handleResetTransform, handlePreviewClose]);
 
   if (!isOpen || !image) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-[100] overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
         {/* Overlay */}
         <div
@@ -362,7 +452,7 @@ export default function ImageDetailModal({
 
       {/* Full-screen Image Preview */}
       {showPreview && (
-        <div className="fixed inset-0 z-[60] overflow-hidden">
+        <div className="fixed inset-0 z-[110] overflow-hidden">
           {/* Blurred Background Image */}
           <div className="absolute inset-0">
             <OptimizedImage
@@ -376,27 +466,96 @@ export default function ImageDetailModal({
             <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
           </div>
 
-          {/* Close Button */}
-          <button
-            onClick={handlePreviewClose}
-            className="absolute top-4 right-4 z-20 p-3 bg-black/80 backdrop-blur-sm rounded-full hover:bg-white/10 transition-colors"
-          >
-            <XMarkIcon className="w-6 h-6 text-white" />
-          </button>
+          {/* Top Controls */}
+          <div className="absolute top-4 right-4 z-10 flex items-center space-x-2">
+            {/* Zoom Controls */}
+            <div className="flex items-center space-x-1 bg-black/80 backdrop-blur-sm rounded-full p-1">
+              <button
+                onClick={handleZoomOut}
+                className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                title="Zoom Out"
+              >
+                <ArrowsPointingInIcon className="w-5 h-5 text-white" />
+              </button>
+              <span className="px-2 text-white text-sm font-medium min-w-[3rem] text-center">
+                {Math.round(zoom * 100)}%
+              </span>
+              <button
+                onClick={handleZoomIn}
+                className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                title="Zoom In"
+              >
+                <ArrowsPointingOutIcon className="w-5 h-5 text-white" />
+              </button>
+            </div>
+
+            {/* Transform Controls */}
+            <div className="flex items-center space-x-1 bg-black/80 backdrop-blur-sm rounded-full p-1">
+              <button
+                onClick={handleRotate}
+                className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                title="Rotate"
+              >
+                <ArrowPathIcon className="w-5 h-5 text-white" />
+              </button>
+              <button
+                onClick={handleFlipHorizontal}
+                className={`p-2 rounded-full hover:bg-white/10 transition-colors ${flipHorizontal ? 'bg-white/20' : ''}`}
+                title="Flip Horizontal"
+              >
+                <ArrowUturnLeftIcon className="w-5 h-5 text-white" />
+              </button>
+              <button
+                onClick={handleFlipVertical}
+                className={`p-2 rounded-full hover:bg-white/10 transition-colors ${flipVertical ? 'bg-white/20' : ''}`}
+                title="Flip Vertical"
+              >
+                <ArrowPathIcon className="w-5 h-5 text-white transform rotate-90" />
+              </button>
+              <button
+                onClick={handleResetTransform}
+                className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                title="Reset"
+              >
+                <span className="text-white text-sm font-bold">↺</span>
+              </button>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={handlePreviewClose}
+              className="p-3 bg-black/80 backdrop-blur-sm rounded-full hover:bg-white/10 transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6 text-white" />
+            </button>
+          </div>
 
           {/* Full-screen Image */}
-          <div className="relative z-10 flex items-center justify-center h-full p-4">
-            <OptimizedImage
-              src={image.url}
-              alt={image.description || t.image.checkPointImage}
-              className="object-contain max-w-full max-h-full shadow-2xl"
-              objectFit="contain"
-              fallbackSrc="/placeholder-image.svg"
-            />
+          <div className="relative z-10 flex items-center justify-center h-full p-4 overflow-hidden">
+            <div
+              className="transition-transform duration-200 ease-out"
+              style={{
+                transform: `
+                  scale(${zoom}) 
+                  rotate(${rotation}deg) 
+                  scaleX(${flipHorizontal ? -1 : 1}) 
+                  scaleY(${flipVertical ? -1 : 1})
+                `,
+                cursor: zoom > 1 ? 'grab' : 'default',
+              }}
+            >
+              <OptimizedImage
+                src={image.url}
+                alt={image.description || t.image.checkPointImage}
+                className="object-contain shadow-2xl"
+                objectFit="contain"
+                fallbackSrc="/placeholder-image.svg"
+              />
+            </div>
           </div>
 
           {/* Image Info Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-6">
+          <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-6">
             <div className="text-center">
               <h3 className="text-white text-lg font-medium mb-2">
                 {image.description || t.image.checkPointImage}

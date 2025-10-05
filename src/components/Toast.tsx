@@ -12,40 +12,40 @@ interface ToastProps {
 
 const toastStyles = {
   success: {
-    bg: 'bg-green-500/10',
-    border: 'border-green-500/20',
+    bg: 'bg-green-500/20',
+    border: 'border-green-400/40',
     icon: '✅',
-    text: 'text-green-400',
+    text: 'text-green-300',
   },
   error: {
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/20',
+    bg: 'bg-red-500/20',
+    border: 'border-red-400/40',
     icon: '❌',
-    text: 'text-red-400',
+    text: 'text-red-300',
   },
   warning: {
-    bg: 'bg-yellow-500/10',
-    border: 'border-yellow-500/20',
+    bg: 'bg-yellow-500/20',
+    border: 'border-yellow-400/40',
     icon: '⚠️',
-    text: 'text-yellow-400',
+    text: 'text-yellow-300',
   },
   info: {
-    bg: 'bg-blue-500/10',
-    border: 'border-blue-500/20',
+    bg: 'bg-blue-500/20',
+    border: 'border-blue-400/40',
     icon: 'ℹ️',
-    text: 'text-blue-400',
+    text: 'text-blue-300',
   },
   reaction: {
-    bg: 'bg-purple-500/10',
-    border: 'border-purple-500/20',
+    bg: 'bg-purple-500/20',
+    border: 'border-purple-400/40',
     icon: '👍',
-    text: 'text-purple-400',
+    text: 'text-purple-300',
   },
   comment: {
-    bg: 'bg-cyan-500/10',
-    border: 'border-cyan-500/20',
+    bg: 'bg-cyan-500/20',
+    border: 'border-cyan-400/40',
     icon: '💬',
-    text: 'text-cyan-400',
+    text: 'text-cyan-300',
   },
 };
 
@@ -86,8 +86,8 @@ export default function Toast({ toast, onClose }: ToastProps) {
       className={`
         transform transition-all duration-300 ease-in-out
         ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
-        bg-dark-card/95 backdrop-blur-sm border ${style.border} ${style.bg}
-        rounded-lg shadow-lg p-4 mb-3 min-w-80 max-w-96
+        bg-black/90 backdrop-blur-md border ${style.border} ${style.bg}
+        rounded-lg shadow-2xl p-4 mb-3 min-w-80 max-w-96
       `}
     >
       {/* Progress bar */}
