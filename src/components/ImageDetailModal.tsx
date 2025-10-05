@@ -211,23 +211,23 @@ export default function ImageDetailModal({
   }, []);
 
   const handleZoomIn = useCallback(() => {
-    setZoom(prev => Math.min(prev + 0.5, 3));
+    setZoom((prev) => Math.min(prev + 0.5, 3));
   }, []);
 
   const handleZoomOut = useCallback(() => {
-    setZoom(prev => Math.max(prev - 0.5, 0.5));
+    setZoom((prev) => Math.max(prev - 0.5, 0.5));
   }, []);
 
   const handleRotate = useCallback(() => {
-    setRotation(prev => (prev + 90) % 360);
+    setRotation((prev) => (prev + 90) % 360);
   }, []);
 
   const handleFlipHorizontal = useCallback(() => {
-    setFlipHorizontal(prev => !prev);
+    setFlipHorizontal((prev) => !prev);
   }, []);
 
   const handleFlipVertical = useCallback(() => {
-    setFlipVertical(prev => !prev);
+    setFlipVertical((prev) => !prev);
   }, []);
 
   const handleResetTransform = useCallback(() => {
@@ -243,49 +243,58 @@ export default function ImageDetailModal({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
-        case '+':
-        case '=':
+        case "+":
+        case "=":
           e.preventDefault();
           handleZoomIn();
           break;
-        case '-':
+        case "-":
           e.preventDefault();
           handleZoomOut();
           break;
-        case 'r':
-        case 'R':
+        case "r":
+        case "R":
           e.preventDefault();
           handleRotate();
           break;
-        case 'h':
-        case 'H':
+        case "h":
+        case "H":
           e.preventDefault();
           handleFlipHorizontal();
           break;
-        case 'v':
-        case 'V':
+        case "v":
+        case "V":
           e.preventDefault();
           handleFlipVertical();
           break;
-        case '0':
+        case "0":
           e.preventDefault();
           handleResetTransform();
           break;
-        case 'Escape':
+        case "Escape":
           e.preventDefault();
           handlePreviewClose();
           break;
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showPreview, handleZoomIn, handleZoomOut, handleRotate, handleFlipHorizontal, handleFlipVertical, handleResetTransform, handlePreviewClose]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    showPreview,
+    handleZoomIn,
+    handleZoomOut,
+    handleRotate,
+    handleFlipHorizontal,
+    handleFlipVertical,
+    handleResetTransform,
+    handlePreviewClose,
+  ]);
 
   if (!isOpen || !image) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto">
+    <div className="fixed inset-0 z-[150] overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
         {/* Overlay */}
         <div
@@ -452,7 +461,7 @@ export default function ImageDetailModal({
 
       {/* Full-screen Image Preview */}
       {showPreview && (
-        <div className="fixed inset-0 z-[110] overflow-hidden">
+        <div className="fixed inset-0 z-[200] overflow-hidden">
           {/* Blurred Background Image */}
           <div className="absolute inset-0">
             <OptimizedImage
@@ -467,7 +476,7 @@ export default function ImageDetailModal({
           </div>
 
           {/* Top Controls */}
-          <div className="absolute top-4 right-4 z-10 flex items-center space-x-2">
+          <div className="absolute top-4 right-4 z-[250] flex items-center space-x-2">
             {/* Zoom Controls */}
             <div className="flex items-center space-x-1 bg-black/80 backdrop-blur-sm rounded-full p-1">
               <button
@@ -500,14 +509,18 @@ export default function ImageDetailModal({
               </button>
               <button
                 onClick={handleFlipHorizontal}
-                className={`p-2 rounded-full hover:bg-white/10 transition-colors ${flipHorizontal ? 'bg-white/20' : ''}`}
+                className={`p-2 rounded-full hover:bg-white/10 transition-colors ${
+                  flipHorizontal ? "bg-white/20" : ""
+                }`}
                 title="Flip Horizontal"
               >
                 <ArrowUturnLeftIcon className="w-5 h-5 text-white" />
               </button>
               <button
                 onClick={handleFlipVertical}
-                className={`p-2 rounded-full hover:bg-white/10 transition-colors ${flipVertical ? 'bg-white/20' : ''}`}
+                className={`p-2 rounded-full hover:bg-white/10 transition-colors ${
+                  flipVertical ? "bg-white/20" : ""
+                }`}
                 title="Flip Vertical"
               >
                 <ArrowPathIcon className="w-5 h-5 text-white transform rotate-90" />
@@ -541,7 +554,7 @@ export default function ImageDetailModal({
                   scaleX(${flipHorizontal ? -1 : 1}) 
                   scaleY(${flipVertical ? -1 : 1})
                 `,
-                cursor: zoom > 1 ? 'grab' : 'default',
+                cursor: zoom > 1 ? "grab" : "default",
               }}
             >
               <OptimizedImage
