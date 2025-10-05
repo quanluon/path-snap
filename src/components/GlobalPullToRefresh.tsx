@@ -24,7 +24,7 @@ export default function GlobalPullToRefresh({ children }: GlobalPullToRefreshPro
       pullingContent={
         <div className="flex items-center justify-center py-4 bg-black/80">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-          <span className="text-white ml-3 font-medium">{t.common.pullToRefresh}</span>
+          <span className="text-white ml-3 font-medium">{t.common.refreshing}</span>
         </div>
       }
       refreshingContent={
