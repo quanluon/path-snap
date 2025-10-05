@@ -34,7 +34,7 @@ const ImageList = ({
 
   // Create virtualizer
   const virtualizer = useVirtualizer({
-    count: hasMore ? images.length + 1 : images.length,
+    count:  images.length + 1,
     getScrollElement: () => parentRef.current,
     overscan: 3, // Render 3 extra items outside viewport
     gap: 5, // No gap between items
@@ -130,7 +130,8 @@ const ImageList = ({
                       <CarouselSkeleton />
                     </div>
                   );
-                } else if (!hasMore && images.length > 0) {
+                }
+                if (!hasMore && images.length > 0) {
                   return (
                     <div
                       key={virtualItem.key}

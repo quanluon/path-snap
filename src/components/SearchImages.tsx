@@ -90,7 +90,7 @@ export default function SearchImages({
   // Remove manual lat/lng search - only use current location
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full mx-auto">
       <div className="bg-dark-card rounded-lg shadow-dark-primary p-6 border border-dark-primary">
         <div className="mb-2">
           <h1 className="text-3xl font-bold text-dark-primary mb-2">
