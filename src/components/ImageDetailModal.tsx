@@ -18,17 +18,14 @@ import {
   CalendarIcon,
   ShareIcon,
   TrashIcon,
-  ArrowPathIcon,
-  ArrowsPointingOutIcon,
-  ArrowsPointingInIcon,
-  ArrowUturnLeftIcon,
 } from "@heroicons/react/24/outline";
 import {
   EyeIcon,
-  MagnifyingGlassIcon,
   UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Address } from "./Address";
@@ -47,12 +44,7 @@ export default function ImageDetailModal({
   const { t } = useLanguage();
   const router = useRouter();
   const { user, isLoading: userLoading } = useUser();
-  const [showPreview, setShowPreview] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [rotation, setRotation] = useState(0);
-  const [flipHorizontal, setFlipHorizontal] = useState(false);
-  const [flipVertical, setFlipVertical] = useState(false);
 
   // Check if current user owns this image
   const isOwner = !userLoading && user && image?.author?.id === user.id;
@@ -87,13 +79,7 @@ export default function ImageDetailModal({
   // Reset states when modal closes
   useEffect(() => {
     if (!isOpen) {
-      setShowPreview(false);
       setShowDeleteModal(false);
-      // Reset all transformations when modal closes
-      setZoom(1);
-      setRotation(0);
-      setFlipHorizontal(false);
-      setFlipVertical(false);
     }
   }, [isOpen]);
 
@@ -197,113 +183,33 @@ export default function ImageDetailModal({
     }
   }, [image]);
 
-  const handleImageClick = useCallback(() => {
-    setShowPreview(true);
-  }, []);
-
-  const handlePreviewClose = useCallback(() => {
-    setShowPreview(false);
-    // Reset all transformations when closing
-    setZoom(1);
-    setRotation(0);
-    setFlipHorizontal(false);
-    setFlipVertical(false);
-  }, []);
-
-  const handleZoomIn = useCallback(() => {
-    setZoom((prev) => Math.min(prev + 0.5, 3));
-  }, []);
-
-  const handleZoomOut = useCallback(() => {
-    setZoom((prev) => Math.max(prev - 0.5, 0.5));
-  }, []);
-
-  const handleRotate = useCallback(() => {
-    setRotation((prev) => (prev + 90) % 360);
-  }, []);
-
-  const handleFlipHorizontal = useCallback(() => {
-    setFlipHorizontal((prev) => !prev);
-  }, []);
-
-  const handleFlipVertical = useCallback(() => {
-    setFlipVertical((prev) => !prev);
-  }, []);
-
-  const handleResetTransform = useCallback(() => {
-    setZoom(1);
-    setRotation(0);
-    setFlipHorizontal(false);
-    setFlipVertical(false);
-  }, []);
-
-  // Keyboard shortcuts for preview
-  useEffect(() => {
-    if (!showPreview) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case "+":
-        case "=":
-          e.preventDefault();
-          handleZoomIn();
-          break;
-        case "-":
-          e.preventDefault();
-          handleZoomOut();
-          break;
-        case "r":
-        case "R":
-          e.preventDefault();
-          handleRotate();
-          break;
-        case "h":
-        case "H":
-          e.preventDefault();
-          handleFlipHorizontal();
-          break;
-        case "v":
-        case "V":
-          e.preventDefault();
-          handleFlipVertical();
-          break;
-        case "0":
-          e.preventDefault();
-          handleResetTransform();
-          break;
-        case "Escape":
-          e.preventDefault();
-          handlePreviewClose();
-          break;
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    showPreview,
-    handleZoomIn,
-    handleZoomOut,
-    handleRotate,
-    handleFlipHorizontal,
-    handleFlipVertical,
-    handleResetTransform,
-    handlePreviewClose,
-  ]);
 
   if (!isOpen || !image) return null;
 
   return (
-    <div className="fixed inset-0 z-[150] overflow-y-auto">
+    <div 
+      className="fixed inset-0 overflow-y-auto" 
+      style={{ 
+        zIndex: 9999,
+        isolation: 'isolate',
+        WebkitTransform: 'translateZ(0)', // Force hardware acceleration on Safari
+        transform: 'translateZ(0)'
+      }}
+    >
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
         {/* Overlay */}
         <div
           className="fixed inset-0 transition-opacity bg-black/90 backdrop-blur-sm"
+          style={{ 
+            zIndex: -1,
+            WebkitBackdropFilter: 'blur(4px)', // Safari-specific backdrop filter
+            backdropFilter: 'blur(4px)'
+          }}
           onClick={onClose}
         />
 
         {/* Modal */}
-        <div className="relative inline-block w-full max-w-6xl overflow-hidden text-left align-middle transition-all transform bg-black rounded-2xl shadow-2xl border border-white/10">
+        <div className="relative inline-block w-full max-w-6xl overflow-hidden text-left align-middle transition-all transform bg-black rounded-2xl shadow-2xl border border-white/10" style={{ zIndex: 1 }}>
           {/* Action Buttons */}
           <div className="absolute top-4 right-4 z-10 flex space-x-2">
             {/* Delete Button - Only show if user owns the image */}
@@ -328,23 +234,16 @@ export default function ImageDetailModal({
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[90vh]">
             {/* Image Section */}
-            <div
-              className="relative bg-green flex items-center justify-center cursor-pointer hover:bg-green-light transition-colors group aspect-[4/3]"
-              onClick={handleImageClick}
-            >
-              <OptimizedImage
-                src={image.url}
-                alt={image.description || t.image.checkPointImage}
-                className="w-full h-full object-contain"
-                objectFit="contain"
-                fallbackSrc="/placeholder-image.svg"
-              />
-              {/* Click to preview overlay */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-                <div className="bg-black/80 backdrop-blur-sm rounded-full p-3">
-                  <MagnifyingGlassIcon className="w-6 h-6 text-white" />
-                </div>
-              </div>
+            <div className="relative bg-green flex items-center justify-center aspect-[4/3]">
+              <Zoom>
+                <OptimizedImage
+                  src={image.url}
+                  alt={image.description || t.image.checkPointImage}
+                  className="w-full h-full object-contain cursor-zoom-in"
+                  objectFit="contain"
+                  fallbackSrc="/placeholder-image.svg"
+                />
+              </Zoom>
             </div>
 
             {/* Details Section */}
@@ -459,129 +358,6 @@ export default function ImageDetailModal({
         </div>
       </div>
 
-      {/* Full-screen Image Preview */}
-      {showPreview && (
-        <div className="fixed inset-0 z-[200] overflow-hidden">
-          {/* Blurred Background Image */}
-          <div className="absolute inset-0">
-            <OptimizedImage
-              src={image.url}
-              alt={image.description || t.image.checkPointImage}
-              className="w-full h-full object-cover"
-              objectFit="cover"
-              fallbackSrc="/placeholder-image.svg"
-            />
-            {/* Blur Overlay */}
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
-          </div>
-
-          {/* Top Controls */}
-          <div className="absolute top-4 right-4 z-[250] flex items-center space-x-2">
-            {/* Zoom Controls */}
-            <div className="flex items-center space-x-1 bg-black/80 backdrop-blur-sm rounded-full p-1">
-              <button
-                onClick={handleZoomOut}
-                className="p-2 rounded-full hover:bg-white/10 transition-colors"
-                title="Zoom Out"
-              >
-                <ArrowsPointingInIcon className="w-5 h-5 text-white" />
-              </button>
-              <span className="px-2 text-white text-sm font-medium min-w-[3rem] text-center">
-                {Math.round(zoom * 100)}%
-              </span>
-              <button
-                onClick={handleZoomIn}
-                className="p-2 rounded-full hover:bg-white/10 transition-colors"
-                title="Zoom In"
-              >
-                <ArrowsPointingOutIcon className="w-5 h-5 text-white" />
-              </button>
-            </div>
-
-            {/* Transform Controls */}
-            <div className="flex items-center space-x-1 bg-black/80 backdrop-blur-sm rounded-full p-1">
-              <button
-                onClick={handleRotate}
-                className="p-2 rounded-full hover:bg-white/10 transition-colors"
-                title="Rotate"
-              >
-                <ArrowPathIcon className="w-5 h-5 text-white" />
-              </button>
-              <button
-                onClick={handleFlipHorizontal}
-                className={`p-2 rounded-full hover:bg-white/10 transition-colors ${
-                  flipHorizontal ? "bg-white/20" : ""
-                }`}
-                title="Flip Horizontal"
-              >
-                <ArrowUturnLeftIcon className="w-5 h-5 text-white" />
-              </button>
-              <button
-                onClick={handleFlipVertical}
-                className={`p-2 rounded-full hover:bg-white/10 transition-colors ${
-                  flipVertical ? "bg-white/20" : ""
-                }`}
-                title="Flip Vertical"
-              >
-                <ArrowPathIcon className="w-5 h-5 text-white transform rotate-90" />
-              </button>
-              <button
-                onClick={handleResetTransform}
-                className="p-2 rounded-full hover:bg-white/10 transition-colors"
-                title="Reset"
-              >
-                <span className="text-white text-sm font-bold">↺</span>
-              </button>
-            </div>
-
-            {/* Close Button */}
-            <button
-              onClick={handlePreviewClose}
-              className="p-3 bg-black/80 backdrop-blur-sm rounded-full hover:bg-white/10 transition-colors"
-            >
-              <XMarkIcon className="w-6 h-6 text-white" />
-            </button>
-          </div>
-
-          {/* Full-screen Image */}
-          <div className="relative z-10 flex items-center justify-center h-full p-4 overflow-hidden">
-            <div
-              className="transition-transform duration-200 ease-out"
-              style={{
-                transform: `
-                  scale(${zoom}) 
-                  rotate(${rotation}deg) 
-                  scaleX(${flipHorizontal ? -1 : 1}) 
-                  scaleY(${flipVertical ? -1 : 1})
-                `,
-                cursor: zoom > 1 ? "grab" : "default",
-              }}
-            >
-              <OptimizedImage
-                src={image.url}
-                alt={image.description || t.image.checkPointImage}
-                className="object-contain shadow-2xl"
-                objectFit="contain"
-                fallbackSrc="/placeholder-image.svg"
-              />
-            </div>
-          </div>
-
-          {/* Image Info Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-6">
-            <div className="text-center">
-              <h3 className="text-white text-lg font-medium mb-2">
-                {image.description || t.image.checkPointImage}
-              </h3>
-              {image.author && (
-                <p className="text-white/70 text-sm">
-                  by {image.author.name || t.image.member}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Confirmation Modal */}
       <ConfirmModal
