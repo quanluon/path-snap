@@ -68,6 +68,15 @@ export default function FilerobotImageEditor({ imageFile, onSave, onCancel }: Fi
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
+  // Force cleanup function
+  const forceCleanup = () => {
+    document.body.classList.remove('editor-open');
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.height = '';
+  };
+
   // Create object URL for the image
   useEffect(() => {
     const url = URL.createObjectURL(imageFile);
@@ -84,72 +93,88 @@ export default function FilerobotImageEditor({ imageFile, onSave, onCancel }: Fi
     // Add body class for mobile handling
     document.body.classList.add('editor-open');
     
+    // Store original styles
+    const originalOverflow = document.body.style.overflow;
+    const originalPosition = document.body.style.position;
+    const originalWidth = document.body.style.width;
+    const originalHeight = document.body.style.height;
+    
     // Prevent body scrolling on mobile
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    const originalPosition = window.getComputedStyle(document.body).position;
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     document.body.style.height = '100%';
 
-    // Prevent zoom on mobile
+    // Only prevent zoom with multiple touches (pinch zoom)
     const preventZoom = (e: TouchEvent) => {
       if (e.touches.length > 1) {
         e.preventDefault();
       }
     };
 
-    // Prevent pull-to-refresh on mobile
-    const preventPullToRefresh = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        const touch = e.touches[0];
-        if (touch.clientY > 100) { // Only prevent if touch is below top area
-          e.preventDefault();
-        }
-      }
-    };
-
-    // Add touch event listeners
+    // Add touch event listeners with passive: true for better performance
     document.addEventListener('touchstart', preventZoom, { passive: false });
     document.addEventListener('touchmove', preventZoom, { passive: false });
-    document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
 
     // Cleanup
     return () => {
-      document.body.classList.remove('editor-open');
-      document.body.style.overflow = originalStyle;
-      document.body.style.position = originalPosition;
-      document.body.style.width = '';
-      document.body.style.height = '';
-      document.removeEventListener('touchstart', preventZoom);
-      document.removeEventListener('touchmove', preventZoom);
-      document.removeEventListener('touchmove', preventPullToRefresh);
+      // Force cleanup with timeout to ensure it happens
+      setTimeout(() => {
+        document.body.classList.remove('editor-open');
+        document.body.style.overflow = originalOverflow;
+        document.body.style.position = originalPosition;
+        document.body.style.width = originalWidth;
+        document.body.style.height = originalHeight;
+        document.removeEventListener('touchstart', preventZoom);
+        document.removeEventListener('touchmove', preventZoom);
+      }, 0);
     };
   }, []);
 
   const handleSave = (savedImageData: { imageBase64?: string; name: string; extension: string }) => {
-    // Convert base64 to File
-    if (!savedImageData.imageBase64) {
-      console.error('No image data received');
-      return;
+    try {
+      // Convert base64 to File
+      if (!savedImageData.imageBase64) {
+        console.error('No image data received');
+        return;
+      }
+      
+      const base64Data = savedImageData.imageBase64.split(',')[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+      const editedFile = new File([blob], imageFile.name, {
+        type: 'image/jpeg',
+        lastModified: Date.now(),
+      });
+      
+      // Call onSave callback
+      onSave(editedFile);
+    } catch (error) {
+      console.error('Error saving image:', error);
     }
-    
-    const base64Data = savedImageData.imageBase64.split(',')[1];
-    const byteCharacters = atob(base64Data);
-    const byteNumbers = new Array(byteCharacters.length);
-    
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
+  };
+
+  const handleClose = () => {
+    try {
+      // Force cleanup immediately
+      forceCleanup();
+      
+      // Add a small delay to ensure proper cleanup
+      setTimeout(() => {
+        onCancel();
+      }, 100);
+    } catch (error) {
+      console.error('Error closing editor:', error);
+      // Ensure cleanup even if there's an error
+      forceCleanup();
     }
-    
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'image/jpeg' });
-    const editedFile = new File([blob], imageFile.name, {
-      type: 'image/jpeg',
-      lastModified: Date.now(),
-    });
-    
-    onSave(editedFile);
   };
 
   if (isLoading) {
@@ -190,7 +215,7 @@ export default function FilerobotImageEditor({ imageFile, onSave, onCancel }: Fi
       <FilerobotEditor
         source={imageUrl}
         onSave={handleSave}
-        onClose={onCancel}
+        onClose={handleClose}
         annotationsCommon={{
           fill: '#ff0000',
         }}
@@ -282,6 +307,14 @@ export default function FilerobotImageEditor({ imageFile, onSave, onCancel }: Fi
         disableSaveIfNoChanges={false}
         removeSaveButton={false}
         resetOnImageSourceChange={false}
+        // Mobile-specific configurations
+        useZoomPresetsMenu={true}
+        backgroundColor="transparent"
+        // Ensure proper event handling
+        onBeforeSave={(savedImageData) => {
+          console.log('Before save:', savedImageData);
+          return true; // Allow save to proceed
+        }}
         theme={{
           palette: {
             'bg-primary-active': '#1f2937',

@@ -45,6 +45,19 @@
   }
 }
 
+/* Fix layout issues after editor closes */
+body:not(.editor-open) {
+  overflow: auto !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Ensure proper cleanup of editor styles */
+.mobile-editor-overlay[style*="display: none"] {
+  display: none !important;
+}
+
 /* Modern Dark Theme Variables */
 :root {
   --bg-primary: #0a0a0a;
