@@ -114,7 +114,14 @@ export default function FilerobotImageEditor({ imageFile, onSave, onCancel }: Fi
   }
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-[9999]" style={{
+      zIndex: 9999,
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+    }}>
       <FilerobotEditor
         source={imageUrl}
         onSave={handleSave}
