@@ -2,6 +2,7 @@
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 
 // Dynamically import FilerobotEditor to avoid SSR issues
@@ -78,6 +79,54 @@ export default function FilerobotImageEditor({ imageFile, onSave, onCancel }: Fi
     };
   }, [imageFile]);
 
+  // Handle mobile viewport and prevent body scrolling
+  useEffect(() => {
+    // Add body class for mobile handling
+    document.body.classList.add('editor-open');
+    
+    // Prevent body scrolling on mobile
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    const originalPosition = window.getComputedStyle(document.body).position;
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.height = '100%';
+
+    // Prevent zoom on mobile
+    const preventZoom = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+
+    // Prevent pull-to-refresh on mobile
+    const preventPullToRefresh = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        if (touch.clientY > 100) { // Only prevent if touch is below top area
+          e.preventDefault();
+        }
+      }
+    };
+
+    // Add touch event listeners
+    document.addEventListener('touchstart', preventZoom, { passive: false });
+    document.addEventListener('touchmove', preventZoom, { passive: false });
+    document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+
+    // Cleanup
+    return () => {
+      document.body.classList.remove('editor-open');
+      document.body.style.overflow = originalStyle;
+      document.body.style.position = originalPosition;
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.removeEventListener('touchstart', preventZoom);
+      document.removeEventListener('touchmove', preventZoom);
+      document.removeEventListener('touchmove', preventPullToRefresh);
+    };
+  }, []);
+
   const handleSave = (savedImageData: { imageBase64?: string; name: string; extension: string }) => {
     // Convert base64 to File
     if (!savedImageData.imageBase64) {
@@ -104,24 +153,40 @@ export default function FilerobotImageEditor({ imageFile, onSave, onCancel }: Fi
   };
 
   if (isLoading) {
-    return (
+    return createPortal(
       <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
         <div className="bg-dark-card rounded-lg p-6 text-center">
           <div className="text-dark-muted">{t.common.loading}</div>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
-  return (
-    <div className="fixed inset-0 z-[9999]" style={{
-      zIndex: 9999,
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-    }}>
+  const editorContent = (
+    <div 
+      className="fixed inset-0 mobile-editor-overlay"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 2147483647, // Maximum z-index value
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        overflow: 'hidden',
+        touchAction: 'none', // Prevent mobile scrolling
+        WebkitOverflowScrolling: 'touch',
+        transform: 'translateZ(0)', // Force hardware acceleration
+        willChange: 'transform',
+        // Mobile-specific styles
+        WebkitTransform: 'translateZ(0)',
+        WebkitBackfaceVisibility: 'hidden',
+        WebkitPerspective: 1000,
+      }}
+    >
       <FilerobotEditor
         source={imageUrl}
         onSave={handleSave}
@@ -172,8 +237,51 @@ export default function FilerobotImageEditor({ imageFile, onSave, onCancel }: Fi
         defaultTabId={TABS.ADJUST}
         defaultToolId={TOOLS.CROP}
         savingPixelRatio={4}
-        previewPixelRatio={window.devicePixelRatio}
+        previewPixelRatio={typeof window !== 'undefined' ? window.devicePixelRatio : 1}
         useBackendTranslations={false}
+        translations={{
+          'common.save': t.common.save,
+          'common.cancel': t.common.cancel,
+          'common.close': t.common.close,
+          'common.loading': t.common.loading,
+          'common.reset': t.editor.reset,
+          'adjust.brightness': t.editor.brightness,
+          'adjust.contrast': t.editor.contrast,
+          'adjust.saturation': t.editor.saturation,
+          'adjust.exposure': t.editor.exposure,
+          'adjust.highlights': t.editor.highlights,
+          'adjust.shadows': t.editor.shadows,
+          'adjust.whites': t.editor.whites,
+          'adjust.blacks': t.editor.blacks,
+          'adjust.temperature': t.editor.temperature,
+          'adjust.tint': t.editor.tint,
+          'adjust.vibrance': t.editor.vibrance,
+          'adjust.hue': t.editor.hue,
+          'adjust.sharpness': t.editor.sharpness,
+          'adjust.clarity': t.editor.clarity,
+          'adjust.dehaze': t.editor.dehaze,
+          'adjust.gamma': t.editor.gamma,
+          'annotate.text': t.editor.text,
+          'annotate.rectangle': t.editor.rectangle,
+          'annotate.ellipse': t.editor.ellipse,
+          'annotate.polygon': t.editor.polygon,
+          'annotate.free': t.editor.free,
+          'annotate.arrow': t.editor.arrow,
+          'annotate.line': t.editor.line,
+          'crop.title': t.editor.crop,
+          'crop.rotate': t.editor.rotate,
+          'crop.flipHorizontal': t.editor.flipHorizontal,
+          'crop.flipVertical': t.editor.flipVertical,
+          'filters.title': t.editor.filters,
+          'resize.title': t.editor.resize,
+          'watermark.title': t.editor.watermark,
+        }}
+        closeAfterSave={true}
+        disableZooming={false}
+        noCrossOrigin={false}
+        disableSaveIfNoChanges={false}
+        removeSaveButton={false}
+        resetOnImageSourceChange={false}
         theme={{
           palette: {
             'bg-primary-active': '#1f2937',
@@ -191,4 +299,7 @@ export default function FilerobotImageEditor({ imageFile, onSave, onCancel }: Fi
       />
     </div>
   );
+
+  // Use portal to render at document.body level for better z-index handling
+  return typeof window !== 'undefined' ? createPortal(editorContent, document.body) : null;
 }

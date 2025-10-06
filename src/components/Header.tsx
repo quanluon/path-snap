@@ -46,7 +46,7 @@ export default function Header() {
   };
 
   return (
-    <header className="flex-shrink-0 z-50 bg-dark-card/80 backdrop-blur-md border-b border-dark-primary shadow-dark-primary">
+    <header className="flex-shrink-0 z-1 bg-dark-card/80 backdrop-blur-md border-b border-dark-primary shadow-dark-primary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}

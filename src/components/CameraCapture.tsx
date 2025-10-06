@@ -393,10 +393,10 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
         <div className="mb-4 p-4 bg-dark-secondary border border-dark-primary rounded-lg">
           <div className="flex items-center text-dark-primary">
             <MapPinIcon className="w-5 h-5 mr-2" />
-            <span className="font-medium">Vị trí không có sẵn</span>
+            <span className="font-medium">{t.camera.locationNotAvailable}</span>
           </div>
           <p className="text-dark-muted text-sm mt-1">
-            Ảnh sẽ được lưu mà không có thông tin vị trí
+            {t.camera.locationNotAvailableDesc}
           </p>
         </div>
       )}

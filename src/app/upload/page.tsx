@@ -70,7 +70,7 @@ export default function UploadPage() {
             {t.auth.unauthorized}
           </h1>
           <p className="text-dark-secondary mb-6">
-            Please login to upload photos and create checkpoints.
+            {t.auth.loginToUpload}
           </p>
           <button
             onClick={() => setAuthModalOpen(true)}
