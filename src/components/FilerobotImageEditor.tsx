@@ -190,16 +190,16 @@ export default function FilerobotImageEditor({ imageFile, onSave, onCancel }: Fi
 
   const editorContent = (
     <div 
-      className="fixed inset-0 mobile-editor-overlay"
+      className="fixed inset-0 z-30"
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
+        zIndex: 30,
         bottom: 0,
         width: '100vw',
         height: '100vh',
-        zIndex: 2147483647, // Maximum z-index value
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
         overflow: 'hidden',
         touchAction: 'none', // Prevent mobile scrolling
