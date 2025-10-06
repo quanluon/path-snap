@@ -188,9 +188,9 @@ export default function ImageDetailModal({
 
   return (
     <div 
-      className="fixed inset-0 overflow-y-auto" 
+      className="fixed inset-0 overflow-y-auto z-50" 
       style={{ 
-        zIndex: 9999,
+        zIndex: 50,
         isolation: 'isolate',
         WebkitTransform: 'translateZ(0)', // Force hardware acceleration on Safari
         transform: 'translateZ(0)'
