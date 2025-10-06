@@ -39,7 +39,6 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
   const [viewMode, setViewMode] = useState<'timeline' | 'map'>('timeline');
   const [showCarousel, setShowCarousel] = useState(false);
   const [carouselImages, setCarouselImages] = useState<typeof images.$inferSelect[]>([]);
-  const [carouselStartIndex, setCarouselStartIndex] = useState(0);
 
   const fetchPlanDetails = useCallback(async () => {
     try {
@@ -98,16 +97,14 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleShowCarousel = (images: any[], startIndex: number) => {
+  const handleShowCarousel = (images: any[]) => {
     setCarouselImages(images);
-    setCarouselStartIndex(startIndex);
     setShowCarousel(true);
   };
 
   const handleCloseCarousel = () => {
     setShowCarousel(false);
     setCarouselImages([]);
-    setCarouselStartIndex(0);
   };
 
   const openGoogleMaps = (lat: number, lng: number) => {
@@ -150,7 +147,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
           onClick={fetchPlanDetails}
           className="px-4 py-2 bg-dark-primary text-dark-secondary rounded-lg hover:bg-dark-hover border border-dark-primary"
         >
-          Thử lại
+          {t.plan.retry}
         </button>
       </div>
     );
@@ -159,7 +156,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
   if (!plan) {
     return (
       <div className="text-center py-20">
-        <p className="text-dark-secondary">Không tìm thấy kế hoạch</p>
+        <p className="text-dark-secondary">{t.plan.planNotFoundMessage}</p>
       </div>
     );
   }
@@ -173,7 +170,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
           className="flex items-center text-dark-primary hover:text-dark-secondary font-medium"
         >
           <ArrowLeftIcon className="w-5 h-5 mr-2" />
-          Quay lại
+          {t.plan.back}
         </button>
         
         {/* End Plan Button - Only show if plan is active */}
@@ -270,7 +267,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
       {plan.images.length > 0 ? (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-dark-primary">
-            Hành trình ({plan.images.length} ảnh)
+            {t.plan.journeyTitle} ({plan.images.length} {t.plan.journeySubtitle})
           </h2>
           
           {viewMode === 'timeline' ? (
@@ -278,12 +275,13 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
               <ImageList 
                 images={plan.images} 
                 onImageClick={handleImageClick}
+                additionCount={0}
               />
               
               {/* Timeline List */}
               <div className="bg-dark-card rounded-lg border border-dark-primary p-6">
                 <h3 className="text-lg font-semibold text-dark-primary mb-4">
-                  Chi tiết theo thời gian
+                  {t.plan.timelineDetails}
                 </h3>
                 <div className="space-y-4">
                   {plan.images.map((image, index) => (
@@ -302,7 +300,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-sm font-medium text-dark-primary truncate">
-                            {image.description || 'Không có mô tả'}
+                            {image.description || t.plan.noDescription}
                           </p>
                           <span className="text-xs text-dark-muted">
                             {formatDate(image.createdAt.toString())}
@@ -340,10 +338,10 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
         <div className="text-center py-12 bg-dark-secondary rounded-lg border border-dark-primary">
           <PhotoIcon className="w-12 h-12 text-dark-muted mx-auto mb-4" />
           <h3 className="text-lg font-medium text-dark-primary mb-2">
-            Chưa có ảnh nào
+            {t.plan.noImages}
           </h3>
           <p className="text-dark-secondary">
-            Kế hoạch này chưa có ảnh nào được thêm vào
+            {t.plan.noImagesDescription}
           </p>
         </div>
       )}
@@ -360,7 +358,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
           <div className="bg-dark-card rounded-lg max-w-4xl max-h-[90vh] w-full mx-4 overflow-hidden border border-dark-primary">
             <div className="flex items-center justify-between p-4 border-b border-dark-primary">
-              <h3 className="text-lg font-semibold text-dark-primary">Tất cả ảnh trong kế hoạch</h3>
+              <h3 className="text-lg font-semibold text-dark-primary">{t.plan.allImagesInPlan}</h3>
               <button
                 onClick={handleCloseCarousel}
                 className="text-dark-secondary hover:text-dark-primary"
@@ -372,6 +370,7 @@ export default function PlanDetails({ planId, onBack }: PlanDetailsProps) {
               <ImageList
                 images={carouselImages}
                 onImageClick={handleImageClick}
+                additionCount={0}
               />
             </div>
           </div>

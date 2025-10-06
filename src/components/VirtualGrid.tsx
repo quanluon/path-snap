@@ -18,6 +18,7 @@ interface VirtualGridProps {
   columns?: number;
   gap?: number;
   itemHeight?: number;
+  additionCount?: number
 }
 
 const offsetWidth = 40;
@@ -31,6 +32,7 @@ const VirtualGrid = ({
   columns = 2,
   gap = 8,
   itemHeight = 500,
+  additionCount = 1,
 }: VirtualGridProps) => {
   const { t } = useLanguage();
   const parentRef = useRef<HTMLDivElement>(null);
@@ -58,8 +60,8 @@ const VirtualGrid = ({
 
   // Calculate total rows needed
   const totalRows = useMemo(() => {
-    return Math.ceil(images.length / responsiveColumns);
-  }, [images.length, responsiveColumns]);
+    return Math.ceil(images.length + additionCount / responsiveColumns);
+  }, [images.length, responsiveColumns, additionCount]);
 
   // Create virtualizer for rows
   const virtualizer = useVirtualizer({

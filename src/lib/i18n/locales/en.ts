@@ -136,6 +136,14 @@ export const en = {
     failedToStartPlan: 'Failed to start plan',
     failedToFetchPlans: 'Failed to fetch plans',
     planNotFound: 'Plan not found',
+    // Plan details specific translations
+    retry: 'Retry',
+    planNotFoundMessage: 'Plan not found',
+    journeyTitle: 'Journey',
+    journeySubtitle: 'images',
+    timelineDetails: 'Timeline Details',
+    noDescription: 'No description',
+    allImagesInPlan: 'All images in plan',
   },
   timeline: {
     title: 'Timeline',

@@ -16,6 +16,7 @@ interface ImageListProps {
   onLoadMore?: () => Promise<void>;
   hasMore?: boolean;
   isLoadingMore?: boolean;
+  additionCount?: number;
 }
 
 const ImageList = ({
@@ -24,6 +25,7 @@ const ImageList = ({
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
+  additionCount = 1
 }: ImageListProps) => {
   const { t } = useLanguage();
   const parentRef = useRef<HTMLDivElement>(null);
@@ -34,7 +36,7 @@ const ImageList = ({
 
   // Create virtualizer
   const virtualizer = useVirtualizer({
-    count: images.length + 1,
+    count: images.length + additionCount,
     getScrollElement: () => parentRef.current,
     overscan: 3, // Render 3 extra items outside viewport
     gap: 5, // No gap between items
@@ -88,6 +90,7 @@ const ImageList = ({
           onLoadMore={onLoadMore}
           hasMore={hasMore}
           isLoadingMore={isLoadingMore}
+          additionCount={additionCount}
         />
       </div>
       <div className="relative w-full h-screen overflow-hidden bg-green sm:hidden">

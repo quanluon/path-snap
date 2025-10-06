@@ -136,6 +136,14 @@ export const vi = {
     failedToStartPlan: 'Bắt đầu kế hoạch thất bại',
     failedToFetchPlans: 'Tải kế hoạch thất bại',
     planNotFound: 'Không tìm thấy kế hoạch',
+    // Plan details specific translations
+    retry: 'Thử lại',
+    planNotFoundMessage: 'Không tìm thấy kế hoạch',
+    journeyTitle: 'Hành trình',
+    journeySubtitle: 'ảnh',
+    timelineDetails: 'Chi tiết theo thời gian',
+    noDescription: 'Không có mô tả',
+    allImagesInPlan: 'Tất cả ảnh trong kế hoạch',
   },
   timeline: {
     title: 'Dòng thời gian',
