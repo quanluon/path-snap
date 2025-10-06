@@ -22,7 +22,7 @@ export default function UploadPage() {
     description: string
   ) => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
     
     // Only append coordinates if location is provided
     if (location) {

@@ -16,8 +16,18 @@ export const IMAGE_CONFIG = {
   QUALITY: 80,
 } as const;
 
+export const VIDEO_CONFIG = {
+  MAX_SIZE_MB: 50, // 50MB for short videos
+  MAX_DURATION_SECONDS: 30, // 30 seconds max
+  ALLOWED_FORMATS: ['video/mp4', 'video/webm', 'video/quicktime'] as const,
+  THUMBNAIL_FORMAT: 'jpeg' as const,
+  THUMBNAIL_QUALITY: 80,
+} as const;
+
 export const STORAGE_BUCKETS = {
   IMAGES: 'checkpoint-images',
+  VIDEOS: 'checkpoint-videos',
+  THUMBNAILS: 'checkpoint-thumbnails',
 } as const;
 
 export const ROUTES = {

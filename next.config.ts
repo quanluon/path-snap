@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   serverExternalPackages: ['sharp'],
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push('canvas');
+    }
+    return config;
+  },
   images: {
     remotePatterns: [
       {

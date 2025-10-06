@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp, uuid, real, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { pgTable, real, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 /**
  * Database schema for Checkpoint app
@@ -30,7 +30,7 @@ export const plans = pgTable('plans', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-// Images table
+// Images table (now supports both images and videos)
 export const images = pgTable('images', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id').references(() => users.id),
@@ -41,6 +41,8 @@ export const images = pgTable('images', {
   latitude: real('latitude').notNull(),
   longitude: real('longitude').notNull(),
   address: text('address'), // Reverse geocoded address from coordinates
+  mediaType: text('media_type').notNull().default('image'),
+  duration: real('duration'), // Video duration in seconds
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

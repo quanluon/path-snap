@@ -4,9 +4,10 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { CameraIcon, MapPinIcon, PencilIcon } from '@heroicons/react/24/solid';
 import { validateImageFile, formatFileSize, getMaxFileSize } from '@/lib/utils/client-image';
+import { validateVideoFile, validateVideoDuration, formatVideoDuration, getMaxVideoSize } from '@/lib/utils/video';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePlan } from '@/contexts/PlanContext';
-import ImageEditor from './ImageEditor';
+import FilerobotImageEditor from './FilerobotImageEditor';
 
 interface Location {
   latitude: number;
@@ -17,6 +18,9 @@ interface CameraCaptureProps {
   onCapture: (file: File, location: Location | null, description: string) => Promise<void>;
   planId?: string;
 }
+
+const acceptedImageFormats = ['image/jpeg', 'image/png', 'image/webp'];
+const acceptedVideoFormats = ['video/mp4', 'video/webm', 'video/quicktime'];
 
 export default function CameraCapture({ onCapture, planId }: CameraCaptureProps) {
   const { t } = useLanguage();
@@ -30,6 +34,8 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isVideo, setIsVideo] = useState(false);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get user's current location
@@ -63,20 +69,59 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-      // Use internationalized error messages with file size details
-      let errorMessage: string = t.validation.invalidFileType;
-      if (validation.error?.includes('File size exceeds')) {
-        const fileSize = formatFileSize(file.size);
-        const maxSize = getMaxFileSize();
-        errorMessage = `${t.validation.fileSizeExceeded} (${fileSize} > ${maxSize})`;
-      } else if (validation.error?.includes('File type')) {
-        errorMessage = t.validation.invalidFileType;
-      }
-      setMessage({ type: 'error', text: errorMessage });
+    // Determine if it's an image or video
+    const isImageFile = file.type.startsWith('image/');
+    const isVideoFile = file.type.startsWith('video/');
+
+    if (!isImageFile && !isVideoFile) {
+      setMessage({ type: 'error', text: t.validation.invalidFileType });
       return;
+    }
+
+    setIsVideo(isVideoFile);
+
+    // Validate file based on type
+    if (isImageFile) {
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        let errorMessage: string = t.validation.invalidFileType;
+        if (validation.error?.includes('File size exceeds')) {
+          const fileSize = formatFileSize(file.size);
+          const maxSize = getMaxFileSize();
+          errorMessage = `${t.validation.fileSizeExceeded} (${fileSize} > ${maxSize})`;
+        } else if (validation.error?.includes('File type')) {
+          errorMessage = t.validation.invalidFileType;
+        }
+        setMessage({ type: 'error', text: errorMessage });
+        return;
+      }
+    } else if (isVideoFile) {
+      const validation = validateVideoFile(file);
+      if (!validation.valid) {
+        let errorMessage: string = t.validation.invalidFileType;
+        if (validation.error?.includes('File size exceeds')) {
+          const fileSize = formatFileSize(file.size);
+          const maxSize = getMaxVideoSize();
+          errorMessage = `${t.validation.fileSizeExceeded} (${fileSize} > ${maxSize})`;
+        } else if (validation.error?.includes('File type')) {
+          errorMessage = t.validation.invalidFileType;
+        }
+        setMessage({ type: 'error', text: errorMessage });
+        return;
+      }
+
+      // Validate video duration
+      try {
+        const durationValidation = await validateVideoDuration(file);
+        if (!durationValidation.valid) {
+          setMessage({ type: 'error', text: durationValidation.error || 'Invalid video duration' });
+          return;
+        }
+        setVideoDuration(durationValidation.duration || null);
+      } catch {
+        setMessage({ type: 'error', text: 'Failed to validate video duration' });
+        return;
+      }
     }
 
     // Store selected file
@@ -228,27 +273,39 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
         >
           {preview ? (
             <>
-              <Image
-                src={preview}
-                alt={t.profile.preview}
-                width={400}
-                height={300}
-                className="w-full h-full object-cover rounded-lg"
-              />
-              {/* Edit Button Overlay */}
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleEditImage();
-                }}
-                className="absolute top-2 right-2 p-2 bg-dark-primary text-dark-secondary rounded-full hover:bg-dark-hover transition-colors shadow-lg"
-                title={t.editor.editImage}
-              >
-                <PencilIcon className="w-5 h-5" />
-              </button>
+              {isVideo ? (
+                <video
+                  src={preview}
+                  className="w-full h-full object-cover rounded-lg"
+                  controls
+                  muted
+                />
+              ) : (
+                <Image
+                  src={preview}
+                  alt={t.profile.preview}
+                  width={400}
+                  height={300}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              )}
               
-              {/* Change Image Button Overlay */}
+              {/* Edit Button Overlay - Only show for images */}
+              {!isVideo && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleEditImage();
+                  }}
+                  className="absolute top-2 right-2 p-2 bg-dark-primary text-dark-secondary rounded-full hover:bg-dark-hover transition-colors shadow-lg"
+                  title={t.editor.editImage}
+                >
+                  <PencilIcon className="w-5 h-5" />
+                </button>
+              )}
+              
+              {/* Change File Button Overlay */}
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -256,7 +313,7 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
                   fileInputRef.current?.click();
                 }}
                 className="absolute top-2 left-2 p-2 bg-dark-secondary text-dark-primary rounded-full hover:bg-dark-hover transition-colors shadow-lg"
-                title={t.editor.changeImage}
+                title={isVideo ? 'Change Video' : t.editor.changeImage}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -278,7 +335,7 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
           id="image-upload"
           ref={fileInputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept={acceptedImageFormats.join(',')}
           onChange={handleFileSelect}
           className="hidden"
         />
@@ -300,8 +357,16 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
           </div>
           <div className="flex items-center justify-between text-sm mt-1">
             <span className="text-dark-primary">{t.upload.maxSize}:</span>
-            <span className="text-dark-secondary">{getMaxFileSize()}</span>
+            <span className="text-dark-secondary">
+              {isVideo ? getMaxVideoSize() : getMaxFileSize()}
+            </span>
           </div>
+          {isVideo && videoDuration && (
+            <div className="flex items-center justify-between text-sm mt-1">
+              <span className="text-dark-primary">Duration:</span>
+              <span className="text-dark-secondary">{formatVideoDuration(videoDuration)}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -376,8 +441,8 @@ export default function CameraCapture({ onCapture, planId }: CameraCaptureProps)
       )}
 
       {/* Image Editor Modal */}
-      {showEditor && selectedFile && (
-        <ImageEditor
+      {showEditor && selectedFile && !isVideo && (
+        <FilerobotImageEditor
           imageFile={selectedFile}
           onSave={handleEditorSave}
           onCancel={handleEditorCancel}

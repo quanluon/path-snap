@@ -1,12 +1,16 @@
-import { uploadToSupabase } from './supabase';
-import { uploadToS3 } from './s3';
+import { uploadToSupabase, uploadVideoToSupabase } from './supabase';
+import { uploadToS3, uploadVideoToS3 } from './s3';
 import sharp from 'sharp';
+import { processVideo, ProcessedVideo } from '@/lib/utils/server-video';
 
 export type StorageProvider = 'supabase' | 's3';
 
 export interface UploadResult {
   url: string;
   key: string;
+  thumbnailUrl?: string;
+  thumbnailKey?: string;
+  duration?: number; // For video files
 }
 
 export interface ProcessedImage {
@@ -77,6 +81,27 @@ export async function uploadImage(
     case 'supabase':
     default:
       return await uploadToSupabase(file, userId, planId);
+  }
+}
+
+export async function uploadVideo(
+  file: File,
+  userId: string,
+  planId?: string
+): Promise<UploadResult> {
+  const provider = (process.env.STORAGE_PROVIDER as StorageProvider) || 'supabase';
+  
+  console.log(`Using storage provider: ${provider} for video upload`);
+  
+  // Process video and generate thumbnail
+  const processedVideo = await processVideo(file);
+  
+  switch (provider) {
+    case 's3':
+      return await uploadVideoToS3(processedVideo, userId, planId);
+    case 'supabase':
+    default:
+      return await uploadVideoToSupabase(processedVideo, userId, planId);
   }
 }
 
